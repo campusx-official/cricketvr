@@ -3,7 +3,20 @@ using UnityEngine;
 
 namespace CricketVR
 {
-    public enum BallEventKind { Ground, Stumps, Net, LeftEnclosure }
+    public enum BallEventKind
+    {
+        Ground,
+        Stumps,
+        Net,
+        LeftEnclosure,
+        /// <summary>GroundMode: the ball's centre passed z &lt; -1 m (behind the stumps).</summary>
+        PassedStumps,
+        /// <summary>GroundMode: the ball crossed the rope or was safety-despawned.</summary>
+        LeftGround,
+    }
+
+    /// <summary>Which terminal rules apply (plan.md §6 for nets, §15 for the ground).</summary>
+    public enum DeliveryRules { Nets, Ground }
 
     /// <summary>Something the ball touched or did during one physics step.</summary>
     public struct BallEvent
@@ -16,6 +29,8 @@ namespace CricketVR
         public static BallEvent Stumps(Vector3 p) => new BallEvent { Kind = BallEventKind.Stumps, Point = p };
         public static BallEvent Net(WallSide wall, Vector3 p) => new BallEvent { Kind = BallEventKind.Net, Wall = wall, Point = p };
         public static BallEvent Exit(WallSide wall, Vector3 p) => new BallEvent { Kind = BallEventKind.LeftEnclosure, Wall = wall, Point = p };
+        public static BallEvent PassedStumps(Vector3 p) => new BallEvent { Kind = BallEventKind.PassedStumps, Point = p };
+        public static BallEvent LeftGround(Vector3 p) => new BallEvent { Kind = BallEventKind.LeftGround, Point = p };
     }
 
     /// <summary>
@@ -23,10 +38,15 @@ namespace CricketVR
     /// The caller feeds it each physics step's events after the step and before that step's successor applies any
     /// bat contact, so "contact happened before this event" is simply "contact was recorded before this call".
     /// Events for another delivery id, or after finalization, are ignored.
+    ///
+    /// Ground rules (no nets): stumps -> Bowled; an UNHIT ball passing behind the stumps, leaving the ground,
+    /// settling or timing out -> Miss; a HIT ball (edges behind the wicket included) leaving the ground, settling
+    /// or timing out -> ScoringPending. A hit ball is never a Miss. Same-step priority: stumps first.
     /// </summary>
     public sealed class DeliveryAdjudicator
     {
         public ScoringRules Rules;
+        public DeliveryRules Mode;
 
         int _id;
         bool _open;
@@ -37,7 +57,11 @@ namespace CricketVR
         CarryState _carry;
         float _carryMetres;
 
-        public DeliveryAdjudicator(ScoringRules rules) { Rules = rules; }
+        public DeliveryAdjudicator(ScoringRules rules, DeliveryRules mode = DeliveryRules.Nets)
+        {
+            Rules = rules;
+            Mode = mode;
+        }
 
         public int DeliveryId => _id;
         /// <summary>A delivery has begun and is not yet finalized or cancelled.</summary>
@@ -122,10 +146,16 @@ namespace CricketVR
                     case BallEventKind.Stumps:
                         rank = 0; z = ScoringZone.None; en = DeliveryEnd.StumpsHit;
                         break;
-                    case BallEventKind.Net:
+                    case BallEventKind.PassedStumps when Mode == DeliveryRules.Ground && !_contact:
+                        rank = 1; z = ScoringZone.None; en = DeliveryEnd.PassedStumps;
+                        break;
+                    case BallEventKind.LeftGround when Mode == DeliveryRules.Ground:
+                        rank = 2; z = ScoringZone.None; en = DeliveryEnd.LeftGround;
+                        break;
+                    case BallEventKind.Net when Mode == DeliveryRules.Nets:
                         z = PracticeScoring.NetZone(e.Wall, e.Point.y, Rules); rank = (int)z; en = DeliveryEnd.NetHit;
                         break;
-                    case BallEventKind.LeftEnclosure:
+                    case BallEventKind.LeftEnclosure when Mode == DeliveryRules.Nets:
                         z = PracticeScoring.ExitZone(e.Wall); rank = (int)z; en = DeliveryEnd.LeftEnclosure;
                         break;
                     default:
@@ -162,6 +192,7 @@ namespace CricketVR
             int runs = _contact && !bowled ? PracticeScoring.Runs(zone, Rules) : 0;
             DeliveryOutcome outcome = bowled ? DeliveryOutcome.Bowled
                 : !_contact ? DeliveryOutcome.Miss
+                : Mode == DeliveryRules.Ground ? DeliveryOutcome.ScoringPending
                 : runs > 0 ? DeliveryOutcome.Scored : DeliveryOutcome.NoRuns;
             var carry = !_contact ? CarryState.NotHit : _carryDecided ? _carry : CarryState.NoLanding;
             return new DeliveryResult(_id, outcome, end, zone, runs, _contact, bowled, carry,

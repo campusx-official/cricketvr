@@ -40,7 +40,9 @@ namespace CricketVR.Editor
             PracticeNetBuilder.Build(main, environment, created);
             EnsureXrOrigin(player, created);
             BattingBuilder.Build(player, environment, main, created);
-            BowlingBuilder.Build(main, environment, AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath), created);
+            var config = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
+            BowlingBuilder.Build(main, environment, config, created);
+            GroundBuilder.Build(main, environment, config, created); // M6.5: generated cricket ground (inactive in NetMode)
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);

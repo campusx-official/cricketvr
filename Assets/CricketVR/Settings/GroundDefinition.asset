@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba29a4d3d86874616ac1c23d45c5a548, type: 3}
+  m_Name: GroundDefinition
+  m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.GroundDefinition
+  pitchLength: 20.12
+  pitchWidth: 3.05
+  pitchStartZ: -1.5
+  pitchEndZ: 21.5
+  poppingCreaseOffset: 1.22
+  poppingCreaseHalfLength: 1.83
+  bowlingCreaseHalfLength: 1.32
+  returnCreaseX: 1.32
+  returnCreaseBehindPopping: 2.44
+  creaseLineWidth: 0.05
+  stumpHeight: 0.711
+  stumpSetWidth: 0.2286
+  boundaryRadiusX: 65
+  boundaryRadiusZ: 65
+  ropeRadius: 0.06
+  ropeSegments: 256
+  ropeSides: 6
+  ropeColor: {r: 0.92, g: 0.92, b: 0.95, a: 1}
+  fieldingCircleRadius: 27.43
+  circleMarkerSpacing: 5
+  circleMarkerDiameter: 0.35
+  outfieldBeyondRope: 10
+  stripeWidth: 5
+  grassLight: {r: 0.38, g: 0.58, b: 0.25, a: 1}
+  grassDark: {r: 0.3, g: 0.49, b: 0.21, a: 1}
+  pitchColor: {r: 0.8, g: 0.71, b: 0.52, a: 1}
+  pitchWornColor: {r: 0.66, g: 0.56, b: 0.4, a: 1}
+  creaseColor: {r: 0.97, g: 0.97, b: 0.97, a: 1}
+  sightScreenWidth: 12
+  sightScreenHeight: 6
+  sightScreenBeyondRope: 5
+  sightScreenColor: {r: 0.035, g: 0.035, b: 0.04, a: 1}
+  boardsBeyondRope: 3
+  boardHeight: 1
+  boardPanelLength: 6
+  boardColors:
+  - {r: 0.1, g: 0.25, b: 0.6, a: 1}
+  - {r: 0.85, g: 0.85, b: 0.88, a: 1}
+  - {r: 0.75, g: 0.15, b: 0.12, a: 1}
+  - {r: 0.95, g: 0.7, b: 0.1, a: 1}
+  - {r: 0.12, g: 0.45, b: 0.3, a: 1}
+  standsBeyondRope: 9
+  standDepth: 18
+  standTiers: 5
+  standFrontHeight: 2
+  standTopHeight: 12
+  sightScreenGapExtra: 1.5
+  skyZenith: {r: 0.33, g: 0.55, b: 0.86, a: 1}
+  skyHorizon: {r: 0.78, g: 0.86, b: 0.94, a: 1}
+  skyDomeRadius: 450
+  fogStart: 60
+  fogEnd: 220
+  outfieldBounciness: 0.45
+  outfieldDynamicFriction: 0.45
+  outfieldStaticFriction: 0.5
+  outfieldColliderThickness: 1
+  outfieldColliderBeyondRope: 12
+  rollingResistance: 0.08
+  leftGroundHideDelay: 1.5
+  safetyDespawnDistance: 150
+  safetyDespawnBelowY: -0.5

@@ -10,6 +10,6 @@ Detailed evidence lives in `specs/001-six-ball-net/validation.md`. This table is
 | M4 Bowling machine | Implemented (T013–T015), 144 Hz physics, tuned bounce | EditMode 40/40, PlayMode 10/10 (E-015, E-016, E-018) | **AC-04 pass** (E-017–E-019) | Done |
 | M5 Batting contact | Implemented (T016–T020): swept resolver, response with swing assist, recorded impact sounds, rhythm-coded haptics | EditMode 52/52, PlayMode 17/17 incl. AC-05 matrix (E-020, E-028) | **AC-05 pass, right controller** (E-022–E-029) | Done |
 | M6 Delivery outcomes | Implemented (T021–T024): DeliveryAdjudicator, practice zones on tagged net walls, boundary exit, measured carry, ScoreManager records | EditMode 76/76, PlayMode 28/28 (E-030) | **AC-06 pass** (E-031, NetMode) | Done; net scoring kept until the virtual-field scorer |
-| M6.5 Cricket ground | Accepted 2026-10-24 (REQ-017–REQ-024, T033–T046) | Pending | Pending | Build on branch m6.5-ground |
+| M6.5 Cricket ground | Implemented on branch m6.5-ground (T033–T045): GroundDefinition/FieldConfig, generated ground, GroundLit/sky shaders, outfield physics + rolling drag, BallLeftGround, GroundMode rules, foveation, perf probe | EditMode 91/91, PlayMode 38/38, previews (E-032) | Pending | Owner: M6.5 headset tests + AC-14 measurement |
 | M7 Six-ball loop | Not started | Pending | Pending | After M6 |
 | M8 Quest polish | Not started | Pending | Pending | After M7 |

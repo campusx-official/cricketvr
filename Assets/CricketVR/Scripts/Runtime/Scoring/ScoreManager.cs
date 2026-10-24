@@ -20,11 +20,17 @@ namespace CricketVR
         [SerializeField] BallController ball;
         [SerializeField] BatBallContactResolver resolver;
         [SerializeField] BowlingMachine machine;
+        [Tooltip("GroundMode only: raises BallLeftGround at the rope.")]
+        [SerializeField] GroundBoundaryMonitor groundMonitor;
 
         DeliveryAdjudicator _adjudicator;
         readonly List<BallEvent> _pending = new List<BallEvent>(8);
         readonly List<DeliveryResult> _results = new List<DeliveryResult>(8);
-        int _pitchLayer, _stumpsLayer;
+        int _groundMask, _stumpsLayer;
+        DeliveryRules _rules;
+
+        /// <summary>GroundMode: an unhit ball whose centre passes this z (behind the stumps) is a miss (GD-8).</summary>
+        public const float MissBehindStumpsZ = -1f;
         int _lastDecidedId = -1;
 
         public IReadOnlyList<DeliveryResult> Results => _results;
@@ -39,8 +45,9 @@ namespace CricketVR
                 enabled = false;
                 return;
             }
-            _adjudicator = new DeliveryAdjudicator(config.scoring.rules);
-            _pitchLayer = LayerMask.NameToLayer("Pitch");
+            _rules = config.environment == EnvironmentMode.GroundMode ? DeliveryRules.Ground : DeliveryRules.Nets;
+            _adjudicator = new DeliveryAdjudicator(config.scoring.rules, _rules);
+            _groundMask = LayerMask.GetMask("Pitch", "Outfield");
             _stumpsLayer = LayerMask.NameToLayer("Stumps");
         }
 
@@ -53,6 +60,7 @@ namespace CricketVR
             }
             if (resolver != null) resolver.BatContact += RecordBatContact;
             if (machine != null) machine.Bowled += OnBowled;
+            if (groundMonitor != null) groundMonitor.BallLeftGround += OnBallLeftGround;
         }
 
         void OnDisable()
@@ -64,6 +72,7 @@ namespace CricketVR
             }
             if (resolver != null) resolver.BatContact -= RecordBatContact;
             if (machine != null) machine.Bowled -= OnBowled;
+            if (groundMonitor != null) groundMonitor.BallLeftGround -= OnBallLeftGround;
         }
 
         /// <summary>Clears the records (session restart). Any open delivery is discarded without a result.</summary>
@@ -95,9 +104,17 @@ namespace CricketVR
 
             if (ball.IsLive)
             {
-                var exit = PracticeScoring.ExitSide(ball.Body.position, config.scoring.exitMargin);
-                if (exit.HasValue)
-                    _pending.Add(BallEvent.Exit(exit.Value, ball.Body.position));
+                var pos = ball.Body.position;
+                if (_rules == DeliveryRules.Nets)
+                {
+                    var exit = PracticeScoring.ExitSide(pos, config.scoring.exitMargin);
+                    if (exit.HasValue)
+                        _pending.Add(BallEvent.Exit(exit.Value, pos));
+                }
+                else if (pos.z < MissBehindStumpsZ && !_adjudicator.HasContact)
+                {
+                    _pending.Add(BallEvent.PassedStumps(pos)); // any x: wide balls count too
+                }
             }
             if (_pending.Count == 0)
                 return;
@@ -126,7 +143,7 @@ namespace CricketVR
                 _pending.Add(BallEvent.Net(wall.side, point));
             else if (go.layer == _stumpsLayer)
                 _pending.Add(BallEvent.Stumps(point));
-            else if (go.layer == _pitchLayer)
+            else if ((_groundMask & (1 << go.layer)) != 0)
                 _pending.Add(BallEvent.Ground(point));
         }
 
@@ -142,6 +159,15 @@ namespace CricketVR
                 ExitVelocity = report.BallVelocityOut,
                 ContactHeightFromToe = report.HeightFromToe,
             });
+        }
+
+        void OnBallLeftGround(int id, Vector3 position, float time)
+        {
+            if (_adjudicator == null)
+                return;
+            EnsureBegun(id); // a ball despawned on its first step must still get its one result
+            if (_adjudicator != null && _adjudicator.IsOpen && id == _adjudicator.DeliveryId)
+                _pending.Add(BallEvent.LeftGround(position));
         }
 
         void OnDeliveryEnded(int id, BallEndReason reason)
@@ -174,6 +200,8 @@ namespace CricketVR
                 Debug.Log($"[CricketVR] Result {result} || {Totals}");
             DeliveryFinalized?.Invoke(result);
         }
+
+        public void ConfigureGround(GroundBoundaryMonitor monitor) => groundMonitor = monitor;
 
         public void Configure(GameConfig cfg, BallController ballController, BatBallContactResolver contactResolver, BowlingMachine bowlingMachine)
         {

@@ -1,6 +1,6 @@
 # Implementation tasks
 
-Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 cricket ground accepted, next. Later milestones pending. This is a task specification, not evidence of a built game.
+Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 T033–T045 implemented with automated checks; T046 (device performance) and the AC-11–AC-14 headset checks pending. Later milestones pending. This is a task specification, not evidence of a built game.
 
 Use `[ ]` for incomplete and `[x]` only for the named completed work. Keep device acceptance pending in `validation.md` when unavailable. Dependencies apply in the order shown. Automated preparatory work may continue while waiting for a physical check, but do not represent untested prerequisites as accepted.
 
@@ -62,25 +62,25 @@ Dependency: M5. Requirements: REQ-008, REQ-009, REQ-010. Acceptance: AC-06.
 
 Dependency: M6 committed. Requirements: REQ-017 to REQ-024. Acceptance: AC-11 to AC-14.
 
-- [ ] T033 Add `GroundDefinition` and `FieldConfig` ScriptableObjects with defaults, plus EditMode tests:
+- [x] T033 Add `GroundDefinition` and `FieldConfig` ScriptableObjects with defaults, plus EditMode tests:
   - pitch 20.12 m;
   - popping crease at 1.22 m;
   - creases and stumps equal to FieldDimensions;
   - 30-yard circle shape (semicircles + joining lines, point spacing ~5 m);
   - fielder polar → world conversion and the left-hand mirror;
   - every fielder in FieldConfig at least 3 m inside the rope at its own angle, for the configured boundary (owner addition).
-- [ ] T034 Add the `Outfield` layer, the `OutfieldGrass` physics material and the collision matrix entry. Treat Pitch or Outfield as ground in the first-bounce and carry checks. Existing tests must still pass. *(test)*
-- [ ] T035 Add `EnvironmentModeSwitch` and `GameConfig.environment`, move the net objects under `Environment/PracticeNet` (scene builder migration) and add the GroundMode build menu. All existing tests must pass in NetMode. *(test)*
-- [ ] T036 `GroundBuilder`: outfield disc with a generated stripe texture, and the outfield collider. *(headset: stripes visible, no shimmer)*
-- [ ] T037 Pitch strip mesh with crease markings painted into its texture, crease extensions (GD-4), and non-striker stumps and bails. *(headset: both ends readable, no flicker)*
-- [ ] T038 Boundary rope tube and 30-yard circle disc mesh. *(headset: rope continuous at 65 m, circle discs visible and stable)*
-- [ ] T039 Sight screens (GD-2), advertising boards, stands with vertex-colour crowd and AO, a gap behind the screens. *(headset: screen behind the machine, ball easy to pick up)*
-- [ ] T040 Sky dome, fog and URP shadow settings (GD-12). *(headset: far stands soft, horizon stable)*
-- [ ] T041 Fielder placeholders from `FieldConfig` with a hide toggle. *(headset + test: positions match config)*
-- [ ] T042 `BallRollingDrag` on the outfield only. *(PlayMode: a rolling ball stops on the outfield; a ball on the pitch is unaffected)*
-- [ ] T043 `GroundBoundaryMonitor` and `BallLeftGround`, with hide after 1.5 s, plus the safety despawn below the outfield or beyond 150 m. *(PlayMode: raised once, ball hidden; safety despawn fires)*
-- [ ] T044 GroundMode terminal rules in ScoreManager (GD-8). *(EditMode + PlayMode: bowled / miss / pending exactly once; unhit wide ball past z < −1 m is a miss; hit edge behind the wicket is pending, never a miss; unhit ball that stops is a miss; stumps beat everything in the same step)*
-- [ ] T045 PlayMode physics checks:
+- [x] T034 Add the `Outfield` layer, the `OutfieldGrass` physics material and the collision matrix entry. Treat Pitch or Outfield as ground in the first-bounce and carry checks. Existing tests must still pass. *(test)*
+- [x] T035 Add `EnvironmentModeSwitch` and `GameConfig.environment`, move the net objects under `Environment/PracticeNet` (scene builder migration) and add the GroundMode build menu. All existing tests must pass in NetMode. *(test)*
+- [x] T036 `GroundBuilder`: outfield disc with a generated stripe texture, and the outfield collider. *(headset: stripes visible, no shimmer)*
+- [x] T037 Pitch strip mesh with crease markings painted into its texture, crease extensions (GD-4), and non-striker stumps and bails. *(headset: both ends readable, no flicker)*
+- [x] T038 Boundary rope tube and 30-yard circle disc mesh. *(headset: rope continuous at 65 m, circle discs visible and stable)*
+- [x] T039 Sight screens (GD-2), advertising boards, stands with vertex-colour crowd and AO, a gap behind the screens. *(headset: screen behind the machine, ball easy to pick up)*
+- [x] T040 Sky dome, fog and URP shadow settings (GD-12). *(headset: far stands soft, horizon stable)*
+- [x] T041 Fielder placeholders from `FieldConfig` with a hide toggle. *(headset + test: positions match config)*
+- [x] T042 `BallRollingDrag` on the outfield only. *(PlayMode: a rolling ball stops on the outfield; a ball on the pitch is unaffected)*
+- [x] T043 `GroundBoundaryMonitor` and `BallLeftGround`, with hide after 1.5 s, plus the safety despawn below the outfield or beyond 150 m. *(PlayMode: raised once, ball hidden; safety despawn fires)*
+- [x] T044 GroundMode terminal rules in ScoreManager (GD-8). *(EditMode + PlayMode: bowled / miss / pending exactly once; unhit wide ball past z < −1 m is a miss; hit edge behind the wicket is pending, never a miss; unhit ball that stops is a miss; stumps beat everything in the same step)*
+- [x] T045 PlayMode physics checks:
   - bowling calibration still within 1 cm with the outfield present;
   - 45 m/s balls at 10 angles never pass below the outfield top;
   - NetMode M6 scoring tests unchanged.

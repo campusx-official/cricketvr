@@ -12,10 +12,24 @@ namespace CricketVR
         Miss,
         /// <summary>Stumps hit, with or without a bat contact first. Always 0 runs.</summary>
         Bowled,
+        /// <summary>GroundMode: bat contact; runs await the virtual-field scorer (plan.md §15).</summary>
+        ScoringPending,
     }
 
     /// <summary>The event that finalized a delivery.</summary>
-    public enum DeliveryEnd { StumpsHit, NetHit, LeftEnclosure, Settled, Timeout }
+    public enum DeliveryEnd
+    {
+        StumpsHit,
+        NetHit,
+        /// <summary>NetMode: went over a net wall.</summary>
+        LeftEnclosure,
+        Settled,
+        Timeout,
+        /// <summary>GroundMode: an unhit ball passed 1 m behind the stumps.</summary>
+        PassedStumps,
+        /// <summary>GroundMode: crossed the boundary rope (or the safety despawn fired).</summary>
+        LeftGround,
+    }
 
     public enum CarryState
     {
@@ -100,6 +114,7 @@ namespace CricketVR
                     case DeliveryOutcome.Bowled: return BatContact ? "BOWLED (played on), 0" : "BOWLED, 0";
                     case DeliveryOutcome.Miss: return "Miss, 0";
                     case DeliveryOutcome.NoRuns: return End == DeliveryEnd.Timeout ? "Hit, no zone (timeout), 0" : "Hit, no zone, 0";
+                    case DeliveryOutcome.ScoringPending: return "Hit, practice scoring pending";
                     default: return $"{Runs} practice run{(Runs == 1 ? "" : "s")}, {PracticeScoring.ZoneLabel(Zone)}";
                 }
             }

@@ -112,6 +112,14 @@ namespace CricketVR
     [CreateAssetMenu(menuName = "CricketVR/Game Config", fileName = "GameConfig")]
     public class GameConfig : ScriptableObject
     {
+        [Tooltip("NetMode: practice net with net scoring. GroundMode: cricket ground, scoring pending (plan.md §15).")]
+        public EnvironmentMode environment = EnvironmentMode.NetMode;
+        [Tooltip("Fixed foveated rendering level on Quest: 0 = off, 1 = maximum (plan.md §15).")]
+        [Range(0f, 1f)] public float foveationLevel = 0.5f;
+        [Tooltip("Development builds: log performance every N seconds (0 = off). AC-14 evidence.")]
+        public float perfWindowSeconds = 10f;
+        [Tooltip("Development builds: alternate foveation between foveationLevel and off every N seconds (0 = never).")]
+        public float foveationAbSeconds = 0f;
         public Handedness defaultHandedness = Handedness.Right;
         public BatSettings bat = new BatSettings();
         public DeliverySettings delivery = new DeliverySettings();

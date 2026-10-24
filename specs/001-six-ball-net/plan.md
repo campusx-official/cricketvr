@@ -242,7 +242,7 @@ The MVP isn't claimed done until AC-10 has real device evidence. **First impleme
 
 Owner decisions GD-1 to GD-12 (accepted 2026-10-24) are recorded in `proposals/M6.5-cricket-ground.md`. Summary: M6 Test 1 and an M6 commit first; black sight screens with the white ball; Outfield layer; GroundDefinition as the single geometry source (Laws values checked against FieldDimensions); vertex-baked shading, no lightmaps; static merged meshes for markers and fielders; 25 m shadow distance.
 
-**Mode switch.**
+**Mode switch.** *(As built: objects are not moved under `Environment/PracticeNet`; the switch holds explicit lists of NetMode objects (Floor, NetFrameAndVisuals, NetBoundaryColliders, Pitch/Markings), NetMode renderers (the Pitch/Surface renderer; its collider stays) and GroundMode objects (Environment/Ground, Gameplay/GroundBoundaryMonitor). The hierarchy, the M2–M6 builders and the scene-layout tests are untouched.)*
 - `GameConfig.environment` holds the mode: `NetMode` (default) or `GroundMode`. `Main.unity` contains both `Environment/PracticeNet` (the existing nets, floor and net colliders) and `Environment/Ground`.
 - At startup `EnvironmentModeSwitch` activates one of them and tells ScoreManager which terminal rules to use.
 - The pitch, the striker's stumps, `BattingAnchor`, `LauncherAnchor`, the bowling machine and the scoreboard are shared and never duplicated.
@@ -303,10 +303,7 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 
 **Leaving the ground (GD-9, owner-resolved).**
 - `GroundBoundaryMonitor` (runtime) checks the ball position each physics step against the boundary shape from `GroundDefinition`. This is a position test rather than a physics trigger, which keeps it deterministic and matches the M6 exit check.
-- The ball has left the ground when any of these happens:
-  - its centre crosses the rope;
-  - it rises above the stand roof height;
-  - it reaches the outer limit beyond the stands.
+- The ball has left the ground when its centre crosses the rope (horizontal test against the boundary ellipse). *(As built: a separate "above the stand roof" test was dropped; the stands are beyond the rope, so any ball above them has already crossed it, and a high catch inside the ground must not count.)*
 - It raises `BallLeftGround(deliveryId, position, time)` once per delivery and hides the ball 1.5 s later.
 - **Safety despawn** (immediate, no event needed): the ball centre goes below the outfield top (y < −0.5 m) or more than 150 m from the ground centre.
 - The brief asked for trigger volumes; the owner accepted the position test instead (deterministic, cheaper, no trigger layer).
@@ -332,6 +329,16 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
   - draw calls ≤ 150;
   - triangles < 250k;
   - texture memory < 150 MB.
+
+**As built (2026-10-24), beyond the table above.**
+- Measured triangle count of the generated ground: about 10k (stands 3.0k, rope 3.1k, fielders 1.3k per hand, outfield 0.9k, boards 0.8k, sky 0.6k, markers 0.5k).
+- The outfield disc runs under the boards up to the stands (10 m past the rope), and the sky dome is closed underneath, so the default skybox never shows through.
+- `GroundLit` has a per-material fog amount; the sight screens use 0.1, otherwise fog at 80 m turned the black screens mid-grey.
+- Realtime shadow casters: the bat, ball, both sets of stumps and the machine. Everything else (scoreboard, debug markers, controller pointer lines, ground) casts none; the thin scoreboard otherwise drew a stray line across the pitch.
+- Rolling drag acts only on real outfield contact (separation ≤ 1 mm). PhysX reports surfaces within its ~1 cm contact offset as touching, and the outfield is 2 mm below the pitch.
+- **Calibration check (conflict with the brief's "within about 1 cm"):** with the outfield present, every preset bounces at exactly the same point as without it (shift 0.00 cm). The absolute distance from the solver's target was already 2.6–10.1 cm before M6.5 (PhysX contact timing; for example 6.0 cm on the default delivery). That is covered by the AC-04 limit of 10 cm on the default delivery. The 1 cm figure applies to the solver's own simulated trajectory (DeliverySolverTests). The M6.5 test therefore asserts "outfield moves the bounce < 1 cm".
+- **Outfield and fast balls:** a 45 m/s ball never passes through or ends up under the 1 m outfield. PhysX CCD does let it dip up to about 21 cm into the box for one 7 ms step before it bounces out (measured at angles of −5° to −85°). Removing the dip would mean changing the ball's collision mode, which could shift the delivery calibration, so it is recorded as a limitation.
+- **Performance probe:** `PerformanceProbe` (development builds) logs FPS, frames on time, CPU and GPU frame time, draw calls, SetPass calls, triangles and texture memory every 10 s. The build option "Ground mode, foveation A-B measurement" alternates fixed foveated rendering between 0.5 and off every 30 s, so one play session yields AC-14 numbers for both. Frame timing stats are on in Player Settings.
 
 ## Requirement traceability
 
@@ -398,3 +405,4 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 | 2026-10-24 | Swing assist: bat contact-point velocity x1.4 in the response (`batSpeedGain`); sweet spot 0.16 -> 0.20 m from the toe, falloff 0.17 -> 0.22 m, off-centre e 0.28 -> 0.35 | Owner: hard swings "not powerful enough" (E-028). Quest log E-022: most contacts 0.42-0.56 m above the toe (sweet factor <= 0.10, e 0.16-0.30) at contact-point bat speeds 1.9-11.3 m/s; a weightless controller is swung slower than a real bat. A game assist, not a physical claim; toe and shoulder hits remain weaker than the middle | REQ-007 |
 | 2026-10-24 | Practice zones = regions of the net wall colliders (`NetWall`), classified from the contact point; boundary exit by position 0.3 m beyond a wall plane; ScoreManager at execution order -45 processes the previous step's events before bat contact; dead-ball linger 1.5 s | PC-01 accepted; avoids triggers intercepting before physical net contact and keeps events chronological without timestamps | REQ-008, REQ-009, REQ-010 |
 | 2026-10-24 | M6.5 cricket ground ahead of M7, behind a NetMode/GroundMode switch; decisions GD-1 to GD-12 in proposals/M6.5-cricket-ground.md (black sight screens; GroundMode results: unhit past z < -1 m or stopped = Miss, any hit = scoring pending; BallLeftGround at the rope, hide after 1.5 s, safety despawn below outfield or > 150 m) | Owner request; explicit owner instruction overrides the CLAUDE.md primitives-first default. NetMode keeps M6 and all tests intact until the virtual-field scorer | REQ-017–REQ-024 |
+| 2026-10-24 | M6.5 as built: mode switch by object lists (no hierarchy moves); left-ground = rope crossing only; sight screens 10% fog; calibration test = outfield shift < 1 cm (absolute error 2.6-10.1 cm pre-existing); outfield dip up to ~21 cm for one step at 45 m/s accepted (no tunnelling); development-build PerformanceProbe with a foveation A/B option | Keeps NetMode and tests unchanged; honest about the brief's 1 cm figure; avoids changing ball CCD (calibration) | REQ-019, REQ-020, REQ-021, REQ-023 |

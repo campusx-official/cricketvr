@@ -20,9 +20,9 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-08 | REQ-013 | Not run | None | M7 restart checks |
 | AC-09 | REQ-014 | Not run | None | M7 interruption checks |
 | AC-10 | REQ-016 | Not run | None | M8 regression/profile |
-| AC-11 | REQ-017, REQ-018, REQ-024 | Not run | None | M6.5 ground visuals |
-| AC-12 | REQ-019, REQ-020 | Not run | None | M6.5 ground physics |
-| AC-13 | REQ-021, REQ-022 | Not run | None | M6.5 mode switch, fielders |
+| AC-11 | REQ-017, REQ-018, REQ-024 | Editor preview renders checked (layout, black screen, no z-fighting at 1 cm near plane); headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
+| AC-12 | REQ-019, REQ-020 | Automated physics checks pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
+| AC-13 | REQ-021, REQ-022 | Automated rules + NetMode regression pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
 | AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
 
 ## Evidence entry template
@@ -541,6 +541,22 @@ Actual result and measured values: owner: "all pass". Logcat (buffer held the en
 Outcome: Pass (owner observation + device log)
 Log or artifact path: adb logcat -s Unity, 2026-10-24
 Remaining limitation / follow-up task: the 3.6 m-wide lane sends most hits into a side net (1 run); net scoring to be replaced by the virtual-field scorer after M6.5
+```
+
+```text
+Check ID / acceptance scenario: E-032 / M6.5 automated: ground geometry, ground physics, GroundMode rules, previews, build (T033-T045)
+Requirement IDs: REQ-017, REQ-018, REQ-019, REQ-020, REQ-021, REQ-022, REQ-024
+Date and tester: 2026-10-24, agent
+Git commit or build identifier: branch m6.5-ground; APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, development, foveation A/B every 30 s), 91.7 MB
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; Editor preview renders (Builds/Preview/Ground_*.png, camera near plane 1 cm); Quest install
+Configuration: GroundDefinition defaults (boundary 65 m circle, rope 6 cm, circle 27.43 m markers ~5 m, black screens 12 x 6 m 5 m past the rope with 10% fog, boards 3 m, stands 9-27 m past the rope 2-12 m high, fog 60-220 m); FieldConfig defaults (third man / fine leg 50 m, GD-3); OutfieldGrass 0.45 / 0.45 / 0.5; rolling drag 0.08 g; shadow distance 25 m, 1 cascade, hard
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (regenerates Environment/Ground; Outfield layer 11; collision matrix Ball-Outfield); GroundPreviewRenderer.Render; -runTests EditMode/PlayMode; QuestBuild.Build -cricketvrGround -cricketvrFoveationAB; adb install
+Expected result: geometry matches the Laws and the accepted decisions; no tunnelling; drag only on the outfield; BallLeftGround once; GroundMode results exactly once; NetMode unchanged
+Actual result and measured values: EditMode 91/91 (15 new: pitch/creases/stumps equal FieldDimensions; popping creases at 1.22 m and 18.90 m; 30-yard circle = semicircles + lines, 43 markers evenly spaced; fielder polar -> world incl. left-hand mirror; every FieldConfig fielder >= 3 m inside the rope at its own angle for both hands; circle/ellipse boundary maths; validation rejects 50/80 m radii and the brief's 58 m third man; GroundMode rules: unhit past z < -1 = Miss at any x, hit behind the wicket = pending never Miss, unhit stop/timeout = Miss, stumps beat everything, nets ignored, finalize once, outfield carry, pending totals). PlayMode 38/38 (10 new, real physics): 45 m/s at 10 angles never through or under the outfield (one-step dip up to 20.9 cm at -49 deg, see plan.md); a 5 m/s rolling ball stops on the outfield; rolling on the pitch keeps >= 97% speed over 1 s; outfield moves the delivery bounce 0.00 cm on all 5 reachable presets (absolute target error 2.6 / 6.0 / 5.7 / 10.1 / 8.4 cm, unchanged pre-existing); lob over the rope -> BallLeftGround once, hidden 1.5 s later (reason Finalized), result pending; safety despawn below the outfield and beyond 150 m, one result each; unhit wide ball past the stumps = Miss (PassedStumps); edge behind the wicket = pending; unhit ball that stops = Miss (Settled); stumps = Bowled. All 28 earlier PlayMode and 76 earlier EditMode tests unchanged and passing (NetMode). Preview renders: black sight screen behind the machine, creases crisp with no z-fighting at a 1 cm near plane, no default sky showing, no stray shadows. Generated ground about 10k triangles. OpenXR validation 0/0; Foveated Rendering feature enabled for Android. Build Success, install Success.
+Outcome: Pass (automated and Editor preview). Headset AC-11 to AC-14 not run.
+Log or artifact path: Builds/Preview/Ground_*.png (gitignored); scratchpad test XML
+Remaining limitation / follow-up task: owner headset checks; on-device performance numbers (AC-14) with foveation on and off; bails not dislodged
 ```
 
 ## M6.5 evidence template (AC-11 to AC-14)

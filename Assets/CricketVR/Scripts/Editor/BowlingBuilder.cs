@@ -20,7 +20,7 @@ namespace CricketVR.Editor
 
         public static void Build(GameObject main, GameObject environment, GameConfig config, List<string> created)
         {
-            PracticeNetBuilder.EnsureLayers(created, BallLayer);
+            PracticeNetBuilder.EnsureLayers(created, BallLayer, GroundBuilder.OutfieldLayer);
             ConfigureCollisionMatrix();
             ApplyPhysicsMaterials(environment, created);
 
@@ -79,6 +79,7 @@ namespace CricketVR.Editor
                 LayerMask.NameToLayer(PracticeNetBuilder.PitchLayer),
                 LayerMask.NameToLayer(PracticeNetBuilder.BoundaryLayer),
                 LayerMask.NameToLayer(PracticeNetBuilder.StumpsLayer),
+                LayerMask.NameToLayer(GroundBuilder.OutfieldLayer),
             };
             for (int layer = 0; layer < 32; layer++)
             {
@@ -179,7 +180,7 @@ namespace CricketVR.Editor
 
             var renderer = ballGo.GetComponent<MeshRenderer>();
             renderer.sharedMaterial = PracticeNetBuilder.Mat("BallWhite", new Color(0.98f, 0.98f, 0.95f));
-            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.shadowCastingMode = ShadowCastingMode.On; // realtime shadow: helps judge the ball's height (plan.md §15)
             renderer.enabled = false; // parked (hidden) until launched; BallController shows it on launch
 
             var body = ballGo.GetComponent<Rigidbody>();
