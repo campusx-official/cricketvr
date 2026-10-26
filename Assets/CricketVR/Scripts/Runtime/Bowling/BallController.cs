@@ -10,6 +10,8 @@ namespace CricketVR
         Cancelled,
         /// <summary>The delivery's result was decided (<see cref="Finish"/>) and the dead ball's linger ended.</summary>
         Finalized,
+        /// <summary>Removed at once by a safety check (left the playable volume); see <see cref="Despawn"/>.</summary>
+        Despawned,
     }
 
     /// <summary>
@@ -25,7 +27,7 @@ namespace CricketVR
         [SerializeField] Renderer ballRenderer;
 
         Rigidbody _body;
-        int _pitchLayer;
+        int _groundMask; // Pitch and Outfield both count as ground (GD-6)
         float _launchTime, _slowSince, _parkAt;
         bool _bounced, _dead;
 
@@ -45,7 +47,7 @@ namespace CricketVR
         void Awake()
         {
             _body = GetComponent<Rigidbody>();
-            _pitchLayer = LayerMask.NameToLayer("Pitch");
+            _groundMask = LayerMask.GetMask("Pitch", "Outfield");
             if (config == null)
             {
                 Debug.LogError("[CricketVR] BallController has no GameConfig; run CricketVR > Setup > 6. Build or Repair Main Scene.", this);
@@ -123,6 +125,16 @@ namespace CricketVR
             return true;
         }
 
+        /// <summary>
+        /// Safety removal: parks the ball at once whether or not its result was decided. Whoever calls it must have
+        /// reported the reason first (e.g. BallLeftGround), so the delivery still gets exactly one result.
+        /// </summary>
+        public void Despawn(int deliveryId)
+        {
+            if (InFlight && deliveryId == ActiveDeliveryId)
+                End(BallEndReason.Despawned);
+        }
+
         /// <summary>Ends the active delivery (if any) and hides the ball.</summary>
         public void Cancel()
         {
@@ -164,7 +176,7 @@ namespace CricketVR
             if (!InFlight)
                 return;
             int id = ActiveDeliveryId;
-            if (!_bounced && collision.gameObject.layer == _pitchLayer)
+            if (!_bounced && (_groundMask & (1 << collision.gameObject.layer)) != 0)
             {
                 _bounced = true;
                 FirstBounce?.Invoke(id, collision.GetContact(0).point, Time.time - _launchTime);

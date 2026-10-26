@@ -10,6 +10,9 @@ Detailed evidence lives in `specs/001-six-ball-net/validation.md`. This table is
 | M4 Bowling machine | Implemented (T013–T015), 144 Hz physics, tuned bounce | EditMode 40/40, PlayMode 10/10 (E-015, E-016, E-018) | **AC-04 pass** (E-017–E-019) | Done |
 | M5 Batting contact | Implemented (T016–T020): swept resolver, response with swing assist, recorded impact sounds, rhythm-coded haptics | EditMode 52/52, PlayMode 17/17 incl. AC-05 matrix (E-020, E-028) | **AC-05 pass, right controller** (E-022–E-029) | Done |
 | M6 Delivery outcomes | Implemented (T021–T024): DeliveryAdjudicator, practice zones on tagged net walls, boundary exit, measured carry, ScoreManager records | EditMode 76/76, PlayMode 28/28 (E-030) | **AC-06 pass** (E-031, NetMode) | Done; net scoring kept until the virtual-field scorer |
-| M6.5 Cricket ground | Accepted 2026-10-24 (REQ-017–REQ-024, T033–T046) | Pending | Pending | Build on branch m6.5-ground |
-| M7 Six-ball loop | Not started | Pending | Pending | After M6 |
-| M8 Quest polish | Not started | Pending | Pending | After M7 |
+| M6.5 Cricket ground | Implemented (T033–T046) | EditMode 91/91, PlayMode 38/38 (E-032) | **AC-11–AC-14 pass** (E-033–E-035): 72 fps, GPU 2.5 ms (FFR on) / 3.0 ms (off), ≤ 63 draw calls, ≤ 59k triangles, 82 MB graphics | Done; merged to main |
+| M7 Session framework + start menu | Not started (re-planned 2026-10-26) | Pending | Pending | After M6.5 merge |
+| M8 Net Practice + Shot Confidence | Not started | Pending | Pending | After M7 |
+| M9 Virtual-field scorer | Not started | Pending | Pending | After M8 (needs calibration CSV) |
+| M10 Match Simulation | Not started | Pending | Pending | After M9 |
+| M11 Polish + device verification | Not started | Pending | Pending | After M10 |

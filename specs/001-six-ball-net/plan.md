@@ -230,7 +230,7 @@ Events are plain C# `event Action<…>` on owners: `DeliveryStarted(id)`, `BatCo
 - Expected cost is trivial. Investigate only demonstrated problems: avoid per-frame allocation in PoseHistory and the resolver, keep shared materials, and turn off debug logs in release builds.
 
 ## 14. Milestone execution order
-Execute strictly M1 → M8 per `tasks.md`, with M6.5 (cricket ground, owner request 2026-10-24) between M6 and M7. Each milestone ends with:
+Execute in order: M1–M6 (done), M6.5 (cricket ground; Test 2, AC-14 and the merge first), then M7 (session framework and start menu), M8 (Net Practice with Shot Confidence), M9 (virtual-field scorer), M10 (Match Simulation), M11 (polish and device verification). Re-planned 2026-10-26 (§16). Each milestone ends with:
 - a tasks.md tick for the code work
 - a `validation.md` evidence entry for each check actually run
 - a `Docs/PROGRESS.md` row update
@@ -242,7 +242,7 @@ The MVP isn't claimed done until AC-10 has real device evidence. **First impleme
 
 Owner decisions GD-1 to GD-12 (accepted 2026-10-24) are recorded in `proposals/M6.5-cricket-ground.md`. Summary: M6 Test 1 and an M6 commit first; black sight screens with the white ball; Outfield layer; GroundDefinition as the single geometry source (Laws values checked against FieldDimensions); vertex-baked shading, no lightmaps; static merged meshes for markers and fielders; 25 m shadow distance.
 
-**Mode switch.**
+**Mode switch.** *(2026-10-26: the switch is permanent; the planned removal of NetMode is cancelled, §16.)* *(As built: objects are not moved under `Environment/PracticeNet`; the switch holds explicit lists of NetMode objects (Floor, NetFrameAndVisuals, NetBoundaryColliders, Pitch/Markings), NetMode renderers (the Pitch/Surface renderer; its collider stays) and GroundMode objects (Environment/Ground, Gameplay/GroundBoundaryMonitor). The hierarchy, the M2–M6 builders and the scene-layout tests are untouched.)*
 - `GameConfig.environment` holds the mode: `NetMode` (default) or `GroundMode`. `Main.unity` contains both `Environment/PracticeNet` (the existing nets, floor and net colliders) and `Environment/Ground`.
 - At startup `EnvironmentModeSwitch` activates one of them and tells ScoreManager which terminal rules to use.
 - The pitch, the striker's stumps, `BattingAnchor`, `LauncherAnchor`, the bowling machine and the scoreboard are shared and never duplicated.
@@ -303,10 +303,7 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 
 **Leaving the ground (GD-9, owner-resolved).**
 - `GroundBoundaryMonitor` (runtime) checks the ball position each physics step against the boundary shape from `GroundDefinition`. This is a position test rather than a physics trigger, which keeps it deterministic and matches the M6 exit check.
-- The ball has left the ground when any of these happens:
-  - its centre crosses the rope;
-  - it rises above the stand roof height;
-  - it reaches the outer limit beyond the stands.
+- The ball has left the ground when its centre crosses the rope (horizontal test against the boundary ellipse). *(As built: a separate "above the stand roof" test was dropped; the stands are beyond the rope, so any ball above them has already crossed it, and a high catch inside the ground must not count.)*
 - It raises `BallLeftGround(deliveryId, position, time)` once per delivery and hides the ball 1.5 s later.
 - **Safety despawn** (immediate, no event needed): the ball centre goes below the outfield top (y < −0.5 m) or more than 150 m from the ground centre.
 - The brief asked for trigger volumes; the owner accepted the position test instead (deterministic, cheaper, no trigger layer).
@@ -319,7 +316,7 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 - Measured carry (first landing on pitch or outfield after contact) still works and is labelled the same.
 - NetMode rules are unchanged.
 
-**Performance measurement.**
+**Performance measurement.** *(As measured, E-035: on Quest 3 / Vulkan, Unity's FrameTimingManager gives no CPU/GPU split and the Texture Memory profiler counter grows on every resume. Use the Meta VrApi logcat lines (`App=` GPU ms, `CPU&GPU=` ms, `Fov=`) or OVR Metrics for frame times, and `adb shell dumpsys meminfo com.cricketvr.prototype` for memory.)*
 - **Unity Profiler:**
   1. Make a development build (`CricketVR/Build/Quest APK (Development)`, with Autoconnect Profiler).
   2. Open Window > Analysis > Profiler and choose the Quest under the target selector (over USB via adb).
@@ -333,6 +330,156 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
   - triangles < 250k;
   - texture memory < 150 MB.
 
+**As built (2026-10-24), beyond the table above.**
+- Measured triangle count of the generated ground: about 10k (stands 3.0k, rope 3.1k, fielders 1.3k per hand, outfield 0.9k, boards 0.8k, sky 0.6k, markers 0.5k).
+- The outfield disc runs under the boards up to the stands (10 m past the rope), and the sky dome is closed underneath, so the default skybox never shows through.
+- `GroundLit` has a per-material fog amount; the sight screens use 0.1, otherwise fog at 80 m turned the black screens mid-grey.
+- Realtime shadow casters: the bat, ball, both sets of stumps and the machine. Everything else (scoreboard, debug markers, controller pointer lines, ground) casts none; the thin scoreboard otherwise drew a stray line across the pitch.
+- Rolling drag acts only on real outfield contact (separation ≤ 1 mm). PhysX reports surfaces within its ~1 cm contact offset as touching, and the outfield is 2 mm below the pitch.
+- **Calibration check (conflict with the brief's "within about 1 cm"):** with the outfield present, every preset bounces at exactly the same point as without it (shift 0.00 cm). The absolute distance from the solver's target was already 2.6–10.1 cm before M6.5 (PhysX contact timing; for example 6.0 cm on the default delivery). That is covered by the AC-04 limit of 10 cm on the default delivery. The 1 cm figure applies to the solver's own simulated trajectory (DeliverySolverTests). The M6.5 test therefore asserts "outfield moves the bounce < 1 cm".
+- **Outfield and fast balls:** a 45 m/s ball never passes through or ends up under the 1 m outfield. PhysX CCD does let it dip up to about 21 cm into the box for one 7 ms step before it bounces out (measured at angles of −5° to −85°). Removing the dip would mean changing the ball's collision mode, which could shift the delivery calibration, so it is recorded as a limitation.
+- **Performance probe:** `PerformanceProbe` (development builds) logs FPS, frames on time, CPU and GPU frame time, draw calls, SetPass calls, triangles and texture memory every 10 s. The build option "Ground mode, foveation A-B measurement" alternates fixed foveated rendering between 0.5 and off every 30 s, so one play session yields AC-14 numbers for both. Frame timing stats are on in Player Settings.
+
+## 16. Two modes, session framework and start menu (M7, T047–T052) — accepted 2026-10-26
+
+Decision record: `proposals/two-modes-replan.md`. Owner additions on approval: M6.5 Test 2, AC-14 and the merge come before M7; seamless handover to the simulated path with sounds and a visible-vs-scored PlayMode test; the same stumps box for played-on; one rolling-resistance value starting at 0.25 g; the timing window and leave thresholds as settings; Δt recorded for every ball; one calibration table (§17).
+
+**Order:** finish M6.5 (Test 2 = AC-12/13 in the headset, the AC-14 numbers with foveation on and off), merge `m6.5-ground` into `main`, then M7 → M8 → M9 → M10 → M11. No code changes until M6.5 is done.
+
+**Modes.**
+- The NetMode/GroundMode switch from M6.5 is permanent; the NetMode removal is cancelled.
+- The start menu sets `EnvironmentModeSwitch.Apply` at runtime (no longer only from GameConfig at startup), the result pipeline and the UI.
+- Net Practice = NetMode environment + net finalization + Shot Confidence.
+- Match Simulation = GroundMode environment + virtual-field scorer + chase UI.
+
+**Session framework (Core, pure C#).** Every scheduled action carries a generation token, so restart, menu and pause make stale actions no-ops. The states:
+- Menu → Countdown → Delivering → Resolving → BallPanel → Interval → (Countdown for the next ball | SessionEnd).
+- Paused can be entered from any in-session state.
+- SessionEnd → Play again / Menu / New scenario.
+
+The ball budget is fixed per session. Early end in Match Simulation (win, or no wickets left) is decided only at finalization. This replaces the earlier M7 six-ball design in §11; the timer and interruption rules of §11 still apply.
+
+**Start menu (REQ-025).**
+- A world-space TextMeshPro panel at the scoreboard position.
+- Right-controller XRI Ray Interactor, enabled only while a menu is shown. The bat visual and proxy are hidden in menus.
+- Bat-tap fallback: a blade-box to button-rectangle distance test (no new colliders; the bat proxy still collides with nothing).
+- The left controller is never required.
+
+**Per-ball record (REQ-027).**
+- `BallRecord` holds:
+  - session id, mode and ball index;
+  - delivery config and seed;
+  - contact report fields (point, normal, v_in, v_out, bat point velocity, sweet, edge, height from toe);
+  - swing data (v_peak, t_peak, Δt, reset age);
+  - closest gap and bat speed near the ball (unhit balls);
+  - the physical `DeliveryResult`;
+  - confidence components;
+  - `ShotLaunch` and `ScorerOutcome`.
+- The CSV writer (development builds, `GameConfig.logBallsCsv`) appends to `Application.persistentDataPath/cricketvr_<session>.csv`. Pull it with `adb pull /sdcard/Android/data/com.cricketvr.prototype/files/`.
+
+**Delivery plans (REQ-028).** `DeliveryPlan` (ScriptableObject) for Net Practice and Easy/Medium/Hard, with ranges as spec.md "Two modes". Each draw is solved before use; an unreachable draw is redrawn up to 10 times with a logged count, then the plan falls back to its default delivery and logs an error. The requested speed is never altered.
+
+**Retiring net-zone runs** (as in proposal §7):
+- **Kept:** finalize once, ordering, priority, stale rejection, carry, dead-ball hold, and NetWall zone labels.
+- **Changed:** run fields and the Scored/NoRuns outcomes in Net Practice, SessionTotals per mode, and the debug readout becomes an overlay.
+- **Tests:** the run assertions are rewritten to zones and outcomes, deliberately, in T052.
+
+## 17. Shot Confidence and calibration (M8–M10)
+
+**Shot Confidence (Core, `ShotConfidence` + `ConfidenceSettings` ScriptableObject).**
+- **Inputs:** S (sweet factor), E = |edge|, v_out, launch λ, horizontal face/exit angle α, swing peak toe speed v_peak, Δt = t_contact − t_peak, the last tracking-reset age, contact point (z_c, y_c).
+- **Shot type:** attacking if v_peak ≥ the attacking threshold; otherwise defensive.
+- **Components:**
+  - **Middle** M = 100·S·(1 − E)².
+    - Edged: E ≥ 0.5.
+    - Middled: S ≥ 0.7 and E < 0.5.
+    - Off-centre: otherwise.
+  - **Timing:**
+    - Attacking: T = 100·exp(−(Δt / w)²), with w = 0.06 s (the ±60 ms setting).
+    - Defensive: 100 inside the window z_c ∈ [0.8, 2.2] m and y_c ≤ 1.1 m, falling linearly to 0 over 0.5 m outside it. If calibration shows it doesn't separate good blocks from bad, set defensive Timing = Middle.
+  - **Control:**
+    - C = 100·(1 − E)·(0.5·c_face + 0.5·c_launch)·c_track.
+    - c_face = clamp01(1 − (α − 10°)/30°).
+    - c_launch = 1 if λ ≤ 15° or S ≥ 0.6; otherwise clamp01(1 − (λ − 15°)/30°).
+    - c_track = 0.5 if there was a tracking reset within 0.5 s before contact, else 1.
+  - **Power:**
+    - Attacking: P = 100·clamp01(v_out / v_target), v_target = 32 m/s.
+    - Defensive: not applied; its weight moves to Control.
+- **Overall:** round(0.35·M + 0.25·T + 0.25·C + 0.15·P), with the weights renormalised for defensive shots.
+  - **Edge cap:** if E ≥ 0.5, the rating is at most 30.
+  - **Labels:** 85+ Excellent, 70–84 Good, 50–69 OK, 30–49 Poor, under 30 Mis-hit.
+- **Unhit balls:** Bowled 0 (counted); Played and missed 0 (counted); Well left (excluded, shown separately). Played and missed = closest gap < 0.20 m, or bat speed toward the ball > 3 m/s within ±0.15 s of the ball passing.
+- **Swing peak:** BatController gains a peak timestamp. Contact is rated after the swing ends (or 0.3 s after contact, whichever comes first), so the peak after contact is known. Δt is written to the CSV for every contacted ball.
+
+**Calibration table.** Every setting tuned from headset data. Change one only against the evidence named; record the before and after values in validation.md.
+
+| Setting | Asset / field | Starting value | How it is measured | Checked by |
+| --- | --- | --- | --- | --- |
+| Timing window width (±) | ConfidenceSettings.timingWidth | 0.06 s | Δt spread (CSV) of middled attacking drives; compare with how shots felt | AC-17 (EditMode values, headset ranking) |
+| Attacking/defensive split | ConfidenceSettings.attackingPeakSpeed | 4 m/s | Gap in the v_peak histogram between blocks and drives | AC-17 |
+| Defensive timing window | ConfidenceSettings.defensiveZ / defensiveMaxY | z 0.8–2.2 m, y ≤ 1.1 m | Contact positions of blocks you rate good vs bad | AC-17 |
+| Power target | ConfidenceSettings.powerTarget | 32 m/s | 90th percentile exit speed of middled attacking contacts | AC-17 |
+| Face/exit angle limits | ConfidenceSettings.faceFull / faceZero | 10° / 40° | α distribution of middled vs sliced shots | AC-17 |
+| Loft limits | ConfidenceSettings.loftFree / loftZero / loftSweetOk | 15° / 45° / S 0.6 | λ of top edges vs clean lofts | AC-17 |
+| Middled / edged thresholds | ConfidenceSettings.middledSweet / edgedEdge | S 0.7 / E 0.5 | Summary counts vs your sense of each shot | AC-18 |
+| Edge cap | ConfidenceSettings.edgeCap | 30 | Edges should never outrank off-centre drives | AC-17 |
+| Component weights | ConfidenceSettings.weights | 35/25/25/15 | Rank order of the AC-17 shot set | AC-17 |
+| Played-and-missed gap | ConfidenceSettings.playMissGap | 0.20 m | 20 announced leaves vs 20 announced play-and-misses | AC-17, T055 tests |
+| Played-and-missed bat speed | ConfidenceSettings.playMissBatSpeed | 3 m/s | As above | AC-17, T055 tests |
+| Air drag | ScorerSettings.drag k | 0.008 /m | Carry distribution of your hits vs a sensible range (physical value ≈ 0.007) | AC-19 (monotonic), AC-21 |
+| Bounce: vertical / horizontal | ScorerSettings.bounceVertical / bounceHorizontal | 0.4 / 0.7 | Run histogram; hard drives along the ground should usually reach the rope | AC-19, AC-21 |
+| Rolling resistance (single value, C-8) | GroundDefinition.rollingResistance | 0.25 g (M6.5 shipped 0.08; changed at M9) | Distance hit balls roll; share of 4s | AC-19, AC-21, AC-12 re-check |
+| Fielder reach | ScorerSettings.reach | 1.2 m | Run histogram; share of catches | AC-20, AC-21 |
+| Fielder run speed | ScorerSettings.runSpeed | 6.5 m/s | As above | AC-20, AC-21 |
+| Fielder reaction | ScorerSettings.reaction | 0.35 s | As above | AC-20, AC-21 |
+| Keeper/slip reaction | ScorerSettings.closeReaction | 0.35 s (try 0.25) | Replay of logged edges: how many become catches | AC-20, AC-21 |
+| Catch height window | ScorerSettings.catchMin / catchMax | 0.2 / 2.5 m | Catches vs "dropped" share | AC-20 |
+| Catch spare time | ScorerSettings.catchSpare | 0.3 s | Caught vs dropped share | AC-20, AC-21 |
+| Pickup, throw speed, run time | ScorerSettings.pickup / throwSpeed / runTime / runStart | 0.5 s / 28 m/s / 3.0 s / 1.0 s | Run histogram (share of 1s, 2s, 3s) | AC-20, AC-21 |
+| Difficulty speeds and yorker/short shares | DeliveryPlan assets | spec.md "Two modes" | Bounce errors (AC-04 re-run to 120 km/h); contact rate per preset | AC-16, AC-04 re-run, AC-23 |
+| Scenario bounds | ScenarioSettings | RR 6–15, 6–36 balls, 1–5 wickets | Win rate across 10+ played scenarios | AC-22, AC-23 |
+
+## 18. Virtual-field scorer and simulated ball path (M9–M10, T058–T066)
+
+**Scorer core.**
+- Pure C# in Core: `VirtualField.Simulate(ShotLaunch, GroundData, FieldData, ScorerSettings) → ScorerOutcome`. `GroundData` and `FieldData` are plain structs copied from GroundDefinition and FieldConfig, so EditMode tests need no assets.
+- Fixed step 1/200 s, semi-implicit Euler, at most 15 s of simulated time.
+- Output: path samples every 1/50 s, the first landing (simulated carry), the shot angle θ = atan2(x, z), and the events below.
+
+**Phases.**
+- **Flight:** a = g − k·|v|·v.
+- **Ground contact** at y ≤ radius:
+  - v_y ← −e_v·v_y and v_h ← e_h·v_h;
+  - roll once |v_y| after the bounce is below 1 m/s.
+- **Roll:** horizontal deceleration μ_roll·g + k·v², with μ_roll = `GroundDefinition.rollingResistance` (the single value, C-8).
+- **Stop** below 0.1 m/s.
+
+**Events.**
+- **Played on:** during the first 1.5 s the path is swept against the stumps box. This is the same box as the stumps collider (centre (0, h/2, 0), size stump-set width × stump height × stump diameter, from GroundDefinition / FieldDimensions), so bowled means the same in both modes.
+- **Rope:** checked with `GroundGeometry.DistanceInsideBoundary`.
+  - Crossed before the first landing = 6.
+  - Crossed after a landing, with no earlier intercept = 4.
+- **Catch:**
+  - Path samples before the first landing, at heights 0.2–2.5 m: spare = (t − reaction) − (|p_xz − f| − reach)/runSpeed.
+  - At the earliest sample with spare ≥ 0: caught if spare ≥ 0.3 s, otherwise "chance, dropped" and the simulation continues.
+- **Ground fielding:**
+  - After the first landing (or below 0.2 m), the earliest t_f with spare ≥ 0.
+  - T = t_f + pickup + throwDistance/throwSpeed.
+  - runs = clamp(floor((T − runStart)/runTime), 0, 3).
+  - An unfielded stop uses the nearest fielder's arrival time.
+- **Tie order:** stumps > catch > rope > intercept.
+
+**Finalization.** The outcome enters the M6 adjudicator as one terminal event at contact time plus the playback time of its end point. "Exactly once", the result hold and stale rejection are unchanged. A pre-contact physical bowled or miss wins, because contact never happened.
+
+**Simulated ball path (REQ-038).**
+- At contact, the resolver's exit state is handed to the scorer, and the ball's Rigidbody switches to kinematic.
+- A `PathPlayback` component moves it along the simulated path from the exact contact position and exit velocity. Sample 0 is the contact position, and playback interpolates using the same t = 0, so there is no jump and no speed change.
+- Playback ends at the catch point (fielder's hands), at the rope (the ball keeps flying 1.5 s, then hides) or at the intercept point.
+- The existing bat-impact sounds are unchanged. Short new clips (landing thud, fielded pick-up, caught, boundary) play from the path events. They will be made from simple recordings or synthesis, with no third-party assets.
+- The PlayMode test plays back several simulated launches and asserts that the visible ball's first landing and end position equal the scored path's within 2 cm, and that there is no position or speed discontinuity at contact.
+
+**Physics in Net Practice** stays as M6 (PhysX after contact, nets, measured carry).
+
 ## Requirement traceability
 
 | Requirement | Plan sections | Tasks | Acceptance |
@@ -344,15 +491,15 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 | REQ-005 | §9 | T013, T015 | AC-04 |
 | REQ-006 | §10 | T016–T017, T020 | AC-05 |
 | REQ-007 | §8, §10 | T011, T016, T018, T020 | AC-03, AC-05 |
-| REQ-008 | §6, §7, §11 | T021, T024 | AC-06 |
-| REQ-009 | §6 | T022, T024 | AC-06 |
-| REQ-010 | §6 | T023–T024 | AC-06 |
-| REQ-011 | §11 | T025–T026, T028 | AC-07 |
-| REQ-012 | §11 | T026, T028 | AC-07 |
-| REQ-013 | §11 | T025, T028 | AC-08 |
-| REQ-014 | §8, §11 | T027–T028 | AC-09 |
+| REQ-008 | §6, §7, §11, §16 | T021, T024, T047, T048 | AC-06, AC-16 |
+| REQ-009 | §6, §16 | T022, T024, T052 | AC-06 |
+| REQ-010 | §6, §18 | T023–T024, T064 | AC-06, AC-23 |
+| REQ-011 | §11, §16 | T047, T051 | AC-07 |
+| REQ-012 | §11, §16 | T047, T051, T056, T063 | AC-07, AC-18, AC-23 |
+| REQ-013 | §11, §16 | T047, T051 | AC-08 |
+| REQ-014 | §11, §16 | T047, T051 | AC-09 |
 | REQ-015 | §5, §10, §11 | T008, T019, T029 | AC-02, AC-05 |
-| REQ-016 | §13, §14 | T030–T032 | AC-10 |
+| REQ-016 | §13, §16 | T069 | AC-10 |
 | REQ-017 | §15 | T036–T041 | AC-11 |
 | REQ-018 | §15 | T033, T036 | AC-11 |
 | REQ-019 | §15 | T034, T036, T042, T045 | AC-12 |
@@ -361,6 +508,21 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 | REQ-022 | §15 | T033, T041 | AC-13 |
 | REQ-023 | §15 | T046 | AC-14 |
 | REQ-024 | §15 | T037–T040 | AC-11 |
+| REQ-025 | §16 | T050 | AC-15 |
+| REQ-026 | §16 | T047, T051 | AC-07, AC-08 |
+| REQ-027 | §16, §17 | T048, T053 | AC-16 |
+| REQ-028 | §16 | T049, T065 | AC-16 |
+| REQ-029 | §17 | T053, T054, T056 | AC-17 |
+| REQ-030 | §17 | T055 | AC-17 |
+| REQ-031 | §17 | T056 | AC-18 |
+| REQ-032 | §18 | T058 | AC-19 |
+| REQ-033 | §18 | T059 | AC-19 |
+| REQ-034 | §18 | T059, T060 | AC-20 |
+| REQ-035 | §17, §18 | T061 | AC-21 |
+| REQ-036 | §16 | T062 | AC-22 |
+| REQ-037 | §16 | T063 | AC-23 |
+| REQ-038 | §18 | T064 | AC-23 |
+| REQ-039 | §13, §15 | T068 | AC-24 |
 
 ## Open owner decisions
 
@@ -398,3 +560,5 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 | 2026-10-24 | Swing assist: bat contact-point velocity x1.4 in the response (`batSpeedGain`); sweet spot 0.16 -> 0.20 m from the toe, falloff 0.17 -> 0.22 m, off-centre e 0.28 -> 0.35 | Owner: hard swings "not powerful enough" (E-028). Quest log E-022: most contacts 0.42-0.56 m above the toe (sweet factor <= 0.10, e 0.16-0.30) at contact-point bat speeds 1.9-11.3 m/s; a weightless controller is swung slower than a real bat. A game assist, not a physical claim; toe and shoulder hits remain weaker than the middle | REQ-007 |
 | 2026-10-24 | Practice zones = regions of the net wall colliders (`NetWall`), classified from the contact point; boundary exit by position 0.3 m beyond a wall plane; ScoreManager at execution order -45 processes the previous step's events before bat contact; dead-ball linger 1.5 s | PC-01 accepted; avoids triggers intercepting before physical net contact and keeps events chronological without timestamps | REQ-008, REQ-009, REQ-010 |
 | 2026-10-24 | M6.5 cricket ground ahead of M7, behind a NetMode/GroundMode switch; decisions GD-1 to GD-12 in proposals/M6.5-cricket-ground.md (black sight screens; GroundMode results: unhit past z < -1 m or stopped = Miss, any hit = scoring pending; BallLeftGround at the rope, hide after 1.5 s, safety despawn below outfield or > 150 m) | Owner request; explicit owner instruction overrides the CLAUDE.md primitives-first default. NetMode keeps M6 and all tests intact until the virtual-field scorer | REQ-017–REQ-024 |
+| 2026-10-24 | M6.5 as built: mode switch by object lists (no hierarchy moves); left-ground = rope crossing only; sight screens 10% fog; calibration test = outfield shift < 1 cm (absolute error 2.6-10.1 cm pre-existing); outfield dip up to ~21 cm for one step at 45 m/s accepted (no tunnelling); development-build PerformanceProbe with a foveation A/B option | Keeps NetMode and tests unchanged; honest about the brief's 1 cm figure; avoids changing ball CCD (calibration) | REQ-019, REQ-020, REQ-021, REQ-023 |
+| 2026-10-26 | Two modes (Net Practice: no runs, Shot Confidence; Match Simulation: chase scored by a deterministic virtual-field scorer), shared session framework and start menu; milestones re-planned M7–M11; NetMode permanent; net-zone runs retired; D-1..D-5 as recommended; simulated ball path with seamless handover; one rolling-resistance value (0.25 g start) | Owner re-plan, approved with additions (proposals/two-modes-replan.md); owner instruction overrides the CLAUDE.md six-ball/practice-scoring product background | REQ-008..014, REQ-016, REQ-021, REQ-025..039 |

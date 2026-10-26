@@ -15,15 +15,25 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
 | AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
-| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode): automated + owner M6 test 1 | APK sha256 225a148…00ee7; E-030, E-031 | Superseded later by the virtual-field scorer; NetMode kept until then |
-| AC-07 | REQ-011, REQ-012 | Not run | None | M7 six-delivery loop |
-| AC-08 | REQ-013 | Not run | None | M7 restart checks |
-| AC-09 | REQ-014 | Not run | None | M7 interruption checks |
-| AC-10 | REQ-016 | Not run | None | M8 regression/profile |
-| AC-11 | REQ-017, REQ-018, REQ-024 | Not run | None | M6.5 ground visuals |
-| AC-12 | REQ-019, REQ-020 | Not run | None | M6.5 ground physics |
-| AC-13 | REQ-021, REQ-022 | Not run | None | M6.5 mode switch, fielders |
-| AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
+| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; run scoring superseded 2026-10-26 (REQ-009 amended) | APK sha256 225a148…00ee7; E-030, E-031 | Re-run the amended AC-06 (no runs) after T052 |
+| AC-07 | REQ-011, REQ-012, REQ-026 | Not run (re-planned: complete session, both modes) | None | M7 T051 |
+| AC-08 | REQ-013 | Not run (re-planned: play again / menu, both modes) | None | M7 T051 |
+| AC-09 | REQ-014 | Not run (both modes) | None | M7 T051 |
+| AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
+| AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
+| AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
+| AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
+| AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
+| AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
+| AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
+| AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
+| AC-18 | REQ-031 | Not run | None | M8 summary |
+| AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
+| AC-20 | REQ-034 | Not run | None | M9 fielding |
+| AC-21 | REQ-035 | Not run | None | M9 calibration replay |
+| AC-22 | REQ-036 | Not run | None | M10 scenarios |
+| AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
+| AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 
 ## Evidence entry template
 
@@ -542,6 +552,92 @@ Outcome: Pass (owner observation + device log)
 Log or artifact path: adb logcat -s Unity, 2026-10-24
 Remaining limitation / follow-up task: the 3.6 m-wide lane sends most hits into a side net (1 run); net scoring to be replaced by the virtual-field scorer after M6.5
 ```
+
+```text
+Check ID / acceptance scenario: E-032 / M6.5 automated: ground geometry, ground physics, GroundMode rules, previews, build (T033-T045)
+Requirement IDs: REQ-017, REQ-018, REQ-019, REQ-020, REQ-021, REQ-022, REQ-024
+Date and tester: 2026-10-24, agent
+Git commit or build identifier: branch m6.5-ground; APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, development, foveation A/B every 30 s), 91.7 MB
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; Editor preview renders (Builds/Preview/Ground_*.png, camera near plane 1 cm); Quest install
+Configuration: GroundDefinition defaults (boundary 65 m circle, rope 6 cm, circle 27.43 m markers ~5 m, black screens 12 x 6 m 5 m past the rope with 10% fog, boards 3 m, stands 9-27 m past the rope 2-12 m high, fog 60-220 m); FieldConfig defaults (third man / fine leg 50 m, GD-3); OutfieldGrass 0.45 / 0.45 / 0.5; rolling drag 0.08 g; shadow distance 25 m, 1 cascade, hard
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (regenerates Environment/Ground; Outfield layer 11; collision matrix Ball-Outfield); GroundPreviewRenderer.Render; -runTests EditMode/PlayMode; QuestBuild.Build -cricketvrGround -cricketvrFoveationAB; adb install
+Expected result: geometry matches the Laws and the accepted decisions; no tunnelling; drag only on the outfield; BallLeftGround once; GroundMode results exactly once; NetMode unchanged
+Actual result and measured values: EditMode 91/91 (15 new: pitch/creases/stumps equal FieldDimensions; popping creases at 1.22 m and 18.90 m; 30-yard circle = semicircles + lines, 43 markers evenly spaced; fielder polar -> world incl. left-hand mirror; every FieldConfig fielder >= 3 m inside the rope at its own angle for both hands; circle/ellipse boundary maths; validation rejects 50/80 m radii and the brief's 58 m third man; GroundMode rules: unhit past z < -1 = Miss at any x, hit behind the wicket = pending never Miss, unhit stop/timeout = Miss, stumps beat everything, nets ignored, finalize once, outfield carry, pending totals). PlayMode 38/38 (10 new, real physics): 45 m/s at 10 angles never through or under the outfield (one-step dip up to 20.9 cm at -49 deg, see plan.md); a 5 m/s rolling ball stops on the outfield; rolling on the pitch keeps >= 97% speed over 1 s; outfield moves the delivery bounce 0.00 cm on all 5 reachable presets (absolute target error 2.6 / 6.0 / 5.7 / 10.1 / 8.4 cm, unchanged pre-existing); lob over the rope -> BallLeftGround once, hidden 1.5 s later (reason Finalized), result pending; safety despawn below the outfield and beyond 150 m, one result each; unhit wide ball past the stumps = Miss (PassedStumps); edge behind the wicket = pending; unhit ball that stops = Miss (Settled); stumps = Bowled. All 28 earlier PlayMode and 76 earlier EditMode tests unchanged and passing (NetMode). Preview renders: black sight screen behind the machine, creases crisp with no z-fighting at a 1 cm near plane, no default sky showing, no stray shadows. Generated ground about 10k triangles. OpenXR validation 0/0; Foveated Rendering feature enabled for Android. Build Success, install Success.
+Outcome: Pass (automated and Editor preview). Headset AC-11 to AC-14 not run.
+Log or artifact path: Builds/Preview/Ground_*.png (gitignored); scratchpad test XML
+Remaining limitation / follow-up task: owner headset checks; on-device performance numbers (AC-14) with foveation on and off; bails not dislodged
+```
+
+```text
+Check ID / acceptance scenario: E-033 / AC-11 headset: standing in the middle (M6.5 test 1)
+Requirement IDs: REQ-017, REQ-018, REQ-024
+Date and tester: 2026-10-26 (reported), owner
+Git commit or build identifier: 87200cb; APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, foveation A/B every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right hand
+Configuration: GroundDefinition / FieldConfig defaults
+Steps or exact command: look around from the crease; creases near and far with head movement; rope, circle markers and stand edges with head movement; watch a few deliveries from release
+Expected result: true-scale ground; no flicker on markings; no shimmer on thin distant lines; ball easy to pick up against the black sight screen and the grass
+Actual result and measured values: owner: "all pass" (all five questions). No device log read: the headset was disconnected when the log was requested.
+Outcome: Pass (owner observation)
+Log or artifact path: none
+Remaining limitation / follow-up task: AC-12/AC-13 headset checks; AC-14 performance numbers
+```
+
+```text
+Check ID / acceptance scenario: E-034 / AC-12 + AC-13 headset: ground physics, results, fielders (M6.5 test 2)
+Requirement IDs: REQ-019, REQ-020, REQ-021, REQ-022
+Date and tester: 2026-10-26, owner
+Git commit or build identifier: APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, foveation A/B every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right hand
+Configuration: GroundDefinition / FieldConfig defaults; rolling resistance 0.08 g
+Steps or exact command: leave one onto the stumps and one wide; edge one behind; ground drives; lofted hits over the rope; gentle block; check fielder positions; at least 4 minutes of play
+Expected result: one result per ball matching what happened (bowled / miss / hit, practice scoring pending; edges behind never a miss); believable roll and stop on the outfield; a ball over the rope disappears about 1.5 s later; fielders where expected; no stutter or flicker at foveation switches
+Actual result and measured values: owner: "all pass". Device log not read: the headset was not connected afterwards (performance lines for AC-14 not yet collected).
+Outcome: Pass (owner observation)
+Log or artifact path: none yet
+Remaining limitation / follow-up task: AC-14 numbers (E-035) from the same session's log if still in the buffer, otherwise a short re-run
+```
+
+```text
+Check ID / acceptance scenario: E-035 / AC-14 ground performance on Quest 3, foveation on and off
+Requirement IDs: REQ-023
+Date and tester: 2026-10-24 and 2026-10-26 sessions (owner played; agent analysed the device log)
+Git commit or build identifier: APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, development build, foveation alternating 0.50 / 0.00 every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, 72 Hz; logcat over USB; dumpsys meminfo
+Configuration: GroundDefinition / FieldConfig defaults; URP Mobile, MSAA 4x, shadow distance 25 m, hard shadows; FFR level 0.50 when on
+Steps or exact command: owner batting sessions (M6.5 tests 1 and 2, several minutes); adb logcat -d (Unity PerformanceProbe lines + Meta VrApi per-second lines, matched to the logged foveation switches); adb shell dumpsys meminfo com.cricketvr.prototype
+Expected result: 72 Hz sustained; draw calls <= 150; triangles < 250k; texture memory < 150 MB; CPU and GPU frame time recorded separately, each well under the 13.9 ms budget (plan: < 11 ms)
+Actual result and measured values:
+  - Frame rate (VrApi, in-game seconds only, FPS >= 60): FFR on 548 s, avg 72.4 fps, 24 s showing 71/72; FFR off 522 s, avg 72.4 fps, 20 s at 71/72. Stale (compositor-reused) frames: on 383 / ~39,500 (0.97%), off 432 / ~37,600 (1.15%). PerformanceProbe: 100.0% of frames on time in steady 10 s windows; drops only in windows where the app was paused (headset off).
+  - GPU (VrApi App=): FFR on avg 2.53 ms, p95 3.30, max 3.79; FFR off avg 3.02 ms, p95 3.94, max 4.96. Foveation saves ~0.5 ms GPU (~16%). VrApi Fov field = 2 when on, 0 when off (confirms foveation applied).
+  - CPU+GPU critical path (VrApi CPU&GPU=): FFR on avg 7.05 ms, p95 8.21; off avg 7.37 ms, p95 8.58. Both under 11 ms.
+  - Draw calls (probe): window averages 19-46, max 63 (84 once while resuming). SetPass max 15-20. Triangles: averages 14k-40k, max 58.6k.
+  - Memory (dumpsys, app running): Graphics 82 MB, GL mtrack 53 MB, total PSS 394 MB.
+Outcome: Pass. Every budget met with a wide margin, foveation on and off.
+Log or artifact path: scratchpad all.log / unity.log (not committed)
+Remaining limitation / follow-up task: (1) Unity FrameTimingManager gives no CPU/GPU split on this Quest/Vulkan setup: the probe's "CPU" equals the frame interval (13.89 ms) and GPU reads 0. Use the VrApi App= / CPU&GPU= lines (or OVR Metrics) instead; fix the probe in M11. (2) The Unity "Texture Memory" profiler counter grows by about 1.1 GB on each pause/resume (559 -> 4365 MB) while the app's real graphics memory stays at 82 MB. Treat the counter as unreliable for budget checks; use dumpsys meminfo. (3) About 1% stale frames: watch in AC-24.
+```
+
+## Re-plan note (2026-10-26)
+
+The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
+- **E-030 and E-031** stay valid for exactly-once finalization, event ordering, stale rejection and carry. Their **run-scoring** assertions are superseded (REQ-009 amended: Net Practice scores no runs).
+- **AC-07 to AC-10** were re-planned; no evidence existed for them.
+- **Planned check IDs:** E-034 = M6.5 Test 2 (AC-12/13); E-035 = AC-14 performance with foveation on and off; later IDs follow as checks run.
+
+## Two-mode evidence additions (AC-15 to AC-24)
+
+Use the standard template plus these fields:
+- **Start menu (AC-15):** which controls were used (ray / bat-tap), every option selected, whether the ray and bat were ever visible together.
+- **Record and log (AC-16):** CSV file name, row count vs finalized balls, empty fields per mode, solver redraw count per plan.
+- **Confidence (AC-17/18):** per shot: S, E, Δt, v_peak, α, λ, v_out, each component, overall, label, the owner's own feel; summary values vs CSV recomputation; settings before/after (plan.md §17).
+- **Scorer (AC-19..21):** test counts; calibration CSV row count; outcome histogram (dot / 1 / 2 / 3 / 4 / 6 / caught / dropped / played on); carry percentiles; each tuned setting before and after, with the reason.
+- **Chase (AC-23):** scenario seed, target / balls / wickets; the ball-by-ball log; the end condition; per ball, whether the visible ball matched the result and the sounds played; the PlayMode visible-vs-scored test result (landing and end-position differences).
+- **Performance (AC-24):** as AC-14, per mode.
 
 ## M6.5 evidence template (AC-11 to AC-14)
 

@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b59104b265a6744a5adad8e3c57d3d65, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.GameConfig
+  environment: 0
+  foveationLevel: 0.5
+  perfWindowSeconds: 10
+  foveationAbSeconds: 0
   defaultHandedness: 0
   bat:
     geometry:

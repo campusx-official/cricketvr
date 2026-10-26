@@ -162,7 +162,8 @@ namespace CricketVR.Editor
             t.GetComponent<MeshFilter>().sharedMesh = mesh;
             var r = t.GetComponent<MeshRenderer>();
             r.sharedMaterial = material;
-            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            // One of the few realtime shadow casters (bat, ball, stumps, machine; plan.md §15).
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
         }
 
         /// <summary>

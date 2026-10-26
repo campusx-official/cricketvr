@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 759fbb3cd46ed4f3d84d010e248e9013, type: 3}
+  m_Name: FieldConfig
+  m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.FieldConfig
+  showFielders: 1
+  fielders:
+  - name: Keeper
+    angleDegrees: 180
+    radius: 12
+  - name: Slip
+    angleDegrees: 160
+    radius: 16
+  - name: Point
+    angleDegrees: 95
+    radius: 25
+  - name: Cover
+    angleDegrees: 55
+    radius: 28
+  - name: Mid-off
+    angleDegrees: 20
+    radius: 27
+  - name: Mid-on
+    angleDegrees: -20
+    radius: 27
+  - name: Midwicket
+    angleDegrees: -60
+    radius: 28
+  - name: Square leg
+    angleDegrees: -95
+    radius: 25
+  - name: Third man
+    angleDegrees: 145
+    radius: 50
+  - name: Fine leg
+    angleDegrees: -150
+    radius: 50
