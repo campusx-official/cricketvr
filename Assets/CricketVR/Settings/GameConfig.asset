@@ -127,6 +127,8 @@ MonoBehaviour:
       frontMiddleMaxHeight: 3
     exitMargin: 0.3
     deadBallLinger: 1.5
+    groundHitDecisionSeconds: 1.5
+    groundHitLinger: 5
     logResults: 1
   session:
     timings:

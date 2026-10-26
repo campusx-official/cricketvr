@@ -32,6 +32,7 @@ namespace CricketVR
         /// <summary>GroundMode: an unhit ball whose centre passes this z (behind the stumps) is a miss (GD-8).</summary>
         public const float MissBehindStumpsZ = -1f;
         int _lastDecidedId = -1;
+        float _contactTime = float.NegativeInfinity;
 
         public IReadOnlyList<DeliveryResult> Results => _results;
         public SessionTotals Totals => SessionTotals.From(_results);
@@ -116,11 +117,23 @@ namespace CricketVR
                     _pending.Add(BallEvent.PassedStumps(pos)); // any x: wide balls count too
                 }
             }
-            if (_pending.Count == 0)
-                return;
-            if (_adjudicator.ProcessStep(id, _pending, out var result))
-                Decide(result);
-            _pending.Clear();
+            if (_pending.Count > 0)
+            {
+                bool decided = _adjudicator.ProcessStep(id, _pending, out var result);
+                _pending.Clear();
+                if (decided)
+                {
+                    Decide(result);
+                    return;
+                }
+            }
+
+            // GroundMode: once the played-on window after a hit has passed, nothing physical can change the result
+            // (runs come later from the virtual-field scorer), so decide it now and let the batter call the next ball.
+            if (_rules == DeliveryRules.Ground && _adjudicator.HasContact &&
+                Time.fixedTime - _contactTime >= config.scoring.groundHitDecisionSeconds &&
+                _adjudicator.EndWithoutTerminal(id, DeliveryEnd.HitWindowElapsed, out var hit))
+                Decide(hit, config.scoring.groundHitLinger);
         }
 
         /// <summary>A ball launched without the bowling machine (tests, future callers) still gets a result.</summary>
@@ -153,6 +166,8 @@ namespace CricketVR
             if (_adjudicator == null)
                 return;
             EnsureBegun(report.DeliveryId);
+            if (_adjudicator.IsOpen && report.DeliveryId == _adjudicator.DeliveryId && !_adjudicator.HasContact)
+                _contactTime = Time.fixedTime;
             _adjudicator.RecordBatContact(report.DeliveryId, new ShotData
             {
                 ContactPoint = report.Point,
@@ -191,10 +206,10 @@ namespace CricketVR
             }
         }
 
-        void Decide(DeliveryResult result)
+        void Decide(DeliveryResult result, float? linger = null)
         {
             _lastDecidedId = result.DeliveryId;
-            ball.Finish(result.DeliveryId, config.scoring.deadBallLinger);
+            ball.Finish(result.DeliveryId, linger ?? config.scoring.deadBallLinger);
             _results.Add(result);
             if (config.scoring.logResults)
                 Debug.Log($"[CricketVR] Result {result} || {Totals}");

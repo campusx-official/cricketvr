@@ -105,6 +105,11 @@ namespace CricketVR
         public float exitMargin = 0.3f;
         [Tooltip("After a delivery is finalized the ball stays visible (but can't be hit or score) for this long (s).")]
         public float deadBallLinger = 1.5f;
+        [Tooltip("GroundMode: a hit ball's result is decided this long after contact unless something ends it sooner; " +
+                 "it is the played-on window (stumps still count until then), so the batter can call the next ball promptly.")]
+        public float groundHitDecisionSeconds = 1.5f;
+        [Tooltip("GroundMode: how long a hit ball stays visible after its result is decided, so the shot can be watched (s).")]
+        public float groundHitLinger = 5f;
         public bool logResults = true;
     }
 

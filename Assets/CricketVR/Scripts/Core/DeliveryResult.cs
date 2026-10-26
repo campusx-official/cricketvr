@@ -27,6 +27,8 @@ namespace CricketVR
         PassedStumps,
         /// <summary>GroundMode: crossed the boundary rope (or the safety despawn fired).</summary>
         LeftGround,
+        /// <summary>GroundMode: a hit ball's result was decided once the played-on window after contact passed.</summary>
+        HitWindowElapsed,
     }
 
     public enum CarryState

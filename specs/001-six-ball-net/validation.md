@@ -654,6 +654,22 @@ Log or artifact path: scratchpad test XML
 Remaining limitation / follow-up task: owner re-check in the headset (M7 test 1)
 ```
 
+```text
+Check ID / acceptance scenario: E-038 / M7 owner feedback: ground-mode delay before B works
+Requirement IDs: REQ-011, REQ-021
+Date and tester: 2026-10-27, owner (feedback) + agent (fix and tests)
+Git commit or build identifier: branch m7-session; APK sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0
+Unity and package versions: as E-001
+Environment: Quest 3 (owner, previous build 7e7254f...); Mac batch-mode tests
+Configuration: ScoringSettings groundHitDecisionSeconds 1.5, groundHitLinger 5; SessionTimings waitForReady true
+Steps or exact command: owner played both modes; -runTests EditMode and PlayMode after the fix; build and install
+Expected result: on the ground, a hit's result appears within the played-on window and B works right after; the ball stays visible to watch the shot
+Actual result and measured values: owner (previous build): Net Practice fine; ground mode "after a few balls it says scoring pending and it takes some time after which B button works". Cause: on the ground a hit was only decided when the ball left the ground, settled or timed out (up to 10 s); the session (correctly) ignores B until the ball's single result exists. Fix: GroundMode decides a hit 1.5 s after contact (stumps still count until then). Tests: EditMode 108/108; PlayMode 44/44 (new GroundHitIsDecidedAfterThePlayedOnWindowAndStaysVisible: result ScoringPending / HitWindowElapsed at 1.5 s (+/-0.25 s), ball still visible, hidden within the 5 s linger, one result; HitOntoTheStumpsWithinTheWindowIsStillBowled: played on = Bowled with both flags). Build Success, install Success.
+Outcome: Pass (automated); owner re-check pending
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: GroundMode carry is only measured if the ball lands within 1.5 s of contact (placeholder until M10's simulated carry)
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:

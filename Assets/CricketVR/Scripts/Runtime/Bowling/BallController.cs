@@ -118,6 +118,12 @@ namespace CricketVR
         /// </summary>
         public bool Finish(int deliveryId, float linger)
         {
+            if (InFlight && _dead && deliveryId == ActiveDeliveryId)
+            {
+                // Already decided: a later reason (e.g. crossing the rope) may only bring the hiding forward.
+                _parkAt = Mathf.Min(_parkAt, Time.time + Mathf.Max(0f, linger));
+                return false;
+            }
             if (!IsLive || deliveryId != ActiveDeliveryId)
                 return false;
             _dead = true;
