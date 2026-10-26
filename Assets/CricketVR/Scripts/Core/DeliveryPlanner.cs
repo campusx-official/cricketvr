@@ -19,8 +19,8 @@ namespace CricketVR
     [Serializable]
     public struct DeliveryPlanSettings
     {
-        /// <summary>Pace types bowl no faster than this until AC-29 passes at 140 km/h (DT-5).</summary>
-        public const float DefaultPaceCapKmh = 120f;
+        /// <summary>Pace types bowl no faster than this. Raised from 120 to 140 km/h once AC-29 passed at 140 (T075, E-047; DT-5).</summary>
+        public const float DefaultPaceCapKmh = 140f;
 
         public string label;
         public float minSpeedKmh;
@@ -39,7 +39,7 @@ namespace CricketVR
         public float shortMaxLength;
         [Tooltip("Delivery types and their weights (M7.5). Empty = Stock only, as before M7.5.")]
         public TypeWeight[] typeMix;
-        [Tooltip("Pace types' speed range is clamped to this (km/h); 0 = the default cap (120 until AC-29 passes at 140).")]
+        [Tooltip("Pace types' speed range is clamped to this (km/h); 0 = the default cap (140 since AC-29, T075).")]
         public float paceCapKmh;
 
         public float PaceCap => paceCapKmh > 0f ? paceCapKmh : DefaultPaceCapKmh;

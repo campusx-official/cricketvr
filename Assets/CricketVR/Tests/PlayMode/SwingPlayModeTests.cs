@@ -108,13 +108,19 @@ namespace CricketVR.Tests
         }
 
         [UnityTest]
-        public IEnumerator SwingingBallsPitchOnTargetAndCurveAsSolved()
+        public IEnumerator SwingingBallsPitchOnTargetAndCurveAsSolved() => SwingMatrix(new[] { 115f, 125f }, 74);
+
+        /// <summary>AC-29 (T075): the same matrix at 140 km/h, part of the test that decides the pace cap.</summary>
+        [UnityTest]
+        public IEnumerator SwingingBallsAt140KmhPitchOnTargetAndCurveAsSolved() => SwingMatrix(new[] { 140f }, 140);
+
+        IEnumerator SwingMatrix(float[] speeds, int seed)
         {
-            var rng = new System.Random(74);
+            var rng = new System.Random(seed);
             float worstPitch = 0f, worstCurve = 0f, minCurve = float.MaxValue, maxCurve = 0f;
             int runs = 0;
             foreach (var kind in new[] { DeliveryKind.Inswinger, DeliveryKind.Outswinger })
-            foreach (var kmh in new[] { 115f, 125f })
+            foreach (var kmh in speeds)
             {
                 var type = Shipped(kind);
                 for (int i = 0; i < 10; i++)
@@ -147,7 +153,7 @@ namespace CricketVR.Tests
                     runs++;
                 }
             }
-            Debug.Log($"[CricketVR] T074 swing PlayMode: {runs} balls, worst pitch error {worstPitch * 100f:F2} cm, " +
+            Debug.Log($"[CricketVR] T074 swing PlayMode {string.Join("/", speeds)} km/h: {runs} balls, worst pitch error {worstPitch * 100f:F2} cm, " +
                       $"worst measured-vs-solved curve {worstCurve * 1000f:F1} mm, curves {minCurve:F3}-{maxCurve:F3} m");
         }
 

@@ -196,6 +196,41 @@ namespace CricketVR.Tests
                       $"{minOffset * 100f:+0.0;-0.0} to {maxOffset * 100f:+0.0;-0.0} cm from the pitch point ({early} before it, {late} after it)");
         }
 
+        /// <summary>
+        /// AC-29 (M7.5 T075): AC-04 re-run at pace speeds. Ten identical deliveries per speed stay within AC-04's
+        /// 0.25 m of the first and within the Stock tolerance of the request; full, good and short lengths at each speed.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PaceSpeedsTo140KmhBounceConsistently()
+        {
+            foreach (var kmh in new[] { 100f, 120f, 140f })
+            {
+                var delivery = DeliveryConfig.Create($"{kmh:F0} km/h good length", kmh, 0.1f, 6f);
+                int first = _bounces.Count;
+                for (int i = 0; i < 10; i++)
+                    yield return BowlAndWaitForBounce(delivery);
+                var p0 = _bounces[first].point;
+                float spread = 0f, error = 0f;
+                for (int i = first; i < _bounces.Count; i++)
+                {
+                    var p = _bounces[i].point;
+                    spread = Mathf.Max(spread, Vector2.Distance(new Vector2(p.x, p.z), new Vector2(p0.x, p0.z)));
+                    error = Mathf.Max(error, Error(p, delivery));
+                }
+                float rebound = _pitches[_pitches.Count - 1].pitch.ReboundOffset;
+                Debug.Log($"[CricketVR] AC-29 AC-04 re-run {delivery}: 10 deliveries, spread {spread * 100f:F2} cm, worst error {error * 100f:F2} cm, rebound {rebound * 100f:+0.0;-0.0} cm");
+                Assert.LessOrEqual(spread, 0.25f, $"{kmh} km/h: AC-04 spread");
+                Assert.LessOrEqual(error, StockTolerance, $"{kmh} km/h: pitch point");
+
+                foreach (var length in new[] { 3f, 9f })
+                {
+                    var d = DeliveryConfig.Create($"{kmh:F0} km/h {length} m", kmh, 0f, length);
+                    yield return BowlAndWaitForBounce(d);
+                    Assert.LessOrEqual(Error(_bounces[_bounces.Count - 1].point, d), StockTolerance, d.ToString());
+                }
+            }
+        }
+
         static float Error(Vector3 p, DeliveryConfig d) =>
             Vector2.Distance(new Vector2(p.x, p.z), new Vector2(d.line, d.length));
 

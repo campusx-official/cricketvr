@@ -37,6 +37,7 @@ namespace CricketVR.Tests
         ScriptedBatDriver _driver;
         BatController _bat;
         BallController _ball;
+        BallFlight _flight;
         BatBallContactResolver _resolver;
         readonly List<BatContactReport> _contacts = new List<BatContactReport>();
         int _frameRate;
@@ -78,6 +79,7 @@ namespace CricketVR.Tests
             ballGo.AddComponent<Rigidbody>().isKinematic = true;
             _ball = ballGo.AddComponent<BallController>();
             _ball.Configure(_config, null, null);
+            _flight = ballGo.AddComponent<BallFlight>(); // idle unless a run starts a swinging flight
 
             var resolverGo = new GameObject("Resolver");
             resolverGo.SetActive(false);
@@ -117,13 +119,14 @@ namespace CricketVR.Tests
 
         const int MaxStallRetries = 2;
 
-        IEnumerator Run(Func<float, Pose> batMotion, Vector3 aim, float ballSpeed, List<BatContactReport> results, Action<string> fail)
+        IEnumerator Run(Func<float, Pose> batMotion, Vector3 aim, float ballSpeed, List<BatContactReport> results, Action<string> fail,
+            FlightPlan swing = default)
         {
             for (int attempt = 0; ; attempt++)
             {
                 double started = Time.unscaledTimeAsDouble;
                 string failure = null;
-                yield return RunOnce(batMotion, aim, ballSpeed, results, f => failure = f);
+                yield return RunOnce(batMotion, aim, ballSpeed, results, f => failure = f, swing);
                 if (failure == null)
                     yield break;
                 if (attempt < MaxStallRetries && StalledSince(started))
@@ -136,7 +139,8 @@ namespace CricketVR.Tests
             }
         }
 
-        IEnumerator RunOnce(Func<float, Pose> batMotion, Vector3 aim, float ballSpeed, List<BatContactReport> results, Action<string> fail)
+        IEnumerator RunOnce(Func<float, Pose> batMotion, Vector3 aim, float ballSpeed, List<BatContactReport> results, Action<string> fail,
+            FlightPlan swing)
         {
             int before = _contacts.Count;
             _driver.Motion = t => { var b = batMotion(t); return ControllerFor(b.position, b.rotation); };
@@ -150,8 +154,17 @@ namespace CricketVR.Tests
             float remaining = ContactTime - (Time.time - _driver.StartTime);
             var start = aim + new Vector3(0f, 0f, ballSpeed * remaining);
             var velocity = new Vector3(0f, 0.5f * -Physics.gravity.y * remaining, -ballSpeed);
+            if (!swing.IsStill)
+            {
+                // Constant sideways acceleration (lateness 0) all the way to the bat: start off the aim by the stepped
+                // drift, A·dt²·n(n+1)/2, so the ball still arrives at the aim point.
+                float dt = Time.fixedDeltaTime, n = Mathf.Round(remaining / dt);
+                start.x -= swing.SwingDirection * swing.SwingAcceleration * dt * dt * n * (n + 1f) * 0.5f;
+            }
             _ball.Launch(_ball.ActiveDeliveryId + 1, start, velocity);
             int id = _ball.ActiveDeliveryId;
+            if (!swing.IsStill)
+                _flight.Begin(id, start, velocity, swing, DeliveryTypeData.Outswinger);
 
             // Watch until well past the bat.
             float watchUntil = Time.time + 0.4f;
@@ -188,18 +201,37 @@ namespace CricketVR.Tests
 
         static float Launch(Vector3 v) => Mathf.Atan2(v.y, new Vector2(v.x, v.z).magnitude) * Mathf.Rad2Deg;
 
-        /// <summary>Straight bat, face toward the bowler, translating along Z at <paramref name="batSpeedZ"/>.</summary>
-        IEnumerator TranslatingCase(float batSpeedZ, Quaternion face, float fromToe, List<BatContactReport> results, List<string> failures)
+        /// <summary>
+        /// Straight bat, face toward the bowler, translating along Z at <paramref name="batSpeedZ"/>. Ball speeds
+        /// 20/22/24 m/s unless <paramref name="ballSpeed"/> is given; <paramref name="swing"/> makes the ball swing.
+        /// </summary>
+        IEnumerator TranslatingCase(float batSpeedZ, Quaternion face, float fromToe, List<BatContactReport> results, List<string> failures,
+            float ballSpeed = 0f, FlightPlan swing = default)
         {
             var g = _config.bat.geometry;
             for (int i = 0; i < Runs; i++)
             {
-                float dx = (i % 5 - 2) * 0.01f, dy = (i / 5 - 0.5f) * 0.04f, speed = 20f + (i % 3) * 2f;
+                float dx = (i % 5 - 2) * 0.01f, dy = (i / 5 - 0.5f) * 0.04f, speed = ballSpeed > 0f ? ballSpeed : 20f + (i % 3) * 2f;
                 var grip = new Vector3(dx, 1.0f, 0.6f);
                 Func<float, Pose> motion = t => new Pose(grip + new Vector3(0f, 0f, batSpeedZ * (t - ContactTime)), face);
                 var aim = SweetPointWorld(motion(ContactTime), g, fromToe) + new Vector3(0f, dy, 0f) + face * Vector3.forward * 0.036f;
                 aim.x = grip.x;
-                yield return Run(motion, aim, speed, results, failures.Add);
+                yield return Run(motion, aim, speed, results, failures.Add, swing);
+            }
+        }
+
+        /// <summary>Bat swinging in the vertical plane about the grip at 25 rad/s (see the rotation-dominated test).</summary>
+        IEnumerator RotationCase(List<BatContactReport> results, List<string> failures, float ballSpeed = 0f, FlightPlan swing = default)
+        {
+            var g = _config.bat.geometry;
+            for (int i = 0; i < Runs; i++)
+            {
+                const float omega = 25f;
+                var grip = new Vector3((i % 5 - 2) * 0.01f, 1.05f, 0.6f);
+                Func<float, Pose> motion = t => new Pose(grip, Quaternion.Euler(-omega * (t - ContactTime) * Mathf.Rad2Deg, 0f, 0f));
+                var aim = SweetPointWorld(motion(ContactTime), g, 0.10f + (i / 5) * 0.04f) + Vector3.forward * 0.036f;
+                aim.x = grip.x;
+                yield return Run(motion, aim, ballSpeed > 0f ? ballSpeed : 20f + (i % 3) * 2f, results, failures.Add, swing);
             }
         }
 
@@ -260,18 +292,52 @@ namespace CricketVR.Tests
             // The bat swings in the vertical plane about the grip at 25 rad/s (toe ~16 m/s, ~20 degrees per frame),
             // passing vertical at ContactTime. The ball is aimed low on the blade, where rotation dominates.
             var results = new List<BatContactReport>(); var failures = new List<string>();
-            var g = _config.bat.geometry;
-            for (int i = 0; i < Runs; i++)
-            {
-                const float omega = 25f;
-                var grip = new Vector3((i % 5 - 2) * 0.01f, 1.05f, 0.6f);
-                Func<float, Pose> motion = t => new Pose(grip, Quaternion.Euler(-omega * (t - ContactTime) * Mathf.Rad2Deg, 0f, 0f));
-                var aim = SweetPointWorld(motion(ContactTime), g, 0.10f + (i / 5) * 0.04f) + Vector3.forward * 0.036f;
-                aim.x = grip.x;
-                yield return Run(motion, aim, 20f + (i % 3) * 2f, results, failures.Add);
-            }
+            yield return RotationCase(results, failures);
             AssertNoFailures("rotation-dominated swing (25 rad/s)", failures, results);
             Assert.Greater(Mean(results, r => r.BatPointVelocity.magnitude), 8f, "contact-point velocity includes rotation");
+        }
+
+        // ---------- AC-29 (M7.5 T075): pace up to 140 km/h, straight and swinging ----------
+
+        /// <summary>The largest swing acceleration the solver produced over the T073 matrix (E-045), constant to the bat.</summary>
+        static FlightPlan HardSwing(int direction) => new FlightPlan
+        {
+            SwingDirection = direction, SwingAcceleration = 150f, SwingLateness = 0f, PlannedTime = 1f,
+        };
+
+        [UnityTest]
+        public IEnumerator FastBallsUpTo140KmhAreHitExactlyOnce()
+        {
+            foreach (var kmh in new[] { 120f, 140f })
+            {
+                float speed = Units.KmhToMs(kmh);
+                var block = new List<BatContactReport>(); var drive = new List<BatContactReport>(); var rotation = new List<BatContactReport>();
+                var failures = new List<string>();
+                yield return TranslatingCase(0f, Quaternion.identity, 0.16f, block, failures, speed);
+                yield return TranslatingCase(14f, Quaternion.identity, 0.16f, drive, failures, speed);
+                yield return RotationCase(rotation, failures, speed);
+                AssertNoFailures($"{kmh:F0} km/h straight: block {block.Count}, drive {drive.Count}, rotation {rotation.Count}", failures, drive);
+                Assert.AreEqual(Runs, block.Count);
+                Assert.AreEqual(Runs, rotation.Count);
+                foreach (var r in block)
+                    Assert.Greater(r.BallVelocityOut.z, 0f, $"{kmh:F0} km/h block goes back toward the bowler");
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator SwingingBallsAt140KmhAreHitExactlyOnce()
+        {
+            float speed = Units.KmhToMs(140f);
+            foreach (var direction in new[] { -1, 1 })
+            {
+                var drive = new List<BatContactReport>(); var rotation = new List<BatContactReport>(); var failures = new List<string>();
+                yield return TranslatingCase(14f, Quaternion.identity, 0.16f, drive, failures, speed, HardSwing(direction));
+                yield return RotationCase(rotation, failures, speed, HardSwing(direction));
+                AssertNoFailures($"140 km/h swinging {(direction < 0 ? "in" : "out")} at 150 m/s^2: drive {drive.Count}, rotation {rotation.Count}", failures, drive);
+                Assert.AreEqual(Runs, rotation.Count);
+                Debug.Log($"[CricketVR] AC-29 swing {direction:+0;-0}: sideways ball speed at contact {Mean(drive, r => Mathf.Abs(r.BallVelocityIn.x)):F1} m/s");
+                Assert.Greater(Mean(drive, r => Mathf.Abs(r.BallVelocityIn.x)), 1f, "the ball was still swinging at contact");
+            }
         }
 
         [UnityTest]

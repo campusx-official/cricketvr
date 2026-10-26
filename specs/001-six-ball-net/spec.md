@@ -139,7 +139,7 @@ Decision record: `proposals/delivery-types.md` (conflicts DT-1..DT-15, decisions
 - **D-4 Visual spin rate:** spinners 4 rev/s, pace 3 rev/s backspin, cap 5 rev/s (≤ 25° per frame at 72 Hz).
 - **D-5 Incoming spin on the shot:** none in v1 (documented simplification); a bounded tangential term is a v2 candidate after M8 calibration.
 - **Natural variation:** seeded per ball, default ±15%, on swing amount, drift and turn angle; recorded per ball. Tests use 0 unless a test is about variation.
-- **Speed cap:** pace types clamp their range at 120 km/h until AC-29 passes at 140 km/h. If it fails, the cap stays at 120 km/h and the swing targets are scaled down; the tests are not weakened, and the owner is told.
+- **Speed cap:** pace types clamp their range at 120 km/h until AC-29 passes at 140 km/h. If it fails, the cap stays at 120 km/h and the swing targets are scaled down; the tests are not weakened, and the owner is told. *(T075, E-047: AC-29's pace checks passed at 140 km/h, so the pace-type cap is 140 km/h. The Hard difficulty's own 95–120 km/h range is unchanged until T065.)*
 - **Drag:** still none before contact. Swing, drift and dip are explicit accelerations.
 
 ## Proposed changes pending owner approval

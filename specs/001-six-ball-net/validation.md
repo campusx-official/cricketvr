@@ -35,10 +35,10 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | Automated pass at 115/125 km/h (E-045, E-046); 140 km/h (T075) and headset pending | E-045, E-046 | M7.5 T075, T076 |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h (E-045–E-047); headset pending | E-045–E-047 | M7.5 T076 (owner) |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
-| AC-29 | REQ-042, REQ-044 | Not run | None | M7.5 T075, T081 |
+| AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 
@@ -840,6 +840,28 @@ Actual result and measured values:
 Outcome: Pass (automated). Not seen in the headset.
 Log or artifact path: scratchpad play.log; Assets/CricketVR/Generated/Ball/BallSeam.png
 Remaining limitation / follow-up task: T075 (140 km/h, AC-04 re-run, AC-05 extension, cap decision); T076 headset; owner decision on swing size; spin balls use the pace visual until T080
+```
+
+```text
+Check ID / acceptance scenario: E-047 / T075 AC-29 pace part: AC-04 re-run to 140 km/h, contact matrix to 39 m/s with swinging balls, cap decision
+Requirement IDs: REQ-042, REQ-044, REQ-004, REQ-005, REQ-006, REQ-007
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T075: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz; contact matrix at 72 Hz frames with the scripted controller (as AC-05, E-020)
+Configuration: shipped PitchSurface and DeliveryType assets; contact cases from AC-05 with ball speeds 33.3 and 38.9 m/s; swinging balls with the largest solved swing acceleration (150 m/s^2, E-045) held constant to the bat
+Steps or exact command: -runTests PlayMode (54 tests, 177 s) and EditMode
+Expected result: AC-04 consistency at 100/120/140 km/h; exactly one contact per run, no tunnelling, at up to 39 m/s, straight and swinging; raise the cap only if all pass
+Actual result and measured values:
+  - AC-04 re-run, 10 identical deliveries each (line +0.10 m, length 6 m): 100 km/h spread 0.00 cm, worst pitch error 0.21 cm; 120 km/h 0.00 / 0.19 cm; 140 km/h 0.00 / 0.12 cm. Lengths 3 m and 9 m at each speed within 1 cm.
+  - Contact matrix, straight balls: 120 and 140 km/h x (stationary block, 14 m/s drive, 25 rad/s rotation-dominated swing) x 10 runs = 60 runs, every one exactly one contact; blocks go back toward the bowler; drive exit 45.0 m/s mean (the response's exit-speed bound).
+  - Contact matrix, swinging balls at 140 km/h: inswing and outswing x (drive, rotation) x 10 = 40 runs, every one exactly one contact; the ball was moving sideways at 4.2 m/s at contact.
+  - Swing matrix at 140 km/h (in/out x 10, seeded lines/lengths/movement, both hands): worst pitch error 0.19 cm; measured curve within 0.9 mm of the solver's; curves 0.203-0.591 m.
+  - All earlier tests unchanged and passing: PlayMode 54/54 (4 new), EditMode 135/135.
+  - Decision (DT-5, owner change 4): every pace check passed, so DeliveryPlanSettings.DefaultPaceCapKmh is raised from 120 to 140 km/h: swing types now use their full 115-140 km/h range. The Hard difficulty's own 95-120 km/h range is a separate M10 setting (T065) and is unchanged.
+Outcome: Pass (automated) for the pace part of AC-29. Spinning balls in the contact matrix come in T081. Whether 140 km/h is playable is the owner's call in the headset (T076).
+Log or artifact path: scratchpad play.log
+Remaining limitation / follow-up task: T076 headset; T081 spinning balls
 ```
 
 ```text
