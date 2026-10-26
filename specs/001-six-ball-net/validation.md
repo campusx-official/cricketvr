@@ -23,7 +23,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
-| AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
+| AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
 | AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
 | AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
@@ -599,6 +599,27 @@ Actual result and measured values: owner: "all pass". Device log not read: the h
 Outcome: Pass (owner observation)
 Log or artifact path: none yet
 Remaining limitation / follow-up task: AC-14 numbers (E-035) from the same session's log if still in the buffer, otherwise a short re-run
+```
+
+```text
+Check ID / acceptance scenario: E-035 / AC-14 ground performance on Quest 3, foveation on and off
+Requirement IDs: REQ-023
+Date and tester: 2026-10-24 and 2026-10-26 sessions (owner played; agent analysed the device log)
+Git commit or build identifier: APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, development build, foveation alternating 0.50 / 0.00 every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, 72 Hz; logcat over USB; dumpsys meminfo
+Configuration: GroundDefinition / FieldConfig defaults; URP Mobile, MSAA 4x, shadow distance 25 m, hard shadows; FFR level 0.50 when on
+Steps or exact command: owner batting sessions (M6.5 tests 1 and 2, several minutes); adb logcat -d (Unity PerformanceProbe lines + Meta VrApi per-second lines, matched to the logged foveation switches); adb shell dumpsys meminfo com.cricketvr.prototype
+Expected result: 72 Hz sustained; draw calls <= 150; triangles < 250k; texture memory < 150 MB; CPU and GPU frame time recorded separately, each well under the 13.9 ms budget (plan: < 11 ms)
+Actual result and measured values:
+  - Frame rate (VrApi, in-game seconds only, FPS >= 60): FFR on 548 s, avg 72.4 fps, 24 s showing 71/72; FFR off 522 s, avg 72.4 fps, 20 s at 71/72. Stale (compositor-reused) frames: on 383 / ~39,500 (0.97%), off 432 / ~37,600 (1.15%). PerformanceProbe: 100.0% of frames on time in steady 10 s windows; drops only in windows where the app was paused (headset off).
+  - GPU (VrApi App=): FFR on avg 2.53 ms, p95 3.30, max 3.79; FFR off avg 3.02 ms, p95 3.94, max 4.96. Foveation saves ~0.5 ms GPU (~16%). VrApi Fov field = 2 when on, 0 when off (confirms foveation applied).
+  - CPU+GPU critical path (VrApi CPU&GPU=): FFR on avg 7.05 ms, p95 8.21; off avg 7.37 ms, p95 8.58. Both under 11 ms.
+  - Draw calls (probe): window averages 19-46, max 63 (84 once while resuming). SetPass max 15-20. Triangles: averages 14k-40k, max 58.6k.
+  - Memory (dumpsys, app running): Graphics 82 MB, GL mtrack 53 MB, total PSS 394 MB.
+Outcome: Pass. Every budget met with a wide margin, foveation on and off.
+Log or artifact path: scratchpad all.log / unity.log (not committed)
+Remaining limitation / follow-up task: (1) Unity FrameTimingManager gives no CPU/GPU split on this Quest/Vulkan setup: the probe's "CPU" equals the frame interval (13.89 ms) and GPU reads 0. Use the VrApi App= / CPU&GPU= lines (or OVR Metrics) instead; fix the probe in M11. (2) The Unity "Texture Memory" profiler counter grows by about 1.1 GB on each pause/resume (559 -> 4365 MB) while the app's real graphics memory stays at 82 MB. Treat the counter as unreliable for budget checks; use dumpsys meminfo. (3) About 1% stale frames: watch in AC-24.
 ```
 
 ## Re-plan note (2026-10-26)

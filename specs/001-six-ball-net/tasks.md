@@ -1,6 +1,6 @@
 # Implementation tasks
 
-Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 T033–T045 implemented with automated checks; AC-11 passed; T046 (AC-14 performance) and the AC-12/AC-13 headset checks (M6.5 Test 2) pending, then the merge into `main`. Re-planned 2026-10-26 into two modes: M7 session framework and start menu, M8 Net Practice, M9 virtual-field scorer, M10 Match Simulation, M11 polish (T047–T069; old T025–T032 retired). This is a task specification, not evidence of a built game.
+Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 complete (AC-11 to AC-14 passed on Quest; merged into `main`). Re-planned 2026-10-26 into two modes: M7 session framework and start menu, M8 Net Practice, M9 virtual-field scorer, M10 Match Simulation, M11 polish (T047–T069; old T025–T032 retired). This is a task specification, not evidence of a built game.
 
 Use `[ ]` for incomplete and `[x]` only for the named completed work. Keep device acceptance pending in `validation.md` when unavailable. Dependencies apply in the order shown. Automated preparatory work may continue while waiting for a physical check, but do not represent untested prerequisites as accepted.
 
@@ -84,7 +84,7 @@ Dependency: M6 committed. Requirements: REQ-017 to REQ-024. Acceptance: AC-11 to
   - bowling calibration still within 1 cm with the outfield present;
   - 45 m/s balls at 10 angles never pass below the outfield top;
   - NetMode M6 scoring tests unchanged.
-- [ ] T046 Turn on fixed foveated rendering (done in code, E-032). Make a development build and record the measured draw calls, triangles, texture memory, and CPU/GPU frame time on Quest with foveation on and off (AC-14). Owner headset checks AC-11 (passed, E-033), AC-12 and AC-13 (M6.5 Test 2). Then merge `m6.5-ground` into `main`; only then start M7.
+- [x] T046 Turn on fixed foveated rendering (done in code, E-032). Make a development build and record the measured draw calls, triangles, texture memory, and CPU/GPU frame time on Quest with foveation on and off (AC-14). Owner headset checks AC-11 (passed, E-033), AC-12 and AC-13 (M6.5 Test 2). Then merge `m6.5-ground` into `main`; only then start M7.
 
 ## Retired tasks (superseded 2026-10-26)
 

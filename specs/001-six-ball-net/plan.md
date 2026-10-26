@@ -316,7 +316,7 @@ The estimates leave large headroom under the 150 draw-call and 250k-triangle bud
 - Measured carry (first landing on pitch or outfield after contact) still works and is labelled the same.
 - NetMode rules are unchanged.
 
-**Performance measurement.**
+**Performance measurement.** *(As measured, E-035: on Quest 3 / Vulkan, Unity's FrameTimingManager gives no CPU/GPU split and the Texture Memory profiler counter grows on every resume. Use the Meta VrApi logcat lines (`App=` GPU ms, `CPU&GPU=` ms, `Fov=`) or OVR Metrics for frame times, and `adb shell dumpsys meminfo com.cricketvr.prototype` for memory.)*
 - **Unity Profiler:**
   1. Make a development build (`CricketVR/Build/Quest APK (Development)`, with Autoconnect Profiler).
   2. Open Window > Analysis > Profiler and choose the Quest under the target selector (over USB via adb).
