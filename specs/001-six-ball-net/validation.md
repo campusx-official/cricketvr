@@ -24,7 +24,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
-| AC-15 | REQ-025 | Code done; headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T050 start menu |
+| AC-15 | REQ-025 | **Pass on Quest** (owner, recorded 2026-10-27 at the owner's request; rest of the M7 re-check pending) | APK sha256 c71f726…2b30f0; E-036, E-039 | Re-check if the near panel, ray or bat-tap changes |
 | AC-16 | REQ-027, REQ-028 | Automated pass for record, CSV and plans (E-036); device CSV pending | APK sha256 e0ff087…0d792; E-036 | M7 T048/T049 record, CSV, delivery plans |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
 | AC-18 | REQ-031 | Not run | None | M8 summary |
@@ -668,6 +668,22 @@ Actual result and measured values: owner (previous build): Net Practice fine; gr
 Outcome: Pass (automated); owner re-check pending
 Log or artifact path: scratchpad test XML
 Remaining limitation / follow-up task: GroundMode carry is only measured if the ball lands within 1.5 s of contact (placeholder until M10's simulated carry)
+```
+
+```text
+Check ID / acceptance scenario: E-039 / AC-15 headset: start menu
+Requirement IDs: REQ-025
+Date and tester: 2026-10-27, owner
+Git commit or build identifier: branch m7-session (b3e7438); APK sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults (near panel 0.75 m in front of the stance; right Near-Far ray only while a panel with buttons is open)
+Steps or exact command: owner's M7 headset use of the start menu
+Expected result: AC-15: both modes and every option selectable by ray, once by bat-tap; the ray visible only while a panel with buttons is open, never during a delivery
+Actual result and measured values: owner: "record AC-15 (menu) as passed for now". No per-option breakdown or device log supplied.
+Outcome: Pass (owner observation)
+Log or artifact path: none
+Remaining limitation / follow-up task: the rest of the M7 re-check (AC-07, AC-08, AC-09, AC-16 device CSV, and the E-037/E-038 changes) is still pending with the owner
 ```
 
 ## Re-plan note (2026-10-26)
