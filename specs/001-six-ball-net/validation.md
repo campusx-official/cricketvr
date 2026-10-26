@@ -21,8 +21,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-09 | REQ-014 | Not run (both modes) | None | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
-| AC-12 | REQ-019, REQ-020 | Automated physics checks pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
-| AC-13 | REQ-021, REQ-022 | Automated rules + NetMode regression pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
+| AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
+| AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
 | AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
 | AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
@@ -583,6 +583,22 @@ Actual result and measured values: owner: "all pass" (all five questions). No de
 Outcome: Pass (owner observation)
 Log or artifact path: none
 Remaining limitation / follow-up task: AC-12/AC-13 headset checks; AC-14 performance numbers
+```
+
+```text
+Check ID / acceptance scenario: E-034 / AC-12 + AC-13 headset: ground physics, results, fielders (M6.5 test 2)
+Requirement IDs: REQ-019, REQ-020, REQ-021, REQ-022
+Date and tester: 2026-10-26, owner
+Git commit or build identifier: APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, foveation A/B every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right hand
+Configuration: GroundDefinition / FieldConfig defaults; rolling resistance 0.08 g
+Steps or exact command: leave one onto the stumps and one wide; edge one behind; ground drives; lofted hits over the rope; gentle block; check fielder positions; at least 4 minutes of play
+Expected result: one result per ball matching what happened (bowled / miss / hit, practice scoring pending; edges behind never a miss); believable roll and stop on the outfield; a ball over the rope disappears about 1.5 s later; fielders where expected; no stutter or flicker at foveation switches
+Actual result and measured values: owner: "all pass". Device log not read: the headset was not connected afterwards (performance lines for AC-14 not yet collected).
+Outcome: Pass (owner observation)
+Log or artifact path: none yet
+Remaining limitation / follow-up task: AC-14 numbers (E-035) from the same session's log if still in the buffer, otherwise a short re-run
 ```
 
 ## Re-plan note (2026-10-26)
