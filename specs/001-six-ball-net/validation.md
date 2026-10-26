@@ -638,6 +638,22 @@ Log or artifact path: scratchpad test XML; Builds/Preview/Ground_Menu.png (gitig
 Remaining limitation / follow-up task: headset checks; Match Simulation bowls a 12-ball placeholder with "scoring pending" until M9/M10; swing timing and confidence columns are empty until M8
 ```
 
+```text
+Check ID / acceptance scenario: E-037 / M7 owner feedback: ball on the batter's B press instead of a timed countdown
+Requirement IDs: REQ-011, REQ-014, REQ-026
+Date and tester: 2026-10-26, owner (feedback) + agent (change and tests)
+Git commit or build identifier: branch m7-session; APK built and installed after the change (see the commit)
+Unity and package versions: as E-001
+Environment: Quest 3 (owner, previous build e0ff087...); Mac batch-mode tests
+Configuration: SessionTimings waitForReady = true, readyDelay = 0 s, betweenBalls = 3 s
+Steps or exact command: owner tried both modes on the previous build; -runTests EditMode and PlayMode after the change
+Expected result: each ball comes only when the batter taps B, straight after the press; no ball bowled on its own; the end screen still follows the last ball
+Actual result and measured values: owner (previous build): "every next ball in both the modes are coming after a set delay ... revert this feature. as a batsman I want that control". After the change: EditMode 108/108 (new ReadyPressTests 3: nothing bowled for 60 s without a press; launch straight after the press; no press accepted mid-delivery; pressing while the result shows skips the wait; resume after pause waits; no press after the last ball). PlayMode 42/42 (new EachBallWaitsForTheReadyPress: 6 balls, each waits 4 s untouched, launches within 1 s of the press, a press after the last ball bowls nothing). Earlier automatic-mode tests kept (waitForReady = false).
+Outcome: Pass (automated); owner re-check pending
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: owner re-check in the headset (M7 test 1)
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:

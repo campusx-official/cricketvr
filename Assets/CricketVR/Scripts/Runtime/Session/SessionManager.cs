@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
 
 namespace CricketVR
 {
@@ -46,6 +47,7 @@ namespace CricketVR
         readonly Dictionary<int, BatContactReport> _contacts = new Dictionary<int, BatContactReport>();
         string _lastResultLine = "";
         InputAction _doneTap;
+        InputAction _readyPress;
         float _doneDown = -1f;
 
         public SessionPhase Phase => _session != null ? _session.Phase : SessionPhase.Menu;
@@ -70,6 +72,10 @@ namespace CricketVR
             if (ui != null) ui.ButtonPressed += OnButton;
             _doneTap = new InputAction("BatSetupDone", InputActionType.Button, "<XRController>/{PrimaryButton}");
             _doneTap.Enable();
+            // The batter asks for each ball with B (owner decision 2026-10-26: "as a batsman I want that control").
+            _readyPress = new InputAction("Ready", InputActionType.Button, "<XRController>/{SecondaryButton}");
+            _readyPress.AddBinding("<Keyboard>/n");
+            _readyPress.Enable();
         }
 
         void OnDisable()
@@ -78,6 +84,7 @@ namespace CricketVR
             if (resolver != null) resolver.BatContact -= OnBatContact;
             if (ui != null) ui.ButtonPressed -= OnButton;
             _doneTap?.Dispose();
+            _readyPress?.Dispose();
         }
 
         void Start()
@@ -104,6 +111,9 @@ namespace CricketVR
                     ExitBatSetup();
                 return;
             }
+
+            if (_readyPress.WasPressedThisFrame())
+                PressReady();
 
             if (_session.Phase == SessionPhase.Countdown || _session.Phase == SessionPhase.Delivering)
                 WatchTracking();
@@ -233,6 +243,15 @@ namespace CricketVR
 
         /// <summary>Same as pressing the named menu button (tests, desktop debugging).</summary>
         public void Press(string buttonName) => OnButton(buttonName);
+
+        /// <summary>The batter's ready press (tap B): bowls the next ball. Ignored when no ball can be bowled.</summary>
+        public void PressReady()
+        {
+            if (_session == null || !_session.Ready())
+                return;
+            if (_readyPress?.activeControl?.device is XRControllerWithRumble c)
+                c.SendImpulse(0.25f, 0.04f);
+        }
 
         /// <summary>Simulates losing focus (tests): the same path as taking the headset off.</summary>
         public void SimulateFocusLoss() => Pause("Focus lost (simulated).");
@@ -370,16 +389,19 @@ namespace CricketVR
         {
             switch (_session.Phase)
             {
+                case SessionPhase.AwaitingReady:
                 case SessionPhase.Countdown:
                 case SessionPhase.Delivering:
                 case SessionPhase.BetweenBalls:
                     var o = _session.Options;
-                    int n = _session.NextBall + (_session.Phase == SessionPhase.BetweenBalls ? 0 : 1);
+                    int n = Mathf.Min(_session.NextBall + (_session.Phase == SessionPhase.BetweenBalls ? 0 : 1), _session.Options.BallBudget);
                     var head = _mode == SessionMode.NetPractice
                         ? $"NET PRACTICE  ball {n} of {o.BallBudget}  (over {(n - 1) / 6 + 1} of {o.Overs})"
                         : $"MATCH SIMULATION  ball {n} of {o.BallBudget}  (scoring pending)";
-                    string middle = _session.Phase == SessionPhase.Countdown ? $"<size=180%>{Mathf.CeilToInt(_session.TimeLeft)}</size>"
-                        : _session.Phase == SessionPhase.Delivering ? "<size=140%>Play!</size>" : "";
+                    string middle = _session.Phase == SessionPhase.AwaitingReady ? "<size=140%>Press B when ready</size>"
+                        : _session.Phase == SessionPhase.Countdown ? (_session.TimeLeft > 0.5f ? $"<size=180%>{Mathf.CeilToInt(_session.TimeLeft)}</size>" : "")
+                        : _session.Phase == SessionPhase.Delivering ? "<size=140%>Play!</size>"
+                        : _session.Timings.waitForReady && !_session.IsOver ? "<size=100%>Press B for the next ball</size>" : "";
                     ui.Board($"{head}\n{middle}\n{_lastResultLine}\n<size=80%>{SessionTotals.From(_session.Records)}</size>");
                     break;
             }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace CricketVR
 {
@@ -9,7 +10,9 @@ namespace CricketVR
     {
         /// <summary>Start menu; no session running.</summary>
         Menu,
-        /// <summary>Readiness countdown before a ball.</summary>
+        /// <summary>Waiting for the batter to say "ready" (tap B) before the next ball (owner decision 2026-10-26).</summary>
+        AwaitingReady,
+        /// <summary>Short delay between "ready" and the ball (0 s by default), or the automatic countdown.</summary>
         Countdown,
         /// <summary>A ball has been requested or is in flight; waiting for its single result.</summary>
         Delivering,
@@ -41,11 +44,18 @@ namespace CricketVR
     [Serializable]
     public struct SessionTimings
     {
+        [Tooltip("True: every ball waits for the batter's ready press (tap B). False: automatic countdowns.")]
+        public bool waitForReady;
+        [Tooltip("Delay from the ready press to the ball (s).")]
+        public float readyDelay;
+        [Tooltip("Automatic mode only: countdown before the first ball (s).")]
         public float firstCountdown;
+        [Tooltip("Automatic mode only: countdown before later balls (s).")]
         public float countdown;
+        [Tooltip("Time the result is shown before the next ball can be requested automatically, or the end screen opens (s).")]
         public float betweenBalls;
 
-        public static SessionTimings Default => new SessionTimings { firstCountdown = 3f, countdown = 2f, betweenBalls = 3f };
+        public static SessionTimings Default => new SessionTimings { waitForReady = true, readyDelay = 0f, firstCountdown = 3f, countdown = 2f, betweenBalls = 3f };
     }
 
     public enum SessionAction
@@ -76,8 +86,8 @@ namespace CricketVR
     /// <see cref="Tick"/> from Update and reports launches and results; the returned <see cref="SessionStep"/> says
     /// what to do. No coroutines or delayed callbacks exist, so restart, menu and pause can never leave stale work;
     /// <see cref="Generation"/> changes whenever outstanding work is invalidated.
-    /// Rules: a ball is requested only after the previous one is finalized and the interval has passed; the ball
-    /// budget is never exceeded; a result is accepted once, only for the active delivery; pausing during a delivery
+    /// Rules: a ball is requested only after the previous one is finalized and, by default, the batter has pressed
+    /// ready (otherwise after the automatic countdown); the ball budget is never exceeded; a result is accepted once, only for the active delivery; pausing during a delivery
     /// cancels it without consuming the ball.
     /// </summary>
     public sealed class SessionStateMachine
@@ -111,7 +121,7 @@ namespace CricketVR
             var step = CancelActive();
             Options = options;
             _records.Clear();
-            Enter(SessionPhase.Countdown, Timings.firstCountdown);
+            EnterBeforeBall(Timings.firstCountdown);
             return step;
         }
 
@@ -146,8 +156,22 @@ namespace CricketVR
                 Enter(SessionPhase.SessionEnd, 0f);
                 return SessionStep.Ended;
             }
-            Enter(SessionPhase.Countdown, Timings.countdown);
+            EnterBeforeBall(Timings.countdown);
             return SessionStep.None;
+        }
+
+        /// <summary>
+        /// The batter is ready (tap B). Accepted while waiting, or while the last result is still shown (the batter
+        /// may skip the display), but never after the last ball or during a delivery. Returns true if accepted.
+        /// </summary>
+        public bool Ready()
+        {
+            if (Phase != SessionPhase.AwaitingReady && !(Phase == SessionPhase.BetweenBalls && Timings.waitForReady))
+                return false;
+            if (IsOver)
+                return false;
+            Enter(SessionPhase.Countdown, Timings.readyDelay);
+            return true;
         }
 
         /// <summary>The runtime bowled the requested ball as <paramref name="deliveryId"/> (0 = the request failed).</summary>
@@ -157,8 +181,8 @@ namespace CricketVR
                 return;
             if (deliveryId <= 0)
             {
-                // The launcher rejected the request: try the same ball again after a countdown (it is not consumed).
-                Enter(SessionPhase.Countdown, Timings.countdown);
+                // The launcher rejected the request: the same ball is requested again (it is not consumed).
+                EnterBeforeBall(Timings.countdown);
                 return;
             }
             ActiveDeliveryId = deliveryId;
@@ -183,7 +207,8 @@ namespace CricketVR
         /// <summary>Focus or tracking lost. A delivery in progress is cancelled and will be bowled again.</summary>
         public SessionStep Pause()
         {
-            if (Phase != SessionPhase.Countdown && Phase != SessionPhase.Delivering && Phase != SessionPhase.BetweenBalls)
+            if (Phase != SessionPhase.Countdown && Phase != SessionPhase.Delivering && Phase != SessionPhase.BetweenBalls &&
+                Phase != SessionPhase.AwaitingReady)
                 return SessionStep.None;
             _pausedFrom = Phase;
             var step = CancelActive();
@@ -201,8 +226,15 @@ namespace CricketVR
                 Enter(SessionPhase.SessionEnd, 0f);
                 return SessionStep.Ended;
             }
-            Enter(SessionPhase.Countdown, Timings.countdown);
+            EnterBeforeBall(Timings.countdown);
             return SessionStep.None;
+        }
+
+        /// <summary>Wait for the ready press, or count down automatically.</summary>
+        void EnterBeforeBall(float automaticCountdown)
+        {
+            if (Timings.waitForReady) Enter(SessionPhase.AwaitingReady, 0f);
+            else Enter(SessionPhase.Countdown, automaticCountdown);
         }
 
         SessionStep CancelActive()

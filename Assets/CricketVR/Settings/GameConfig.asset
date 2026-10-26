@@ -130,6 +130,8 @@ MonoBehaviour:
     logResults: 1
   session:
     timings:
+      waitForReady: 1
+      readyDelay: 0
       firstCountdown: 3
       countdown: 2
       betweenBalls: 3

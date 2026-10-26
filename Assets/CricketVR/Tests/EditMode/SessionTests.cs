@@ -193,6 +193,62 @@ namespace CricketVR.Tests
         }
     }
 
+    /// <summary>The batter controls each ball with a ready press (tap B; owner decision 2026-10-26).</summary>
+    public class ReadyPressTests
+    {
+        SessionStateMachine _s;
+
+        [SetUp]
+        public void SetUp() => _s = new SessionStateMachine(SessionTimings.Default);
+
+        [Test]
+        public void DefaultSettingsWaitForTheBatterBeforeEveryBall()
+        {
+            Assert.IsTrue(SessionTimings.Default.waitForReady);
+            Assert.AreEqual(0f, SessionTimings.Default.readyDelay);
+            _s.Start(SessionOptions.NetPractice(1, 0));
+            Assert.AreEqual(SessionPhase.AwaitingReady, _s.Phase);
+            Assert.AreEqual(SessionAction.None, _s.Tick(60f).Action, "nothing is bowled without a ready press");
+            Assert.IsTrue(_s.Ready());
+            Assert.AreEqual(SessionAction.LaunchBall, _s.Tick(0.01f).Action, "bowled straight after the press");
+            _s.BallLaunched(1);
+            Assert.IsFalse(_s.Ready(), "no ready press during a delivery");
+            Assert.IsTrue(_s.BallFinalized(new BallRecord { DeliveryId = 1 }));
+            Assert.AreEqual(SessionPhase.BetweenBalls, _s.Phase);
+            Assert.AreEqual(SessionAction.None, _s.Tick(60f).Action);
+            Assert.AreEqual(SessionPhase.AwaitingReady, _s.Phase, "after the result the game waits again");
+            Assert.AreEqual(SessionAction.None, _s.Tick(60f).Action);
+        }
+
+        [Test]
+        public void ReadyDuringTheResultDisplaySkipsTheWait()
+        {
+            _s.Start(SessionOptions.NetPractice(1, 0));
+            _s.Ready();
+            _s.Tick(0.01f);
+            _s.BallLaunched(5);
+            _s.BallFinalized(new BallRecord { DeliveryId = 5 });
+            Assert.IsTrue(_s.Ready(), "the batter may ask for the next ball while the result is shown");
+            Assert.AreEqual(SessionAction.LaunchBall, _s.Tick(0.01f).Action);
+        }
+
+        [Test]
+        public void NoReadyAfterTheLastBallAndPauseReturnsToWaiting()
+        {
+            _s.Start(SessionOptions.MatchSimulation(1, 0));
+            _s.Pause();
+            Assert.AreEqual(SessionPhase.Paused, _s.Phase, "pause works while waiting");
+            _s.Resume();
+            Assert.AreEqual(SessionPhase.AwaitingReady, _s.Phase, "resume waits for the batter, never bowls by itself");
+            _s.Ready();
+            _s.Tick(0.01f);
+            _s.BallLaunched(9);
+            _s.BallFinalized(new BallRecord { DeliveryId = 9 });
+            Assert.IsFalse(_s.Ready(), "budget used: no further ball");
+            Assert.AreEqual(SessionAction.SessionEnded, _s.Tick(60f).Action);
+        }
+    }
+
     /// <summary>Per-ball record and calibration CSV (REQ-027; T048).</summary>
     public class BallRecordTests
     {

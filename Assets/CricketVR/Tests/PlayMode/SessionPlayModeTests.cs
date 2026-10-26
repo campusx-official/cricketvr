@@ -122,6 +122,37 @@ namespace CricketVR.Tests
             }
         }
 
+        /// <summary>Default behaviour: each ball comes only when the batter presses B (owner decision 2026-10-26).</summary>
+        [UnityTest]
+        public IEnumerator EachBallWaitsForTheReadyPress()
+        {
+            _config.session.timings = new SessionTimings { waitForReady = true, readyDelay = 0f, betweenBalls = 1f };
+            var gameplay = _session.gameObject;
+            gameplay.SetActive(false); // re-create the session with the new timings
+            Object.DestroyImmediate(_session);
+            _session = gameplay.AddComponent<SessionManager>();
+            _session.Configure(_config, gameplay.GetComponent<BowlingMachine>(), _ball, gameplay.GetComponent<ScoreManager>(),
+                null, null, null, null, null, null, gameplay.GetComponent<SessionUI>(), null, null, null);
+            gameplay.SetActive(true);
+            yield return null;
+            _session.Press("Overs1");
+            _session.Press("Start");
+            for (int ball = 0; ball < 6; ball++)
+            {
+                yield return WaitFor(() => false, 4f);
+                Assert.AreEqual(ball, _launches.Count, $"ball {ball + 1} must wait for the press");
+                Assert.AreEqual(SessionPhase.AwaitingReady, _session.Phase);
+                _session.PressReady();
+                yield return WaitFor(() => _launches.Count == ball + 1, 1f);
+                Assert.AreEqual(ball + 1, _launches.Count, $"ball {ball + 1} bowled straight after the press");
+                yield return WaitFor(() => _session.Session.Records.Count == ball + 1, 15f);
+            }
+            _session.PressReady();
+            yield return WaitFor(() => _session.Phase == SessionPhase.SessionEnd, 5f);
+            Assert.AreEqual(SessionPhase.SessionEnd, _session.Phase);
+            Assert.AreEqual(6, _launches.Count, "a press after the last ball bowls nothing");
+        }
+
         [UnityTest]
         public IEnumerator FocusLossMidDeliveryCancelsItAndTheBallIsBowledAgainAfterResume()
         {
