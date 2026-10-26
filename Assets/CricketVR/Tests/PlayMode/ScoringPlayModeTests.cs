@@ -149,14 +149,13 @@ namespace CricketVR.Tests
             yield return WaitForBallToPark();
             var r = ResultFor(id);
             Assert.AreEqual(DeliveryOutcome.Bowled, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
             Assert.IsFalse(r.BatContact);
             Assert.AreEqual(1, _results.Count, "nothing after the stump strike added a result");
             Assert.Contains((id, BallEndReason.Finalized), _ends);
         }
 
         [UnityTest]
-        public IEnumerator UnhitBallIntoTheBackNetIsAMissAndScoresNothing()
+        public IEnumerator UnhitBallIntoTheBackNetIsAMiss()
         {
             int id = Launch(new Vector3(0.6f, 0.5f, 3f), new Vector3(0f, 1f, -15f));
             yield return WaitForResult(id);
@@ -164,7 +163,6 @@ namespace CricketVR.Tests
             Assert.AreEqual(DeliveryOutcome.Miss, r.Outcome);
             Assert.AreEqual(DeliveryEnd.NetHit, r.End);
             Assert.AreEqual(ScoringZone.RearNet, r.Zone);
-            Assert.AreEqual(0, r.Runs);
             Assert.AreEqual(CarryState.NotHit, r.Carry);
         }
 
@@ -182,18 +180,17 @@ namespace CricketVR.Tests
         // ---------- Hits ----------
 
         [UnityTest]
-        public IEnumerator FrontNetHitsScoreByHeight()
+        public IEnumerator FrontNetHitsAreLabelledByHeight()
         {
-            var cases = new[] { (0.5f, ScoringZone.FrontLow, 2), (2f, ScoringZone.FrontMiddle, 4), (4.5f, ScoringZone.FrontUpper, 6) };
+            var cases = new[] { (0.5f, ScoringZone.FrontLow), (2f, ScoringZone.FrontMiddle), (4.5f, ScoringZone.FrontUpper) };
             var from = new Vector3(0f, 1f, 2f);
-            foreach (var (height, zone, runs) in cases)
+            foreach (var (height, zone) in cases)
             {
                 int id = Hit(from, AimAtFrontNet(from, height, 25f));
                 yield return WaitForResult(id);
                 var r = ResultFor(id);
                 Assert.AreEqual(zone, r.Zone, $"aimed at {height} m");
-                Assert.AreEqual(runs, r.Runs);
-                Assert.AreEqual(DeliveryOutcome.Scored, r.Outcome);
+                Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome, "no runs in Net Practice (REQ-009 amended)");
                 Assert.AreEqual(CarryState.NetFirst, r.Carry, "reached the net on the full");
                 yield return WaitForBallToPark();
             }
@@ -217,47 +214,46 @@ namespace CricketVR.Tests
         }
 
         [UnityTest]
-        public IEnumerator ClearingTheFrontNetScoresSix()
+        public IEnumerator ClearingTheFrontNetIsLabelled()
         {
             int id = Hit(new Vector3(0f, 1f, 2f), new Vector3(0f, 12f, 22f));
             yield return WaitForResult(id);
             var r = ResultFor(id);
             Assert.AreEqual(DeliveryEnd.LeftEnclosure, r.End);
             Assert.AreEqual(ScoringZone.OverFront, r.Zone);
-            Assert.AreEqual(6, r.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome);
             Assert.AreEqual(CarryState.NoLanding, r.Carry);
         }
 
         [UnityTest]
-        public IEnumerator HitIntoASideNetScoresOne()
+        public IEnumerator HitIntoASideNetIsLabelled()
         {
             int id = Hit(new Vector3(0f, 1f, 2f), new Vector3(8f, 2f, 6f));
             yield return WaitForResult(id);
             var r = ResultFor(id);
             Assert.AreEqual(ScoringZone.SideNet, r.Zone);
-            Assert.AreEqual(1, r.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome);
         }
 
         [UnityTest]
-        public IEnumerator ContactThenBowledIsZeroWithBothFlags()
+        public IEnumerator ContactThenBowledHasBothFlags()
         {
             int id = Hit(new Vector3(0f, 0.5f, 1.5f), new Vector3(0f, 0f, -8f));
             yield return WaitForResult(id);
             var r = ResultFor(id);
             Assert.AreEqual(DeliveryOutcome.Bowled, r.Outcome);
             Assert.IsTrue(r.BatContact && r.Bowled);
-            Assert.AreEqual(0, r.Runs);
         }
 
         [UnityTest]
-        public IEnumerator HitThatSettlesInsideTheNetIsTheZeroRunFallback()
+        public IEnumerator HitThatSettlesInsideTheNetIsAHitWithNoZone()
         {
             int id = Hit(new Vector3(0.5f, 0.5f, 5f), new Vector3(0f, -1f, 0f));
             yield return WaitForResult(id);
             var r = ResultFor(id);
             Assert.AreEqual(DeliveryEnd.Settled, r.End);
-            Assert.AreEqual(DeliveryOutcome.NoRuns, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome);
+            Assert.AreEqual(ScoringZone.None, r.Zone);
         }
 
         // ---------- Lifecycle ----------

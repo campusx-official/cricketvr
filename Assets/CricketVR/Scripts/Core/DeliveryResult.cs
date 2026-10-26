@@ -4,10 +4,8 @@ namespace CricketVR
 {
     public enum DeliveryOutcome
     {
-        /// <summary>Bat contact, then a scoring zone.</summary>
-        Scored,
-        /// <summary>Bat contact, but no runs (settled or timed out without reaching a zone).</summary>
-        NoRuns,
+        /// <summary>Net Practice: bat contact, not bowled. Scores no runs (REQ-009 amended); the zone says where it went.</summary>
+        Hit,
         /// <summary>No bat contact and not bowled.</summary>
         Miss,
         /// <summary>Stumps hit, with or without a bat contact first. Always 0 runs.</summary>
@@ -62,8 +60,8 @@ namespace CricketVR
         public readonly int DeliveryId;
         public readonly DeliveryOutcome Outcome;
         public readonly DeliveryEnd End;
+        /// <summary>Net Practice: where a hit ball went (no runs).</summary>
         public readonly ScoringZone Zone;
-        public readonly int Runs;
         public readonly bool BatContact;
         public readonly bool Bowled;
         public readonly CarryState Carry;
@@ -72,14 +70,13 @@ namespace CricketVR
         public readonly ShotData Shot;
         public readonly DeliveryConfig Config;
 
-        public DeliveryResult(int deliveryId, DeliveryOutcome outcome, DeliveryEnd end, ScoringZone zone, int runs,
+        public DeliveryResult(int deliveryId, DeliveryOutcome outcome, DeliveryEnd end, ScoringZone zone,
             bool batContact, bool bowled, CarryState carry, float carryMetres, ShotData shot, DeliveryConfig config)
         {
             DeliveryId = deliveryId;
             Outcome = outcome;
             End = end;
             Zone = zone;
-            Runs = runs;
             BatContact = batContact;
             Bowled = bowled;
             Carry = carry;
@@ -111,11 +108,10 @@ namespace CricketVR
             {
                 switch (Outcome)
                 {
-                    case DeliveryOutcome.Bowled: return BatContact ? "BOWLED (played on), 0" : "BOWLED, 0";
-                    case DeliveryOutcome.Miss: return "Miss, 0";
-                    case DeliveryOutcome.NoRuns: return End == DeliveryEnd.Timeout ? "Hit, no zone (timeout), 0" : "Hit, no zone, 0";
+                    case DeliveryOutcome.Bowled: return BatContact ? "BOWLED (played on)" : "BOWLED";
+                    case DeliveryOutcome.Miss: return "Miss";
                     case DeliveryOutcome.ScoringPending: return "Hit, practice scoring pending";
-                    default: return $"{Runs} practice run{(Runs == 1 ? "" : "s")}, {PracticeScoring.ZoneLabel(Zone)}";
+                    default: return Zone == ScoringZone.None ? "Hit" : $"Hit, {PracticeScoring.ZoneLabel(Zone)}";
                 }
             }
         }

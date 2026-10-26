@@ -43,6 +43,7 @@ namespace CricketVR.Editor
             var config = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
             BowlingBuilder.Build(main, environment, config, created);
             GroundBuilder.Build(main, environment, config, created); // M6.5: generated cricket ground (inactive in NetMode)
+            SessionBuilder.Build(main, config, created); // M7: session framework, start menu, menu ray, bat-tap
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);

@@ -11,7 +11,7 @@ Detailed evidence lives in `specs/001-six-ball-net/validation.md`. This table is
 | M5 Batting contact | Implemented (T016–T020): swept resolver, response with swing assist, recorded impact sounds, rhythm-coded haptics | EditMode 52/52, PlayMode 17/17 incl. AC-05 matrix (E-020, E-028) | **AC-05 pass, right controller** (E-022–E-029) | Done |
 | M6 Delivery outcomes | Implemented (T021–T024): DeliveryAdjudicator, practice zones on tagged net walls, boundary exit, measured carry, ScoreManager records | EditMode 76/76, PlayMode 28/28 (E-030) | **AC-06 pass** (E-031, NetMode) | Done; net scoring kept until the virtual-field scorer |
 | M6.5 Cricket ground | Implemented (T033–T046) | EditMode 91/91, PlayMode 38/38 (E-032) | **AC-11–AC-14 pass** (E-033–E-035): 72 fps, GPU 2.5 ms (FFR on) / 3.0 ms (off), ≤ 63 draw calls, ≤ 59k triangles, 82 MB graphics | Done; merged to main |
-| M7 Session framework + start menu | Not started (re-planned 2026-10-26) | Pending | Pending | After M6.5 merge |
+| M7 Session framework + start menu | Implemented on branch m7-session (T047–T052) | EditMode 105/105, PlayMode 41/41 (E-036) | Pending | Owner: M7 headset tests (menu, session, pause) |
 | M8 Net Practice + Shot Confidence | Not started | Pending | Pending | After M7 |
 | M9 Virtual-field scorer | Not started | Pending | Pending | After M8 (needs calibration CSV) |
 | M10 Match Simulation | Not started | Pending | Pending | After M9 |

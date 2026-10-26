@@ -194,7 +194,6 @@ namespace CricketVR.Tests
                 "an edge going behind the wicket does not end the delivery");
             var r = Step(BallEvent.LeftGround(new Vector3(20f, 1f, -50f)));
             Assert.AreEqual(DeliveryOutcome.ScoringPending, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
             Assert.AreEqual("Hit, practice scoring pending", r.Summary);
             Assert.IsFalse(r.Miss);
         }

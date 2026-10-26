@@ -53,6 +53,9 @@ namespace CricketVR.Editor
             Shoot(cam, rt, eye, eye + new Vector3(-1f, -0.15f, -0.4f), 90f, "LegSide");
             Shoot(cam, rt, eye, new Vector3(0f, 0.3f, 1.5f), 90f, "Crease");
             Shoot(cam, rt, new Vector3(0f, 90f, -70f), new Vector3(0f, 0f, 12f), 60f, "Aerial");
+            var near = GameObject.Find("Main/UI/NearPanel");
+            if (near != null)
+                Shoot(cam, rt, eye, near.transform.position, 70f, "Menu");
 
             cam.targetTexture = null;
             Object.DestroyImmediate(rt);

@@ -203,6 +203,21 @@ namespace CricketVR
 
         public void ConfigureGround(GroundBoundaryMonitor monitor) => groundMonitor = monitor;
 
+        /// <summary>
+        /// Switches the terminal rules at runtime when the start menu picks a mode (REQ-021 amended). Only between
+        /// deliveries; an open delivery is discarded without a result.
+        /// </summary>
+        public void SetEnvironment(EnvironmentMode mode)
+        {
+            if (_adjudicator == null)
+                return;
+            if (_adjudicator.IsOpen)
+                _adjudicator.Cancel(_adjudicator.DeliveryId);
+            _pending.Clear();
+            _rules = mode == EnvironmentMode.GroundMode ? DeliveryRules.Ground : DeliveryRules.Nets;
+            _adjudicator.Mode = _rules;
+        }
+
         public void Configure(GameConfig cfg, BallController ballController, BatBallContactResolver contactResolver, BowlingMachine bowlingMachine)
         {
             config = cfg;

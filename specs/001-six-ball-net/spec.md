@@ -47,7 +47,7 @@ Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simula
 | REQ-022 | Static placeholder fielders stand at the positions in a `FieldConfig` list (angle and radius from the striker's stumps). They can be hidden and don't move or field. | M6.5 |
 | REQ-023 | GroundMode holds the 72 Hz target on Quest 3 within these budgets: ≤ 150 draw calls, < 250k triangles, < 150 MB texture memory. Textures are ASTC with mipmaps. There are no large transparent surfaces and no animated environment. | M6.5 |
 | REQ-024 | The ball stays high-contrast against the sight screen behind the machine, the pitch and the outfield. Thin distant lines (rope, circle markers, stands) don't visibly shimmer, and markings don't z-fight. | M6.5 |
-| REQ-025 | A world-space start menu offers Net Practice (overs 1/2/3/5, default 2) and Match Simulation (scenario preset or random; difficulty Easy/Medium/Hard). It is operated by the right controller's XRI ray, with a fallback of tapping a button with the bat blade. Outside menus the ray is hidden; in menus the bat is hidden. | M7 |
+| REQ-025 | A world-space start menu offers Net Practice (overs 1/2/3/5, default 2) and Match Simulation (scenario preset or random; difficulty Easy/Medium/Hard). It is operated by the right controller's XRI ray, with a fallback of tapping a button with the bat blade. *(Amended 2026-10-26 during M7: panels with buttons appear about 0.75 m in front of the stance so the bat can reach them, and the bat stays visible there; the ray is shown only while such a panel is open. Live ball information stays on the far scoreboard.)* | M7 |
 | REQ-026 | A shared session framework drives both modes: menu → countdown → ball-by-ball (deliver, finalize, per-ball panel, interval) → end screen → play again / menu (/ new scenario), with pause (REQ-014). | M7 |
 | REQ-027 | One per-ball record type holds the delivery parameters (and seed), contact data, `ShotLaunch`, the physical result, the swing timing offset Δt, the Shot Confidence components (when computed) and the virtual-field outcome (Match Simulation). In development builds each record is appended to a per-session CSV on the device for calibration. | M7 |
 | REQ-028 | Each mode has a delivery plan: Net Practice mixes lines and lengths; Match Simulation uses a difficulty preset (speed range; how often yorkers and short balls come). Every planned delivery passes the solver before use; an unreachable one is redrawn and logged, never silently altered. | M7 |
@@ -200,7 +200,7 @@ Given GroundMode on Quest 3 during normal batting for at least 2 minutes:
 
 ### AC-15 — Start menu (REQ-025)
 
-With only the right controller, the owner selects each mode and each option by ray, and once by bat-tap. The ray and the bat are never shown at the same time.
+With only the right controller, the owner selects each mode and each option by ray, and once by bat-tap. The ray is visible only while a panel with buttons is open, never during a delivery.
 
 ### AC-16 — Per-ball record and log (REQ-027, REQ-028)
 

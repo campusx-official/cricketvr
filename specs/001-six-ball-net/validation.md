@@ -15,17 +15,17 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
 | AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
-| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; run scoring superseded 2026-10-26 (REQ-009 amended) | APK sha256 225a148…00ee7; E-030, E-031 | Re-run the amended AC-06 (no runs) after T052 |
-| AC-07 | REQ-011, REQ-012, REQ-026 | Not run (re-planned: complete session, both modes) | None | M7 T051 |
-| AC-08 | REQ-013 | Not run (re-planned: play again / menu, both modes) | None | M7 T051 |
-| AC-09 | REQ-014 | Not run (both modes) | None | M7 T051 |
+| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
+| AC-07 | REQ-011, REQ-012, REQ-026 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-08 | REQ-013 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-09 | REQ-014 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
-| AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
-| AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
+| AC-15 | REQ-025 | Code done; headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T050 start menu |
+| AC-16 | REQ-027, REQ-028 | Automated pass for record, CSV and plans (E-036); device CSV pending | APK sha256 e0ff087…0d792; E-036 | M7 T048/T049 record, CSV, delivery plans |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
 | AC-18 | REQ-031 | Not run | None | M8 summary |
 | AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
@@ -620,6 +620,22 @@ Actual result and measured values:
 Outcome: Pass. Every budget met with a wide margin, foveation on and off.
 Log or artifact path: scratchpad all.log / unity.log (not committed)
 Remaining limitation / follow-up task: (1) Unity FrameTimingManager gives no CPU/GPU split on this Quest/Vulkan setup: the probe's "CPU" equals the frame interval (13.89 ms) and GPU reads 0. Use the VrApi App= / CPU&GPU= lines (or OVR Metrics) instead; fix the probe in M11. (2) The Unity "Texture Memory" profiler counter grows by about 1.1 GB on each pause/resume (559 -> 4365 MB) while the app's real graphics memory stays at 82 MB. Treat the counter as unreliable for budget checks; use dumpsys meminfo. (3) About 1% stale frames: watch in AC-24.
+```
+
+```text
+Check ID / acceptance scenario: E-036 / M7 automated: session framework, per-ball record and CSV, delivery plans, net runs retired, menu build (T047-T052)
+Requirement IDs: REQ-008, REQ-009, REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-025, REQ-026, REQ-027, REQ-028
+Date and tester: 2026-10-26, agent
+Git commit or build identifier: branch m7-session; APK sha256 e0ff087810600fe132052037b9ad68c41d023b25ecc4b4ab418568a6576d0792 (NetMode default, development)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; Editor preview render of the menu; Quest install
+Configuration: SessionTimings 3 / 2 / 3 s (tests 1 / 1 / 1 s); delivery plans per spec.md "Two modes"; CSV logging on in development builds
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (adds EventSystem + XRUIInputModule, NearPanel, SessionBoard, SessionManager with SessionUI / MenuPointer / BallLogWriter / BatTapButtons); -runTests EditMode and PlayMode; QuestBuild.Build; adb install
+Expected result: exactly-N-balls sessions; no stale results after pause, play again or menu; the interrupted ball is not consumed; records round-trip through CSV; every planned delivery reachable; no runs in Net Practice; all earlier tests still pass
+Actual result and measured values: EditMode 105/105 (new: SessionStateMachineTests 9 - 12-ball session then end with no 13th, countdown 3 s then 2 s, between balls 3 s, stale / duplicate / out-of-phase results rejected, pause mid-delivery cancels and re-bowls the same ball, pause from countdown / between balls, pause after the last ball resumes to the end, play again and menu from every phase invalidate work and clear records, early-end rule, rejected launch retries; BallRecordTests 2 - CSV round trip incl. quotes and NaN, de-DE locale proof; DeliveryPlannerTests 3 - 1,000 draws x 4 plans all reachable with 0 redraws, speeds/lines in range, yorker share 43/95/201 per 1,000 vs 5/10/20%, short 106/159/219 vs 10/15/20%, left-hand mirror, same seed same delivery, redraw not alter, fallback). Net-zone run tests rewritten to zones and Hit outcomes (DeliveryAdjudicatorTests, ScoringPlayModeTests); none removed without replacement. PlayMode 41/41 (new SessionPlayModeTests 3 with the real machine, ball and ScoreManager: one over = exactly 6 launches and 6 records, no 7th after the end; focus loss mid-delivery cancels the ball, no auto-resume, not consumed, re-bowled as a new delivery after Resume; 5 rounds of Play again / Menu mid-delivery leave no stale ball or record). Menu preview render readable at the stance (Builds/Preview/Ground_Menu.png). Build Success, install Success.
+Outcome: Pass (automated). Headset AC-07/08/09/15/16 not run.
+Log or artifact path: scratchpad test XML; Builds/Preview/Ground_Menu.png (gitignored)
+Remaining limitation / follow-up task: headset checks; Match Simulation bowls a 12-ball placeholder with "scoring pending" until M9/M10; swing timing and confidence columns are empty until M8
 ```
 
 ## Re-plan note (2026-10-26)

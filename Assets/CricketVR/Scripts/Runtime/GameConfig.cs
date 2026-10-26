@@ -108,6 +108,19 @@ namespace CricketVR
         public bool logResults = true;
     }
 
+    [Serializable]
+    public class SessionSettings
+    {
+        public SessionTimings timings = SessionTimings.Default;
+        public int defaultOvers = 2;
+        [Tooltip("Match Simulation balls until the scenario generator exists (M10).")]
+        public int matchPlaceholderBalls = 12;
+        [Tooltip("Development builds: write one CSV row per finalized ball to Application.persistentDataPath (REQ-027).")]
+        public bool logBallsCsv = true;
+        [Tooltip("Pause if the bat controller stays untracked this long during a countdown or delivery (s).")]
+        public float trackingLossPauseSeconds = 0.5f;
+    }
+
     /// <summary>Tunable game settings. One asset: Assets/CricketVR/Settings/GameConfig.asset.</summary>
     [CreateAssetMenu(menuName = "CricketVR/Game Config", fileName = "GameConfig")]
     public class GameConfig : ScriptableObject
@@ -125,5 +138,6 @@ namespace CricketVR
         public DeliverySettings delivery = new DeliverySettings();
         public ContactSettings contact = new ContactSettings();
         public ScoringSettings scoring = new ScoringSettings();
+        public SessionSettings session = new SessionSettings();
     }
 }

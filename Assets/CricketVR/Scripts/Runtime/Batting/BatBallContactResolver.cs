@@ -40,6 +40,9 @@ namespace CricketVR
 
         public event Action<BatContactReport> BatContact;
 
+        /// <summary>Closest bat-ball gap (m) seen during delivery <paramref name="id"/>, or NaN if it isn't the tracked one.</summary>
+        public float ClosestGapFor(int id) => id == _trackedDelivery && !float.IsPositiveInfinity(_closestGap) ? _closestGap : float.NaN;
+
         /// <summary>Delivery id that has already been struck (-1 if none since the last launch).</summary>
         public int StruckDelivery => _struckDelivery;
 
