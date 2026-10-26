@@ -20,7 +20,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-08 | REQ-013 | Not run | None | M7 restart checks |
 | AC-09 | REQ-014 | Not run | None | M7 interruption checks |
 | AC-10 | REQ-016 | Not run | None | M8 regression/profile |
-| AC-11 | REQ-017, REQ-018, REQ-024 | Editor preview renders checked (layout, black screen, no z-fighting at 1 cm near plane); headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
+| AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | Automated physics checks pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
 | AC-13 | REQ-021, REQ-022 | Automated rules + NetMode regression pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
 | AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
@@ -557,6 +557,22 @@ Actual result and measured values: EditMode 91/91 (15 new: pitch/creases/stumps 
 Outcome: Pass (automated and Editor preview). Headset AC-11 to AC-14 not run.
 Log or artifact path: Builds/Preview/Ground_*.png (gitignored); scratchpad test XML
 Remaining limitation / follow-up task: owner headset checks; on-device performance numbers (AC-14) with foveation on and off; bails not dislodged
+```
+
+```text
+Check ID / acceptance scenario: E-033 / AC-11 headset: standing in the middle (M6.5 test 1)
+Requirement IDs: REQ-017, REQ-018, REQ-024
+Date and tester: 2026-10-26 (reported), owner
+Git commit or build identifier: 87200cb; APK sha256 c6b7ff9fec7596f131f0df5204a576f28ba27096264730d4d0c7143a8e50e41e (GroundMode, foveation A/B every 30 s)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right hand
+Configuration: GroundDefinition / FieldConfig defaults
+Steps or exact command: look around from the crease; creases near and far with head movement; rope, circle markers and stand edges with head movement; watch a few deliveries from release
+Expected result: true-scale ground; no flicker on markings; no shimmer on thin distant lines; ball easy to pick up against the black sight screen and the grass
+Actual result and measured values: owner: "all pass" (all five questions). No device log read: the headset was disconnected when the log was requested.
+Outcome: Pass (owner observation)
+Log or artifact path: none
+Remaining limitation / follow-up task: AC-12/AC-13 headset checks; AC-14 performance numbers
 ```
 
 ## M6.5 evidence template (AC-11 to AC-14)
