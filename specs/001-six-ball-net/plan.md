@@ -159,7 +159,7 @@ Events are plain C# `event Action<…>` on owners: `DeliveryStarted(id)`, `BatCo
 
 ## 9. Bowling and ball (M4, T013–T015)
 - Ball: SphereCollider r = 0.036, mass 0.16 kg, dynamic Rigidbody, `ContinuousDynamic`, interpolation on, linear damping 0 (no drag in MVP, documented), layer `Ball`. Pitch PhysicMaterial: bounciness ~0.5, friction ~0.35 (tuned at M4). Combine modes are set so the pitch value dominates.
-- `DeliverySolver`:
+- `DeliverySolver` (Stock path; the movement-aware solve for other delivery types is in §19):
   - Displacement d = B − P0, horizontal D, vertical Δy (bounce point at y = r).
   - For speed s: `tanθ = (s² − √(s⁴ − g(gD² + 2Δy s²))) / (gD)`, taking the **lower** (flat) root.
   - A negative discriminant means Unreachable, reported with the minimum feasible speed. The speed is never silently changed.
@@ -438,6 +438,17 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | Pickup, throw speed, run time | ScorerSettings.pickup / throwSpeed / runTime / runStart | 0.5 s / 28 m/s / 3.0 s / 1.0 s | Run histogram (share of 1s, 2s, 3s) | AC-20, AC-21 |
 | Difficulty speeds and yorker/short shares | DeliveryPlan assets | spec.md "Two modes" | Bounce errors (AC-04 re-run to 120 km/h); contact rate per preset | AC-16, AC-04 re-run, AC-23 |
 | Scenario bounds | ScenarioSettings | RR 6–15, 6–36 balls, 1–5 wickets | Win rate across 10+ played scenarios | AC-22, AC-23 |
+| Swing curve range | DeliveryType.swingMin / swingMax | 0.2 / 0.6 m | Measured curve (CSV) vs what the owner sees; visible but hittable | AC-26 |
+| Swing lateness | DeliveryType.swingLateness p | 1.5 | Owner's sense of "late swing"; position along the flight where half the curve has happened | AC-26 |
+| Drift | DeliveryType.driftMin / driftMax | per §19 table | Measured drift by the bounce; visible but subtle | AC-27 |
+| Dip | DeliveryType.dip | 0.6–1.2 m/s² | Arrival angle and bounce height vs Stock at the same speed and length | AC-27 |
+| Turn range | DeliveryType.turnMin / turnMax | per §19 table | Measured turn (CSV); off-spin vs leg-spin distinguishable in the headset | AC-27 |
+| Bounce factor | DeliveryType.bounceFactor | per §19 table | Bounce height at the crease vs Stock | AC-27 |
+| Grip loss | DeliveryType.grip | 0.05–0.06 | Speed after the bounce vs Stock | AC-27 |
+| Visual spin rate | DeliveryType.visualRevPerSecond | 4 (spin) / 3 (pace) | Owner: reads as spinning the right way, no strobing | AC-28 |
+| Pace speed cap | DeliveryPlanSettings | 120 → 140 km/h | AC-04 re-run and AC-05 matrix extension; on failure stay at 120 and scale the swing targets down | AC-29 |
+| Natural variation | DeliveryTypeData.variation | ±15% | Owner: balls feel varied but each type stays recognisable | AC-31, AC-26/27 |
+| Stock bounce tolerance | AC-04 tests | 10 cm → ~1 cm only if T070 passes | T070 lowest-point measurement over the presets | AC-04, T070 |
 
 ## 18. Virtual-field scorer and simulated ball path (M9–M10, T058–T066)
 
@@ -480,6 +491,91 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 
 **Physics in Net Practice** stays as M6 (PhysX after contact, nets, measured carry).
 
+## 19. Delivery types (M7.5, T070–T083) — accepted 2026-10-27
+
+Decision record: `proposals/delivery-types.md`. Directions are for a right-handed batter (off side = +X; deliveries travel −Z); everything mirrors x → −x for a left-hander.
+
+**Module (Core + Runtime).**
+- `DeliveryTypeData` (Core struct) and `DeliveryType` (ScriptableObject wrapping it, one asset per type under `Assets/CricketVR/Settings/DeliveryTypes/`).
+- `DeliveryRequest` (Core) = `DeliveryConfig` fields + type + movement 0–1 + handedness + line reference + seed:
+  - `ToConfig` / `FromConfig` for Stock, so every existing caller and test keeps working (DT-6);
+  - `ForBatter(handedness)` mirrors x and every movement sign. It is the only mirroring, applied once by the bowling machine; the planner emits right-handed requests plus a handedness (DT-7).
+- `DeliveryFlightModel` (Core, pure):
+  - `Acceleration(t, velocity, plan)` gives the extra acceleration before the bounce;
+  - `TurnAtBounce(velocity, plan)` gives the post-bounce velocity.
+  - Used identically by the solver and at runtime.
+- `BallFlight` (Runtime, on the ball):
+  - applies `Acceleration` with `AddForce(…, ForceMode.Acceleration)` in FixedUpdate before the bounce;
+  - detects the physical bounce (vertical velocity changes sign);
+  - applies `TurnAtBounce` in that step (DT-4);
+  - drives `BallVisual` rotation.
+  - Execution order is before the contact resolver (−40), so the resolver sees the step's real velocity.
+- Stock = zero acceleration and no turn: `BallFlight` does nothing, and the solver uses today's code path.
+
+**Flight model** (m = movement 0–1; s = +1 right-hander / −1 left-hander; X̂ = world +X; t = time since release; T = the solver's planned time to the bounce).
+
+| Effect | Formula | Notes |
+| --- | --- | --- |
+| Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the curve equals D(m) = D_min + m·(D_max − D_min): A = D·(p+1)(p+2)/T². p = 0 uniform, p = 2 late. |
+| Drift (spin) | a = −s·τ·d · ŝ, constant before the bounce | τ = turn direction (−1 off-spin/googly, +1 leg-spin/doosra). Drift is opposite to the turn. d gives 0.05–0.15 m of drift by the bounce. |
+| Dip (spin) | a = −k_dip · Ŷ, constant before the bounce | Top-spin dip. The solver compensates with a higher launch, so the ball arrives steeper and bounces higher. |
+| Turn at the bounce | v_h′ = R_Y(s·τ·θ(m)) · v_h · (1 − g_grip); v_y′ = v_y · (1 + b) | θ(m) = θ_min + m·(θ_max − θ_min); b = bounce-height factor; g_grip = speed lost to grip. Applied once, in the step after the physical bounce. |
+| Seam (pace, D-2) | v_h′ = R_Y(φ) · v_h | φ = 0 in v1. |
+
+**Swing deviation (DT-13)** = the largest lateral distance between the actual path and the straight line from release to the bounce point, before the bounce (how much it curved). The arrival line at the batter is logged too. The 0.2–0.6 m target applies to the curve. Because the solver aims the bounce at the requested line, a swinging ball starts wider and curves in.
+
+**Natural variation (owner change 3).**
+- Each ball draws factors f_swing, f_drift, f_turn ∈ [1 − v, 1 + v] from `System.Random(request.seed)`, with v = `DeliveryTypeData.variation` (default 0.15).
+- They multiply D, d and θ before the solve, so the solver still lands the ball where requested.
+- The factors are written to the record (`var_swing`, `var_drift`, `var_turn`).
+- Tests set v = 0 except the variation tests.
+
+**Starting values per type** (all calibrated; §17 table):
+
+| Type | Speed (km/h) | Swing D (m) / p | Drift d (m) | Dip k (m/s²) | Turn θ (°) / dir | Bounce b | Grip |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Stock | plan's range | 0 | 0 | 0 | 0 | 0 | 0 |
+| Inswinger | 115–140 (120 cap, DT-5) | 0.2–0.6 / 1.5 | 0 | 0 | 0 | 0 | 0 |
+| Outswinger | 115–140 (120 cap) | 0.2–0.6 / 1.5 | 0 | 0 | 0 | 0 | 0 |
+| Off-spin | 80–92 | 0 | 0.05–0.10 (→ +X) | 0.6 | 3–6 / −X | +0.05 | 0.05 |
+| Leg-spin | 75–90 | 0 | 0.06–0.12 (→ −X) | 0.8 | 4–9 / +X | +0.08 | 0.06 |
+| Doosra | 80–92 (same as off-spin) | 0 | 0.05–0.10 (→ −X) | 0.6 | 2.5–5 / +X | +0.03 | 0.05 |
+| Googly | 75–90 (same as leg-spin) | 0 | 0.06–0.12 (→ +X) | 1.2 | 3.5–7.5 / −X | +0.12 | 0.06 |
+
+**Solver (DT-2).**
+- *Stock:* today's `Solve`, unchanged.
+- *Moving types:* shooting on (yaw, elevation).
+  - Start from the no-movement solution.
+  - Integrate gravity plus `Acceleration` with the same semi-implicit Euler step as PhysX (v += a·dt, then x += v·dt), until the ball's lowest point.
+  - Correct yaw by the lateral miss over the distance, and elevation by the existing bisection on range.
+  - Stop at < 1 mm, at most 20 outer iterations.
+  - T (needed by swing) comes from the current iterate, so the converged plan is self-consistent.
+- *Arrival line (D-1):* the same, then continue through `TurnAtBounce` with the measured pitch restitution to z = 1.22 m and correct yaw on the arrival miss (tolerance about 3 cm).
+- *Unreachable:* rejected with the reason (speed too low for the length, or too much movement to reach the line).
+
+**Bounce measurement (DT-3, T070).**
+- Cause: PhysX's default contact offset is 0.01 m, so `OnCollisionEnter` reports the first bounce while the ball is still about 1 cm above the pitch. On a ball descending at about 10° that is about 6 cm early.
+- `BallController` reports the first bounce at the ball's lowest point: the step where v_y changes from negative to positive, interpolated in position.
+- `OnCollisionEnter` still marks the event for the delivery logic.
+- The machine's bounce error uses this point.
+- The physics, the pitch material and the launch velocities are unchanged.
+
+**Visual ball (DT-9, DT-10, D-3, D-4).**
+- The physics sphere keeps its collider and Rigidbody (its rotation unused). `BallVisual` is a child mesh with a generated seam texture, rotated by `BallFlight` at the visual rate about the type's display axis:
+  - **pace:** backspin about the axis ⟂ to the seam plane, with the seam upright and angled toward fine leg (inswing) or slip (outswing);
+  - **spin:** about the stock ball's axis (deceptive) or the true axis (honest), switching to the true axis at the bounce.
+- The rate is at most 25° per frame (real 20–30 rev/s would strobe at 72 Hz).
+
+**Contact and after.** No change to the swept contact or the response; they read the ball's velocity, which already includes any movement. Incoming spin has no effect on the shot in v1 (D-5). The M9 scorer and the M10 simulated path are unaffected.
+
+**Plans and UI.** `DeliveryPlanSettings` gains a `typeMix` (type → weight).
+- **Net Practice mixes:** All (equal weights over the seven types); Pace (Stock, In, Out); Spin (Off, Leg, Doosra, Googly); One type; Variations (60% stock spin, 40% doosra/googly).
+- **Match difficulty mixes:** Easy: Stock 80%, In/Out 10% each. Medium: Stock 40%, In/Out 20% each, Off/Leg 10% each. Hard: In/Out 25% each, Off/Leg 15% each, Doosra/Googly 10% each.
+- **Scenarios (M10)** may set "spinner" or "pace" for an over, which restricts the mix to that style.
+- **Reveal:** Net Practice shows the type after the ball (before, optionally). Match Simulation shows it after the ball only.
+
+**Testing.** As AC-25..AC-31. The PlayMode type tests use the shipped `DeliveryType` assets and pitch material, so re-tuning them is caught.
+
 ## Requirement traceability
 
 | Requirement | Plan sections | Tasks | Acceptance |
@@ -511,7 +607,7 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | REQ-025 | §16 | T050 | AC-15 |
 | REQ-026 | §16 | T047, T051 | AC-07, AC-08 |
 | REQ-027 | §16, §17 | T048, T053 | AC-16 |
-| REQ-028 | §16 | T049, T065 | AC-16 |
+| REQ-028 | §16, §19 | T049, T065, T071 | AC-16 |
 | REQ-029 | §17 | T053, T054, T056 | AC-17 |
 | REQ-030 | §17 | T055 | AC-17 |
 | REQ-031 | §17 | T056 | AC-18 |
@@ -523,12 +619,27 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | REQ-037 | §16 | T063 | AC-23 |
 | REQ-038 | §18 | T064 | AC-23 |
 | REQ-039 | §13, §15 | T068 | AC-24 |
+| REQ-040 | §19 | T071, T072 | AC-25 |
+| REQ-041 | §19 | T071 | AC-25 |
+| REQ-042 | §19 | T073–T076 | AC-26, AC-29 |
+| REQ-043 | §19 | T077, T078, T082 | AC-27 |
+| REQ-044 | §9, §19 | T070, T073, T074, T077–T079 | AC-26, AC-27, AC-29 |
+| REQ-045 | §19 | T070, T072 | AC-25 |
+| REQ-046 | §19 | T074, T080, T082 | AC-28 |
+| REQ-047 | §19 | T071, T073, T078 | AC-26, AC-27 |
+| REQ-048 | §19 | T072a | AC-31 |
 
 ## Open owner decisions
 
 1. ~~Zone geometry and boundary-exit rule (§6)~~: accepted by the owner 2026-10-24 (PC-01).
 2. ~~Unity 6 LTS patch version~~: resolved 2026-10-23, 6000.3.27f1 (see decisions log).
 3. **Default delivery length.** The proposal is a bounce 6 m from the stumps at 80 km/h. It gets confirmed after M4 measurement, with slower deliveries used for early M5 batting.
+
+4. **Delivery types, open (M7.5, `proposals/delivery-types.md` §7):**
+   1. Incoming spin effect on the shot (D-5), v2 after M8 calibration.
+   2. Seam movement for pace (D-2), revisit after the headset test.
+   3. "Flighted" spin (the solver's higher, loopier root) as an option for slower, loopier deliveries, if the flat trajectories feel machine-like.
+   4. Reverse swing (late inswing of an old ball) as a later variation of the swing types: it needs only different settings.
 
 ## Decisions log
 
@@ -565,3 +676,6 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | 2026-10-26 | M7 as built: near panel (menu, pause, end, bat setup) 0.75 m in front of the stance with the bat visible; right Near-Far ray only while it is open; all other XRI interactors off; XRUIInputModule; SessionManager drives the pure SessionStateMachine; net-zone runs removed from code (Hit / Miss / Bowled) | Bat-tap fallback needs the bat and a reachable panel; REQ-009 amended | REQ-021, REQ-025, REQ-026, REQ-009 |
 | 2026-10-26 | Ready press: in both modes every ball waits for the batter to tap B (AwaitingReady phase); bowled straight after the press (readyDelay 0 s); pressing B while the last result is shown skips the wait; resume after a pause waits for B; automatic countdowns kept as SessionTimings.waitForReady = false | Owner, after M7 headset use: "before it was coming on the press of button B ... as a batsman I want that control" | REQ-011, REQ-014, REQ-026 |
 | 2026-10-27 | GroundMode: a hit ball's result is decided once the 1.5 s played-on window after contact passes (DeliveryEnd.HitWindowElapsed); the ball stays visible up to 5 s; crossing the rope can only bring the hiding forward. Interim until M10 (simulated path) | Owner: in ground mode B waited until a hit ball stopped ("it takes some time after which B button works"); the window equals the M10 played-on window | REQ-011, REQ-021 |
+| 2026-10-27 | Delivery Types module (M7.5): seven types from one `DeliveryRequest` path; Stock unchanged; movement-aware solver for other types; turn applied in the step after the physical bounce; D-1..D-5 as recommended (bounce line default, no pace seam movement in v1, deceptive seam by default, 4 / 3 rev/s visual spin, no incoming-spin effect in v1); ±15% seeded natural variation; pace capped at 120 km/h until AC-29 passes at 140 | Owner request (proposals/delivery-types.md, accepted with changes); overrides the CLAUDE.md §2/§9 deferral of swing/seam/spin | REQ-028, REQ-040..048 |
+| 2026-10-27 | The bounce is measured at the ball's lowest point, not at the PhysX contact report | The 0.01 m contact offset reported the bounce ~1 cm above the pitch, ~6 cm early on a 10° descent; measurement only, physics unchanged | REQ-005, REQ-044 |
+| 2026-10-27 | M7.5 branches from `m7-session` and is rebased onto `main` after M7 merges; no merge into `main` before the owner's M7 re-check | Owner instruction: start M7.5 without waiting for the M7 re-check | All M7.5 tasks |

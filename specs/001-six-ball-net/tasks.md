@@ -1,6 +1,6 @@
 # Implementation tasks
 
-Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 complete (AC-11 to AC-14 passed on Quest; merged into `main`). Re-planned 2026-10-26 into two modes: M7 session framework and start menu, M8 Net Practice, M9 virtual-field scorer, M10 Match Simulation, M11 polish (T047–T069; old T025–T032 retired). This is a task specification, not evidence of a built game.
+Status: M1 implemented, AC-01 partial (left controller hardware). M2 complete (AC-02 passed). M3 complete for the right controller (AC-03 pass; left hand pending hardware). M4 complete (AC-04 passed on Quest). M5 complete (AC-05 passed on Quest, right controller). M6 complete (AC-06 passed on Quest in NetMode). M6.5 complete (AC-11 to AC-14 passed on Quest; merged into `main`). Re-planned 2026-10-26 into two modes: M7 session framework and start menu, M8 Net Practice, M9 virtual-field scorer, M10 Match Simulation, M11 polish (T047–T069; old T025–T032 retired). M7.5 delivery types added 2026-10-27 between M7 and M8 (T070–T083, plus T072a), on branch `m7.5-delivery` from `m7-session`. This is a task specification, not evidence of a built game.
 
 Use `[ ]` for incomplete and `[x]` only for the named completed work. Keep device acceptance pending in `validation.md` when unavailable. Dependencies apply in the order shown. Automated preparatory work may continue while waiting for a physical check, but do not represent untested prerequisites as accepted.
 
@@ -110,6 +110,31 @@ Dependency: M6.5 complete and merged. Requirements: REQ-008, REQ-011..014, REQ-0
 - [ ] T051 *(code done, E-036; headset AC-07 passed, E-050; AC-08/09 pending owner confirmation)* Wire both modes to the framework with interim results (Net: hit/miss/bowled; Ground: pending), the per-ball panel, the end screen, Play again / Menu / New scenario, and pause/resume. *(headset: AC-07, AC-08, AC-09)*
 - [x] T052 Retire net-zone runs from the player-facing game (plan.md §16, proposal §7). Rewrite the run assertions in DeliveryAdjudicatorTests and ScoringPlayModeTests to zones and outcomes; keep every finalization test. No test left failing.
 
+## M7.5 — Delivery types
+
+Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main` once M7 passes and is merged, and nothing merges into `main` before the owner's M7 re-check. Requirements: REQ-040..048 (plus REQ-028 amended). Acceptance: AC-25..AC-31. Decision record: `proposals/delivery-types.md`. Every task ends with all automated tests passing; stop and tell the owner before any headset task.
+
+### Phase 0 — Foundation
+- [ ] T070 Bounce measured at the ball's lowest point (DT-3), as a measurement change only (physics, materials and launches unchanged). Re-run the Stock calibration tests and record the before/after accuracy per preset in validation.md, with the reason the old ~6 cm changed. Tighten the Stock tolerance to about 1 cm only if every preset passes it; otherwise record the measured accuracy and keep the tolerance.
+- [ ] T071 `DeliveryTypeData` / `DeliveryType` assets (seven types, starting values), `DeliveryRequest` (Stock ↔ `DeliveryConfig`, `ForBatter` mirroring), and plans with a type mix (existing plans Stock-only). EditMode tests: asset value ranges, exact mirror symmetry, Stock request = existing config.
+- [ ] T072 Record and CSV columns (type, movement, predicted/measured curve, turn, arrival line, measured bounce and error, variation factors). Round-trip test.
+- [ ] T072a Natural variation (REQ-048): seeded per-ball factors on swing, drift and turn (default ±15%), recorded; the solver applies them before solving. Tests (AC-31): same seed same ball; bounds over 1,000 seeds; 0 = nominal. Every other type test uses variation 0.
+
+### Phase A — Swing
+- [ ] T073 `DeliveryFlightModel.Acceleration` (swing) and the movement-aware solver (yaw + elevation). EditMode tests: determinism, direction per type and hand, simulated bounce within 1 mm, unreachable rejection.
+- [ ] T074 `BallFlight` runtime (forces before the bounce) and seam-up visual for pace. PlayMode: 10 runs × in/out × 115/125/140 km/h (140 only behind the cap test): curve in range, bounce within the Stock tolerance.
+- [ ] T075 AC-04 re-run at 100/120/140 km/h; extend the AC-05 contact matrix to 39 m/s with swinging balls (AC-29). Raise the pace cap only if both pass. If either fails at 140 km/h: keep 120 km/h, scale the swing targets down for 115–120 km/h, keep the tests as written, and report the result to the owner.
+- [ ] T076 Headset: AC-26 (see the swing, both directions).
+
+### Phase B — Spin
+- [ ] T077 Drift and dip in the flight model and solver. Tests: drift opposite to turn; googly dips most; spin speeds 75–95 km/h reach lengths 3–9 m.
+- [ ] T078 Turn at the physical bounce (`TurnAtBounce`, bounce factor, grip), applied in the step after v_y > 0. PlayMode: 10 runs × 4 spin types × both hands: turn in range, direction correct, bounce point unchanged by the turn, googly bounces higher than leg-spin.
+- [ ] T079 Arrival-line requests (D-1). Test: crease line within about 3 cm for every type.
+- [ ] T080 Spin visual: seam texture, readable rate (≤ 25°/frame), deceptive/honest seam (D-3). Test: rate limit; the variation's display axis equals its stock ball's axis until the bounce.
+- [ ] T081 Contact matrix with spinning balls (AC-29); performance check with the ball visual (AC-30).
+- [ ] T082 Headset: AC-27 and AC-28 (off-spin vs leg-spin, deception, no strobing, 72 Hz).
+- [ ] T083 Calibration: tune the plan.md §17 type rows from the CSV and the owner's feedback; record before/after values.
+
 ## M8 — Net Practice with Shot Confidence
 
 Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended), AC-17, AC-18.
@@ -117,7 +142,7 @@ Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended)
 - [ ] T053 Swing-peak timestamp in BatController; per-contact swing data (v_peak, t_peak, Δt, reset age) in the contact report and the CSV for every contacted ball. *(Completes AC-16's swing-timing columns, deferred from M7 by the owner on 2026-10-27.)*
 - [ ] T054 `ShotConfidence` and `ConfidenceSettings` (every plan.md §17 calibration setting, including the ±60 ms timing window). EditMode tests per component, edge cap, defensive renormalisation, labels.
 - [ ] T055 Leave / played-and-missed classification with the 0.20 m and 3 m/s thresholds as settings. Tests with recorded gap and bat-speed traces.
-- [ ] T056 Overs selection, per-ball confidence panel with breakdown, and the session summary (averages, best/worst, counts, per-over trend). Test: summary = values recomputed from records.
+- [ ] T056 Overs selection, per-ball confidence panel with breakdown, and the session summary (averages, best/worst, counts, per-over trend). Test: summary = values recomputed from records. *(Amended 2026-10-27, M7.5: delivery-mix menu option, type reveal after the ball (optionally before), and confidence by type in the summary.)*
 - [ ] T057 Headset: the AC-17 shot set and AC-18; collect the first calibration CSV; tune the confidence rows of the plan.md §17 table and record before/after values.
 
 ## M9 — Virtual-field scorer
@@ -136,7 +161,7 @@ Dependency: M9. Requirements: REQ-010 (amended), REQ-012, REQ-036..038. Acceptan
 - [ ] T062 Scenario presets and the seeded random generator (RR 6–15, 6–36 balls, 1–5 wickets). Tests: bounds over 1,000 draws; same seed, same scenario.
 - [ ] T063 Chase state and scoreboard (runs needed, balls left, wickets left, required rate while balls remain); win/loss exactly once; D-1/D-2 rules; Shot Confidence as a secondary line (D-4). Tests for every end path.
 - [ ] T064 Simulated ball path: kinematic playback from the exact contact position and exit velocity (no jump or speed change), ending at the catch, rope or intercept; "Simulated carry" labels; landing / fielded / caught / boundary sounds alongside the existing bat sounds. PlayMode test: the visible ball and the scored path have the same first landing point and end position (within 2 cm) and no discontinuity at contact.
-- [ ] T065 Difficulty presets wired to the delivery plans (Hard ≤ 120 km/h until an AC-04 re-run covers 100–120 km/h).
+- [ ] T065 Difficulty presets wired to the delivery plans (Hard ≤ 120 km/h until an AC-04 re-run covers 100–120 km/h). *(Amended 2026-10-27, M7.5: difficulty delivery mixes and per-over bowler style, with T062 scenarios.)*
 - [ ] T066 Headset: AC-23, three scenarios; record each ball and whether the visual matched the result.
 
 ## M11 — Polish and device verification

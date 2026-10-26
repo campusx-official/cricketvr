@@ -34,6 +34,13 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-22 | REQ-036 | Not run | None | M10 scenarios |
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
+| AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
+| AC-26 | REQ-042, REQ-044, REQ-047 | Not run | None | M7.5 T073–T076 |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
+| AC-28 | REQ-046 | Not run | None | M7.5 T080, T082 |
+| AC-29 | REQ-042, REQ-044 | Not run | None | M7.5 T075, T081 |
+| AC-30 | REQ-039 | Not run | None | M7.5 T081 |
+| AC-31 | REQ-048 | Not run | None | M7.5 T072a |
 
 ## Evidence entry template
 
@@ -744,6 +751,14 @@ Use the standard template plus these fields:
 - **Scorer (AC-19..21):** test counts; calibration CSV row count; outcome histogram (dot / 1 / 2 / 3 / 4 / 6 / caught / dropped / played on); carry percentiles; each tuned setting before and after, with the reason.
 - **Chase (AC-23):** scenario seed, target / balls / wickets; the ball-by-ball log; the end condition; per ball, whether the visible ball matched the result and the sounds played; the PlayMode visible-vs-scored test result (landing and end-position differences).
 - **Performance (AC-24):** as AC-14, per mode.
+
+## Delivery-types evidence additions (M7.5, AC-25 to AC-31)
+
+Added 2026-10-27 from `proposals/delivery-types.md`. Planned evidence starts at E-040 (T070 bounce measurement). Use the standard template plus:
+- **Bounce measurement change (T070):** per preset, the old error (contact report) and the new error (lowest point), and whether the Stock tolerance was tightened.
+- **Swing/spin runs:** type, hand, speed, requested length/line/movement; measured bounce and its error; curve (predicted/measured); drift; turn angle; arrival line; the 10-run range.
+- **Headset (AC-26..28):** for each type, whether the movement was seen and its direction; whether off-spin and leg-spin could be told apart; whether the deception held; any strobing.
+- **AC-29:** speeds tested; contact matrix counts per speed and type; the cap decision.
 
 ## M6.5 evidence template (AC-11 to AC-14)
 
