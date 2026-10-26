@@ -35,7 +35,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | Not run | None | M7.5 T073–T076 |
+| AC-26 | REQ-042, REQ-044, REQ-047 | Simulation pass (E-045); PlayMode and headset pending | E-045 | M7.5 T074–T076 |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Not run | None | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | Not run | None | M7.5 T075, T081 |
@@ -792,6 +792,31 @@ Actual result and measured values: DeliveryMovement.For resolves a world-frame r
 Outcome: Pass (automated) for the factors. "Same seed, same path" is checked once there is a path (T073 solver, T074 runtime).
 Log or artifact path: scratchpad test XML
 Remaining limitation / follow-up task: the solver applies the factors before solving in T073
+```
+
+```text
+Check ID / acceptance scenario: E-045 / T073 swing flight model and movement-aware solver (AC-26 automated, simulation only)
+Requirement IDs: REQ-042, REQ-044, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T073: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner (EditMode; pure C# simulation stepped exactly as PhysX at 1/144 s)
+Configuration: Inswinger / Outswinger starting values (curve 0.2-0.6 m, lateness 1.5), variation 0 except the variation test
+Steps or exact command: -runTests EditMode
+Expected result: deterministic; in/out swing toward -X/+X for a right-hander, mirrored for a left-hander; simulated pitch point within 1 mm; unreachable requests rejected, never altered; Stock path unchanged
+Actual result and measured values:
+  - EditMode 133/133 (8 new SwingSolverTests).
+  - 576 solves (2 types x 2 hands x 115/120/125/140 km/h x movement 0/0.5/1 x lengths 2/4/6/8 m x lines -0.1/0/0.3 m): all reachable at the requested speed (to 1e-3 m/s); worst landing miss 0.099 mm; worst curve error 0.49 mm; the plan's T equals the flight's own time. Solve time about 0.2 ms each.
+  - Direction: sideways velocity gained between release and pitch point is toward -X for an inswinger and +X for an outswinger (right-hander), reversed for a left-hander; the ball is aimed wide first and curves in.
+  - Left-hand solution is the exact mirror (velocity x, pitch point x negated; curve equal, to 1e-4).
+  - Natural variation 0.15 applied before solving: curve = nominal x var_swing (1 mm) and the ball still pitches where requested (1 mm), 20 seeds.
+  - Rejections: 30 km/h ("needs at least ..."), an 8 m curve (no aim). Stock requests return the unchanged Stock solve (identical velocity).
+  - Closed-form swing acceleration checked against a direct integration for lateness 0, 1, 1.5, 2 (2 mm).
+  - Size of the movement (for the open decision): at lateness 1.5, curve 0.2 / 0.4 / 0.6 m gives a heading change of 7.2-7.3 / 14.3-14.6 / 21.3-21.7 deg, a distance from the launch line of 0.46 / 0.92 / 1.38 m, and peak sideways acceleration 25-36 / 49-72 / 73-108 m/s^2 (115-140 km/h). Largest over the 576 solves: 150 m/s^2 (15 g), 26 deg.
+  - Correction to the plan: the proposal's A = D(p+1)(p+2)/T^2 sets the distance from the launch line, not the curve; implemented the curve as DT-13 defines it.
+Outcome: Pass (automated, simulation). Not yet run in PhysX (T074) or seen in the headset (T076).
+Log or artifact path: scratchpad edit.log
+Remaining limitation / follow-up task: owner decision on the swing size definition (plan.md open decision 4) before T076; the machine still rejects moving types until T074
 ```
 
 ```text

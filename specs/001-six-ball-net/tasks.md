@@ -121,7 +121,7 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 - [x] T072a *(done, E-044; the solver applies the factors from T073)* Natural variation (REQ-048): seeded per-ball factors on swing, drift and turn (default ±15%), recorded; the solver applies them before solving. Tests (AC-31): same seed same ball; bounds over 1,000 seeds; 0 = nominal. Every other type test uses variation 0.
 
 ### Phase A — Swing
-- [ ] T073 `DeliveryFlightModel.Acceleration` (swing) and the movement-aware solver (yaw + elevation). EditMode tests: determinism, direction per type and hand, simulated bounce within 1 mm, unreachable rejection.
+- [x] T073 *(done, E-045; swing size definition open, plan.md open decision 4)* `DeliveryFlightModel.Acceleration` (swing) and the movement-aware solver (yaw + elevation). EditMode tests: determinism, direction per type and hand, simulated bounce within 1 mm, unreachable rejection.
 - [ ] T074 `BallFlight` runtime (forces before the bounce) and seam-up visual for pace. PlayMode: 10 runs × in/out × 115/125/140 km/h (140 only behind the cap test): curve in range, bounce within the Stock tolerance.
 - [ ] T075 AC-04 re-run at 100/120/140 km/h; extend the AC-05 contact matrix to 39 m/s with swinging balls (AC-29). Raise the pace cap only if both pass. If either fails at 140 km/h: keep 120 km/h, scale the swing targets down for 115–120 km/h, keep the tests as written, and report the result to the owner.
 - [ ] T076 Headset: AC-26 (see the swing, both directions).

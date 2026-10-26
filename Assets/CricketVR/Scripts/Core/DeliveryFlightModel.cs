@@ -69,4 +69,65 @@ namespace CricketVR
             return new Vector3(swing, drift, turn);
         }
     }
+
+    /// <summary>
+    /// What the flight applies before the bounce, as solved for one ball: swing acceleration A along the side
+    /// direction, growing as (t/T)^p. Solved by <see cref="DeliverySolver"/>; the runtime flight applies exactly this.
+    /// </summary>
+    public struct FlightPlan
+    {
+        /// <summary>-1 = toward −X, +1 = toward +X, 0 = no swing (world).</summary>
+        public int SwingDirection;
+        /// <summary>Swing acceleration at t = T (m/s²).</summary>
+        public float SwingAcceleration;
+        public float SwingLateness;
+        /// <summary>The solver's planned time from release to the pitch point (s).</summary>
+        public float PlannedTime;
+
+        public bool IsStill => SwingDirection == 0 || SwingAcceleration == 0f;
+    }
+
+    /// <summary>
+    /// Pure delivery-type flight model (plan.md §19), used identically by the solver and by the runtime flight.
+    /// Arcade-believable movement, not aerodynamics: explicit accelerations, no drag.
+    /// </summary>
+    public static class DeliveryFlightModel
+    {
+        /// <summary>
+        /// Extra acceleration (m/s², world, excluding gravity) for the step starting at time <paramref name="t"/>
+        /// after release, from the velocity at the start of that step. Swing acts sideways: perpendicular to the
+        /// horizontal velocity, on the side of the swing direction.
+        /// </summary>
+        public static Vector3 Acceleration(float t, Vector3 velocity, in FlightPlan plan)
+        {
+            if (plan.IsStill || !(plan.PlannedTime > 0f))
+                return Vector3.zero;
+            var side = new Vector3(-velocity.z, 0f, velocity.x);
+            float length = side.magnitude;
+            if (length < 1e-6f)
+                return Vector3.zero;
+            side /= length;
+            if (side.x * plan.SwingDirection < 0f)
+                side = -side;
+            float u = Mathf.Max(0f, t / plan.PlannedTime);
+            float growth = plan.SwingLateness > 0f ? Mathf.Pow(u, plan.SwingLateness) : 1f;
+            return side * (plan.SwingAcceleration * growth);
+        }
+
+        /// <summary>
+        /// Swing acceleration A that curves a ball of flight time T by <paramref name="curve"/> (m), the largest
+        /// sideways distance from the straight release-to-bounce line (DT-13). With a = A (t/T)^p and both ends on the
+        /// line, the deviation peaks at u* = (p + 2)^(−1/(p+1)) and equals A T² (u* − u*^(p+2)) / ((p+1)(p+2)).
+        /// Small-angle result; the solver corrects the remainder so the simulated curve matches.
+        /// </summary>
+        public static float SwingAccelerationFor(float curve, float flightTime, float lateness)
+        {
+            if (!(curve > 0f) || !(flightTime > 0f))
+                return 0f;
+            float p = Mathf.Max(0f, lateness);
+            float u = Mathf.Pow(p + 2f, -1f / (p + 1f));
+            float k = (u - Mathf.Pow(u, p + 2f)) / ((p + 1f) * (p + 2f));
+            return curve / (flightTime * flightTime * k);
+        }
+    }
 }

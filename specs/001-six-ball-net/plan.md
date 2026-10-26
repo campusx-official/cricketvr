@@ -516,7 +516,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 
 | Effect | Formula | Notes |
 | --- | --- | --- |
-| Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the curve equals D(m) = D_min + m·(D_max − D_min): A = D·(p+1)(p+2)/T². p = 0 uniform, p = 2 late. |
+| Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the curve equals D(m) = D_min + m·(D_max − D_min): A = D / (T²·K(p)), K = (u* − u*^(p+2)) / ((p+1)(p+2)), u* = (p+2)^(−1/(p+1)) (K = 1/8 for p = 0); the solver rescales A so the simulated curve matches exactly. *(Corrected in T073: the proposal's A = D·(p+1)(p+2)/T² makes the distance from the launch line equal D, not the curve.)* p = 0 uniform, p = 2 late. |
 | Drift (spin) | a = −s·τ·d · ŝ, constant before the bounce | τ = turn direction (−1 off-spin/googly, +1 leg-spin/doosra). Drift is opposite to the turn. d gives 0.05–0.15 m of drift by the bounce. |
 | Dip (spin) | a = −k_dip · Ŷ, constant before the bounce | Top-spin dip. The solver compensates with a higher launch, so the ball arrives steeper and bounces higher. |
 | Turn at the bounce | v_h′ = R_Y(s·τ·θ(m)) · v_h · (1 − g_grip); v_y′ = v_y · (1 + b) | θ(m) = θ_min + m·(θ_max − θ_min); b = bounce-height factor; g_grip = speed lost to grip. Applied once, in the step after the physical bounce. |
@@ -544,12 +544,13 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 
 **Solver (DT-2).**
 - *Stock:* today's `Solve`, unchanged.
-- *Moving types:* shooting on (yaw, elevation).
+- *Moving types (as built, T073):* shooting on (yaw, elevation) at the requested speed.
   - Start from the no-movement solution.
-  - Integrate gravity plus `Acceleration` with the same semi-implicit Euler step as PhysX (v += a·dt, then x += v·dt), until the ball's lowest point.
-  - Correct yaw by the lateral miss over the distance, and elevation by the existing bisection on range.
-  - Stop at < 1 mm, at most 20 outer iterations.
-  - T (needed by swing) comes from the current iterate, so the converged plan is self-consistent.
+  - Integrate gravity plus `Acceleration` with the same semi-implicit Euler step as PhysX (v += (g + a)·dt, then x += v·dt; a from the velocity at the step's start), down to the pitch point (crossing of contact height).
+  - Inner loop: Newton steps on (yaw, elevation) from finite differences of the landing point, to < 0.1 mm.
+  - Outer loop: T = that flight's time to the pitch point, and the swing rescaled so the simulated curve equals D (within 0.5 mm). About three outer passes. (Updating swing and aim in one loop oscillated: the curve is measured against the line to the target, so it is only meaningful once the ball lands there.)
+  - Output: launch velocity and a `FlightPlan` (direction, A, p, T) that the runtime applies unchanged.
+  - Rejected with a reason: Stock-unreachable speed, aim more than 0.5 rad off the line ("too much movement"), or no convergence.
 - *Arrival line (D-1):* the same, then continue through `TurnAtBounce` with the measured pitch restitution to z = 1.22 m and correct yaw on the arrival miss (tolerance about 3 cm).
 - *Unreachable:* rejected with the reason (speed too low for the length, or too much movement to reach the line).
 
@@ -635,8 +636,9 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 2. ~~Unity 6 LTS patch version~~: resolved 2026-10-23, 6000.3.27f1 (see decisions log).
 3. **Default delivery length.** The proposal is a bounce 6 m from the stumps at 80 km/h. It gets confirmed after M4 measurement, with slower deliveries used for early M5 batting.
 
-4. **Pitch bounce owner (M7.5, before Phase B):** keep PhysX's bounce (rebound starts up to one step either side of the pitch point; T078/T079 model it) or resolve the bounce in code at the pitch point (exact; changes every ball's post-bounce path by up to ~12 cm; AC-04 headset re-check). See §19 and E-042.
-5. **Delivery types, open (M7.5, `proposals/delivery-types.md` §7):**
+4. **Swing size definition (M7.5, before T076):** DT-13/REQ-042 define the 0.2–0.6 m as the *curve* (largest deviation from the release-to-bounce line). Measured in T073 (E-045) at late swing p = 1.5, 115–140 km/h: curve 0.2 / 0.4 / 0.6 m turns the ball's heading by about 7 / 14 / 22° and puts it 0.46 / 0.92 / 1.38 m off the line it was launched on, with sideways accelerations of 25–108 m/s². Real big swing is about 0.5 m off the launch line. Options: (a) keep the curve definition and lower the range to about 0.05–0.25 m; (b) define swing as the distance from the launch line (how swing is usually quoted, and what the proposal's formula did), keeping 0.2–0.6 m, i.e. a curve of about 0.09–0.26 m; (c) keep as is (deliberately exaggerated arcade swing). Recommendation: (b). Either way it is a setting and test-range change, not a model change.
+5. **Pitch bounce owner (M7.5, before Phase B):** keep PhysX's bounce (rebound starts up to one step either side of the pitch point; T078/T079 model it) or resolve the bounce in code at the pitch point (exact; changes every ball's post-bounce path by up to ~12 cm; AC-04 headset re-check). See §19 and E-042.
+6. **Delivery types, open (M7.5, `proposals/delivery-types.md` §7):**
    1. Incoming spin effect on the shot (D-5), v2 after M8 calibration.
    2. Seam movement for pace (D-2), revisit after the headset test.
    3. "Flighted" spin (the solver's higher, loopier root) as an option for slower, loopier deliveries, if the flat trajectories feel machine-like.
