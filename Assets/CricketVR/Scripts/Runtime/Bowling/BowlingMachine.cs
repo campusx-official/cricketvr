@@ -35,13 +35,13 @@ namespace CricketVR
         void OnEnable()
         {
             if (ball != null)
-                ball.FirstBounce += OnFirstBounce;
+                ball.Pitched += OnPitched;
         }
 
         void OnDisable()
         {
             if (ball != null)
-                ball.FirstBounce -= OnFirstBounce;
+                ball.Pitched -= OnPitched;
         }
 
         void Start()
@@ -96,7 +96,8 @@ namespace CricketVR
             return id;
         }
 
-        void OnFirstBounce(int id, Vector3 point, float flightTime)
+        // Where the ball pitched (T070), not the PhysX contact report, which lands 6-10 cm past it.
+        void OnPitched(int id, Vector3 point, float flightTime)
         {
             if (id != ball.ActiveDeliveryId)
                 return; // stale

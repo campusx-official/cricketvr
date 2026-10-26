@@ -448,7 +448,7 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | Visual spin rate | DeliveryType.visualRevPerSecond | 4 (spin) / 3 (pace) | Owner: reads as spinning the right way, no strobing | AC-28 |
 | Pace speed cap | DeliveryPlanSettings | 120 → 140 km/h | AC-04 re-run and AC-05 matrix extension; on failure stay at 120 and scale the swing targets down | AC-29 |
 | Natural variation | DeliveryTypeData.variation | ±15% | Owner: balls feel varied but each type stays recognisable | AC-31, AC-26/27 |
-| Stock bounce tolerance | AC-04 tests | 10 cm → ~1 cm only if T070 passes | T070 lowest-point measurement over the presets | AC-04, T070 |
+| Stock bounce tolerance | AC-04 tests (`BowlingPlayModeTests.StockTolerance`) | 10 cm → **1 cm** (T070 passed: worst 0.21 cm, E-040) | T070 pitch measurement over the presets | AC-04, T070 |
 
 ## 18. Virtual-field scorer and simulated ball path (M9–M10, T058–T066)
 
@@ -553,12 +553,12 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 - *Arrival line (D-1):* the same, then continue through `TurnAtBounce` with the measured pitch restitution to z = 1.22 m and correct yaw on the arrival miss (tolerance about 3 cm).
 - *Unreachable:* rejected with the reason (speed too low for the length, or too much movement to reach the line).
 
-**Bounce measurement (DT-3, T070).**
-- Cause: PhysX's default contact offset is 0.01 m, so `OnCollisionEnter` reports the first bounce while the ball is still about 1 cm above the pitch. On a ball descending at about 10° that is about 6 cm early.
-- `BallController` reports the first bounce at the ball's lowest point: the step where v_y changes from negative to positive, interpolated in position.
-- `OnCollisionEnter` still marks the event for the delivery logic.
-- The machine's bounce error uses this point.
+**Bounce measurement (DT-3, T070, as built, E-040).**
+- Cause, measured by a step-by-step probe at 144 Hz: the free flight matches the solver exactly (the centre reaches contact height within 0.2 cm of the target), but PhysX does not resolve the pitch contact in that step. The ball ends the step 1.6–2.5 cm inside the pitch, and the rebound velocity is applied in the next step. `OnCollisionEnter`'s contact point lies under the sunk position, 2.2–10.1 cm **past** the touch (one step is 11–19 cm of travel). *The proposal's stated cause (the 0.01 m contact offset making the report early) was wrong; the lowest sample is the sunk one, so measuring it would not have helped.*
+- `BallController` keeps the last few descending samples. Once the ball has touched the ground and its vertical velocity turns upward (or after 4 steps without a rebound), `BounceMeasurement.TouchPoint` interpolates between the last sample above contact height and the next one to where the centre reaches surface + radius. PhysX moves the ball in a straight line within a step, so the interpolation is exact. The surface height is the highest ground contact in that bounce (the outfield top is 2 mm below the pitch top and sometimes reports first).
+- New event `BallController.Pitched(id, point, time)`; the machine's bounce error, marker and readout use it. `FirstBounce` (the contact report) keeps its timing for delivery logic.
 - The physics, the pitch material and the launch velocities are unchanged.
+- **Known limitation for T078/T079:** the rebound starts from the sunk position, so the post-bounce path begins up to one step's travel past the touch point. The turn (applied in the step after v_y > 0) and the arrival-line solver must model the rebound as PhysX produces it (rebound from the lowest sample), not from the touch point.
 
 **Visual ball (DT-9, DT-10, D-3, D-4).**
 - The physics sphere keeps its collider and Rigidbody (its rotation unused). `BallVisual` is a child mesh with a generated seam texture, rotated by `BallFlight` at the visual rate about the type's display axis:
@@ -677,5 +677,5 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | 2026-10-26 | Ready press: in both modes every ball waits for the batter to tap B (AwaitingReady phase); bowled straight after the press (readyDelay 0 s); pressing B while the last result is shown skips the wait; resume after a pause waits for B; automatic countdowns kept as SessionTimings.waitForReady = false | Owner, after M7 headset use: "before it was coming on the press of button B ... as a batsman I want that control" | REQ-011, REQ-014, REQ-026 |
 | 2026-10-27 | GroundMode: a hit ball's result is decided once the 1.5 s played-on window after contact passes (DeliveryEnd.HitWindowElapsed); the ball stays visible up to 5 s; crossing the rope can only bring the hiding forward. Interim until M10 (simulated path) | Owner: in ground mode B waited until a hit ball stopped ("it takes some time after which B button works"); the window equals the M10 played-on window | REQ-011, REQ-021 |
 | 2026-10-27 | Delivery Types module (M7.5): seven types from one `DeliveryRequest` path; Stock unchanged; movement-aware solver for other types; turn applied in the step after the physical bounce; D-1..D-5 as recommended (bounce line default, no pace seam movement in v1, deceptive seam by default, 4 / 3 rev/s visual spin, no incoming-spin effect in v1); ±15% seeded natural variation; pace capped at 120 km/h until AC-29 passes at 140 | Owner request (proposals/delivery-types.md, accepted with changes); overrides the CLAUDE.md §2/§9 deferral of swing/seam/spin | REQ-028, REQ-040..048 |
-| 2026-10-27 | The bounce is measured at the ball's lowest point, not at the PhysX contact report | The 0.01 m contact offset reported the bounce ~1 cm above the pitch, ~6 cm early on a 10° descent; measurement only, physics unchanged | REQ-005, REQ-044 |
+| 2026-10-27 | The bounce is measured where the incoming flight reaches the pitch (interpolated within the step, after the v_y sign change), not at the PhysX contact report; Stock tolerance 10 cm → 1 cm | T070 probe (E-040): PhysX resolves the contact a step late with the ball 1.6–2.5 cm inside the pitch, so the report was 2.2–10.1 cm past the touch (not early, as the proposal assumed); new error ≤ 0.21 cm on every preset; measurement only, physics unchanged | REQ-005, REQ-044 |
 | 2026-10-27 | M7.5 branches from `m7-session` and is rebased onto `main` after M7 merges; no merge into `main` before the owner's M7 re-check | Owner instruction: start M7.5 without waiting for the M7 re-check | All M7.5 tasks |

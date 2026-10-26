@@ -92,5 +92,39 @@ namespace CricketVR.Tests
             Assert.IsFalse(Solve(float.NaN, 0f, 6f).Reachable);
             Assert.IsFalse(Solve(80f, 0f, FieldDimensions.DefaultReleasePoint.z).Reachable, "bounce under the release point");
         }
+
+        // ---------- T070: where the ball pitched ----------
+
+        [Test]
+        public void PitchIsWhereTheIncomingFlightReachesContactHeight()
+        {
+            // Samples from the 80 km/h good-length PlayMode probe: the last one has sunk 1.6 cm into the pitch.
+            var samples = new[] { new Vector3(0f, 0.1057f, 6.2489f), new Vector3(0f, 0.0629f, 6.0946f), new Vector3(0f, 0.0197f, 5.9403f) };
+            var p = BounceMeasurement.TouchPoint(samples, 3, R, out float stepsBefore);
+            Assert.AreEqual(R, p.y, 1e-5f);
+            Assert.AreEqual(5.9985f, p.z, 5e-4f, "crossing of contact height, not the sunk sample (5.940)");
+            Assert.AreEqual(1f - 0.6227f, stepsBefore, 1e-3f);
+        }
+
+        [Test]
+        public void PitchAtTheLowestSampleWhenTheBallNeverSankIn()
+        {
+            var samples = new[] { new Vector3(0.1f, 0.09f, 6.2f), new Vector3(0.1f, 0.04f, 6.0f) };
+            var p = BounceMeasurement.TouchPoint(samples, 2, R, out float stepsBefore);
+            Assert.AreEqual(samples[1], p);
+            Assert.AreEqual(0f, stepsBefore);
+        }
+
+        [Test]
+        public void PitchFindsTheCrossingWhenSunkForSeveralSteps()
+        {
+            var samples = new[] { new Vector3(0f, 0.05f, 6.3f), new Vector3(0f, 0.03f, 6.1f), new Vector3(0f, 0.01f, 5.9f) };
+            var p = BounceMeasurement.TouchPoint(samples, 3, R, out float stepsBefore);
+            Assert.AreEqual(6.3f - 0.2f * (0.014f / 0.02f), p.z, 1e-4f);
+            Assert.AreEqual(2f - 0.7f, stepsBefore, 1e-4f);
+            p = BounceMeasurement.TouchPoint(new[] { new Vector3(0f, 0.02f, 6f), new Vector3(0f, 0.01f, 5.8f) }, 2, R, out stepsBefore);
+            Assert.AreEqual(6f, p.z, "all below contact height: oldest sample");
+            Assert.AreEqual(1f, stepsBefore);
+        }
     }
 }

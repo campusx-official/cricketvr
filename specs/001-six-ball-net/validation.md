@@ -13,7 +13,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-01 | REQ-001 | Partial: 4/5 owner checks pass; left controller not working (cause not isolated) | APK sha256 2076861…a47fe; E-001–E-004 | Owner: test left controller in Quest Home, then in CricketVR |
 | AC-02 | REQ-002, REQ-015 | **Pass** | APK sha256 f35ebef…f8192; E-005, E-006 | Re-check if the stance, net or scoreboard moves (M3/M7) |
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
-| AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
+| AC-04 | REQ-004, REQ-005 | **Pass on Quest**; automated tolerance tightened to 1 cm with the T070 pitch measurement (E-040) | APK sha256 b8f7d8d…9ace3; E-015–E-019, E-040 | Re-check if physics rate or pitch material changes; re-run at 100/120/140 km/h in T075 |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
 | AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
@@ -694,6 +694,36 @@ Remaining limitation / follow-up task: the rest of the M7 re-check (AC-07, AC-08
 ```
 
 ```text
+Check ID / acceptance scenario: E-040 / T070 bounce measured where the ball pitched (AC-04 Stock calibration re-run; REQ-044 tolerance)
+Requirement IDs: REQ-004, REQ-005, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T070: ..."); no APK (measurement change only)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner (EditMode, PlayMode, real PhysX at 144 Hz with the shipped PitchSurface material)
+Configuration: GameConfig debug presets (80 km/h good/full/short/outside off, 100 km/h quick, 60 km/h slow); default release point; ball radius 0.036 m; contact offset 0.01 m (ball and ground, Unity default)
+Steps or exact command: a throwaway probe test logged the ball's position and velocity after every physics step around the bounce (deleted after use); then -runTests EditMode and PlayMode with the new measurement
+Expected result: physics, pitch material and launches unchanged; new error per preset recorded next to the old; tolerance tightened to about 1 cm only if every preset passes
+Actual result and measured values:
+  - Probe (80 km/h, good length): the centre crosses contact height (y = 0.036) between steps 82 and 83 at z = 5.9985 (target 6.000; solver predicted 5.9984). Step 83 ends at y = 0.0197, 1.6 cm inside the pitch, still descending (v_y -6.22). The rebound velocity (v_y +4.53) appears in step 84. OnCollisionEnter reports z = 5.9403, the position of the sunk step. Other presets sink 0.8-2.5 cm.
+  - Reason the old figure changed: the old measurement was the contact report, which sits under the ball's sunk position after a contact PhysX resolves one step late, so it read 2.2-10.1 cm PAST the touch (more at higher speed: one step = 11-19 cm of travel). The proposal's explanation (0.01 m contact offset making the report early) was wrong, and the sampled lowest point is the sunk sample, so "lowest point" alone would not have changed the error. New measurement: where the incoming flight reaches contact height, interpolated within the step, taken once v_y turns upward.
+  - Per preset, old (contact report) -> new (pitch point) error to the requested bounce:
+      Full 80 km/h 3.5 m: 2.64 -> 0.09 cm
+      Good length 80 km/h 6 m: 5.97 -> 0.16 cm
+      Outside off 80 km/h +0.25 m, 6 m: 5.73 -> 0.16 cm
+      Quick 100 km/h 6.5 m: 10.07 -> 0.21 cm
+      Short 80 km/h 9 m: 8.35 -> 0.21 cm
+      Slow 60 km/h 5 m: 2.20 -> 0.00 cm
+    The remaining 0.1-0.2 cm is the solver's 5 mm bisection tolerance.
+  - AC-04 ten identical deliveries: spread 0.00 cm, max error 0.16 cm. Length/line test: 3.499 / 5.998 / 8.998 m, line 0.250 m.
+  - Ground rig (outfield 2 mm below the pitch): first run showed a 0.71-0.72 cm shift with the outfield on 3 presets, because the outfield pair sometimes reported first and set the surface 2 mm low (2 mm / tan 15.6 deg = 0.72 cm). Fixed by using the highest ground surface touched in the bounce; then shift 0.00 cm and error 0.0-0.2 cm on all 6 presets.
+  - Tolerance: every preset passes 1 cm, so the Stock tolerance was tightened from 10 cm to 1 cm (AC-04 max error, length/line, new StockPresetsPitchOnTheRequestedPoint, ground calibration absolute error). Line tolerance 5 cm -> 1 cm.
+  - Tests: EditMode 111/111 (3 new: interpolation on the probe's real samples, no-sink case, multi-step sink). PlayMode 45/45 (1 new: StockPresetsPitchOnTheRequestedPoint; each preset also asserts the new error is below the old). All earlier tests unchanged except the tolerances above.
+Outcome: Pass (automated). Physics, pitch material and launch velocities unchanged (no change to DeliverySolver, materials or the ball's Rigidbody setup).
+Log or artifact path: scratchpad play.log / play.xml (not committed)
+Remaining limitation / follow-up task: (1) PhysX still lets the ball sink 0.8-2.5 cm into the pitch for one step and starts the rebound from there, up to one step past the touch; T078 (turn at the bounce) and T079 (arrival line) must model the rebound as PhysX produces it. (2) Device check not needed for a measurement change; the next AC-04 headset re-check (T075) uses the new readout.
+```
+
+```text
 Check ID / acceptance scenario: E-050 / M7 headset re-check: AC-07 complete session, E-037 B-press control, E-038 ground-mode timing; AC-16 device CSV
 Requirement IDs: REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-026, REQ-027
 Date and tester: 2026-10-27 09:52-09:55, owner (headset); agent (install over adb, CSV pull and analysis)
@@ -755,7 +785,7 @@ Use the standard template plus these fields:
 ## Delivery-types evidence additions (M7.5, AC-25 to AC-31)
 
 Added 2026-10-27 from `proposals/delivery-types.md`. Planned evidence starts at E-040 (T070 bounce measurement). Use the standard template plus:
-- **Bounce measurement change (T070):** per preset, the old error (contact report) and the new error (lowest point), and whether the Stock tolerance was tightened.
+- **Bounce measurement change (T070):** per preset, the old error (contact report) and the new error (pitch point), and whether the Stock tolerance was tightened.
 - **Swing/spin runs:** type, hand, speed, requested length/line/movement; measured bounce and its error; curve (predicted/measured); drift; turn angle; arrival line; the 10-run range.
 - **Headset (AC-26..28):** for each type, whether the movement was seen and its direction; whether off-spin and leg-spin could be told apart; whether the deception held; any strobing.
 - **AC-29:** speeds tested; contact matrix counts per speed and type; the cap decision.

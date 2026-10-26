@@ -19,13 +19,21 @@ namespace CricketVR.Tests
         PhysicsMaterial _pitchMaterial;
         float _timeScale;
 
+        /// <summary>Where each ball pitched (T070 measurement).</summary>
         readonly List<(int id, Vector3 point)> _bounces = new List<(int, Vector3)>();
+        /// <summary>The PhysX first-contact report (the measurement before T070), kept for comparison.</summary>
+        readonly List<(int id, Vector3 point)> _contacts = new List<(int, Vector3)>();
+
+        /// <summary>Stock bounce accuracy, measured where the ball pitched: 10 cm before T070, tightened to 1 cm once
+        /// every preset passed it (worst 0.21 cm, E-040).</summary>
+        public const float StockTolerance = 0.01f;
         readonly List<(int id, BallEndReason reason)> _ends = new List<(int, BallEndReason)>();
 
         [SetUp]
         public void SetUp()
         {
             _bounces.Clear(); // NUnit reuses the fixture instance across tests
+            _contacts.Clear();
             _ends.Clear();
             _timeScale = Time.timeScale;
             Time.timeScale = 5f;
@@ -64,7 +72,8 @@ namespace CricketVR.Tests
 
             ballGo.SetActive(true);
             machineGo.SetActive(true);
-            _ball.FirstBounce += (id, p, t) => _bounces.Add((id, p));
+            _ball.Pitched += (id, p, t) => _bounces.Add((id, p));
+            _ball.FirstBounce += (id, p, t) => _contacts.Add((id, p));
             _ball.DeliveryEnded += (id, r) => _ends.Add((id, r));
         }
 
@@ -106,7 +115,7 @@ namespace CricketVR.Tests
             }
             Debug.Log($"[CricketVR] AC-04 PlayMode: 10 deliveries {delivery}; max spread from first {maxSpread * 100f:F2} cm, max error from target {maxError * 100f:F2} cm");
             Assert.LessOrEqual(maxSpread, 0.25f, "AC-04: within 0.25 m of the first bounce");
-            Assert.LessOrEqual(maxError, 0.10f, "bounce should land near the requested point");
+            Assert.LessOrEqual(maxError, StockTolerance, "bounce should land near the requested point");
         }
 
         [UnityTest]
@@ -120,9 +129,37 @@ namespace CricketVR.Tests
             for (int i = 0; i < _bounces.Count; i++)
                 Debug.Log($"[CricketVR] Length/line test bounce {i}: ({_bounces[i].point.x:F3}, {_bounces[i].point.y:F3}, {_bounces[i].point.z:F3})");
             for (int i = 0; i < lengths.Length; i++)
-                Assert.AreEqual(lengths[i], _bounces[i].point.z, 0.10f, $"length {lengths[i]}");
-            Assert.AreEqual(0.25f, _bounces[3].point.x, 0.05f, "line");
+                Assert.AreEqual(lengths[i], _bounces[i].point.z, StockTolerance, $"length {lengths[i]}");
+            Assert.AreEqual(0.25f, _bounces[3].point.x, Mathf.Min(0.05f, StockTolerance), "line");
         }
+
+        /// <summary>
+        /// T070 Stock calibration: every reachable debug preset, where it pitched vs the requested point, logged next
+        /// to the old measurement (the PhysX contact report) for validation.md.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator StockPresetsPitchOnTheRequestedPoint()
+        {
+            float worst = 0f;
+            foreach (var delivery in _config.delivery.debugPresets)
+            {
+                if (delivery.speedKmh < 40f) continue; // the deliberately unreachable preset
+                yield return BowlAndWaitForBounce(delivery);
+                int id = _bounces[_bounces.Count - 1].id;
+                var pitched = _bounces[_bounces.Count - 1].point;
+                var contact = _contacts.Find(c => c.id == id).point;
+                float error = Error(pitched, delivery), oldError = Error(contact, delivery);
+                worst = Mathf.Max(worst, error);
+                Debug.Log($"[CricketVR] T070 {delivery}: pitched ({pitched.x:F4}, {pitched.y:F4}, {pitched.z:F4}) error {error * 100f:F2} cm; " +
+                          $"contact report ({contact.x:F4}, {contact.z:F4}) error {oldError * 100f:F2} cm");
+                Assert.LessOrEqual(error, StockTolerance, delivery.label);
+                Assert.Less(error, oldError, $"{delivery.label}: the pitch point should be nearer the request than the contact report");
+            }
+            Debug.Log($"[CricketVR] T070 worst Stock pitch error {worst * 100f:F2} cm");
+        }
+
+        static float Error(Vector3 p, DeliveryConfig d) =>
+            Vector2.Distance(new Vector2(p.x, p.z), new Vector2(d.line, d.length));
 
         [UnityTest]
         public IEnumerator ReleaseSpeedMatchesRequestedKmh()

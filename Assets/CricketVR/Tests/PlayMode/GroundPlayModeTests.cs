@@ -205,8 +205,8 @@ namespace CricketVR.Tests
 
         /// <summary>
         /// The outfield must not move the delivery bounce. Each preset is bowled with the outfield collider off, then
-        /// on; the bounce points must agree within 1 cm. (The absolute error to the target, about 6 cm on the
-        /// default delivery since M4, is PhysX contact timing and stays covered by the AC-04 tests' 10 cm limit.)
+        /// on; the bounce points must agree within 1 cm, and each must pitch within the Stock tolerance of its target
+        /// (measured where the ball pitched since T070; the old contact report was 2.2-10.1 cm past it).
         /// </summary>
         [UnityTest]
         public IEnumerator OutfieldDoesNotMoveTheDeliveryBounce()
@@ -230,6 +230,7 @@ namespace CricketVR.Tests
                 float shift = Vector2.Distance(new Vector2(points[0].x, points[0].z), new Vector2(points[1].x, points[1].z));
                 Debug.Log($"[CricketVR] M6.5 calibration {delivery.label}: bounce {points[1].z:F3} m, shift with outfield {shift * 100f:F2} cm, error {_bounces[_bounces.Count - 1].error * 100f:F1} cm");
                 Assert.Less(shift, 0.01f, $"{delivery.label}: the outfield moved the bounce by {shift * 100f:F2} cm");
+                Assert.LessOrEqual(_bounces[_bounces.Count - 1].error, BowlingPlayModeTests.StockTolerance, $"{delivery.label} error to target");
             }
         }
 
