@@ -40,7 +40,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-28 | REQ-046 | Not run | None | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | Not run | None | M7.5 T075, T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
-| AC-31 | REQ-048 | Not run | None | M7.5 T072a |
+| AC-31 | REQ-048 | Automated pass for the factors (E-044); path determinism in T073/T074 | E-044 | M7.5 T073/T074 |
 
 ## Evidence entry template
 
@@ -776,6 +776,22 @@ Actual result and measured values: new columns type, movement, hand, line_ref, b
 Outcome: Pass (automated)
 Log or artifact path: scratchpad test XML
 Remaining limitation / follow-up task: device CSV with the new columns comes with the next APK
+```
+
+```text
+Check ID / acceptance scenario: E-044 / T072a natural variation (AC-31)
+Requirement IDs: REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072a: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner
+Configuration: variation 0.15 on every moving type (Stock 0)
+Steps or exact command: -runTests EditMode and PlayMode
+Expected result: same seed = same factors and movement; factors within +/-v and spread over the range; v = 0 gives exactly the nominal movement
+Actual result and measured values: DeliveryMovement.For resolves a world-frame request: swing curve, drift and turn = Lerp(min, max, movement) x the ball's factors; dip, bounce factor, grip and seam are not varied. Factors drawn swing, drift, turn from System.Random(request seed). EditMode 125/125 (4 new: same seed identical factors and movement for all 7 types, a different seed differs; 1,000 seeds: every factor within [0.85, 1.15] and each quarter of the range holds > 180 of 1,000 for all three factors; v = 0 gives factors 1 and the exact nominal curve, drift and turn at movement 0/0.25/0.5/0.75/1; variation leaves dip and bounce unchanged, is the same ball for either hand and keeps the mirrored direction). The machine records the factors per ball (var_swing / var_drift / var_turn). PlayMode 46/46 unchanged.
+Outcome: Pass (automated) for the factors. "Same seed, same path" is checked once there is a path (T073 solver, T074 runtime).
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: the solver applies the factors before solving in T073
 ```
 
 ```text

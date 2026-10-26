@@ -22,6 +22,8 @@ namespace CricketVR
         public DeliveryConfig LastConfig { get; private set; }
         /// <summary>The latest request as received (batter frame, with its type, movement and seed).</summary>
         public DeliveryRequest LastRequest { get; private set; }
+        /// <summary>The latest ball's resolved movement, including its natural-variation factors (REQ-048).</summary>
+        public DeliveryMovement LastMovement { get; private set; }
         public DeliverySolution LastSolution { get; private set; }
         /// <summary>Measured first bounce of the latest delivery, if it has bounced.</summary>
         public Vector3? LastBounce { get; private set; }
@@ -67,6 +69,7 @@ namespace CricketVR
         {
             LastRequest = delivery;
             var world = delivery.ForBatter();
+            LastMovement = DeliveryMovement.For(world);
             if (!world.type.IsStill || world.lineReference != LineReference.AtBounce)
                 return Reject(world.ToConfig(), $"{world.type.displayName} deliveries are not available yet (M7.5 in progress)");
             return BowlStill(world.ToConfig());

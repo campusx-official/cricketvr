@@ -218,5 +218,92 @@ namespace CricketVR.Tests
             }
             CollectionAssert.IsEmpty(offenders, "type-specific code outside the module");
         }
+
+        // ---------- T072a natural variation (AC-31) ----------
+
+        static DeliveryRequest Moving(DeliveryTypeData type, int seed, float movement = 0.5f, Handedness hand = Handedness.Right) => new DeliveryRequest
+        {
+            label = type.displayName, type = type, speedKmh = 85f, releasePosition = FieldDimensions.DefaultReleasePoint,
+            line = 0.1f, length = 5f, movement = movement, seed = seed, handedness = hand,
+        };
+
+        [Test]
+        public void SameSeedGivesTheSameMovementAndFactors()
+        {
+            foreach (var type in DeliveryTypeData.All)
+            {
+                var a = DeliveryMovement.For(Moving(type, 12345).ForBatter());
+                var b = DeliveryMovement.For(Moving(type, 12345).ForBatter());
+                Assert.AreEqual(a.VarSwing, b.VarSwing);
+                Assert.AreEqual(a.VarDrift, b.VarDrift);
+                Assert.AreEqual(a.VarTurn, b.VarTurn);
+                Assert.AreEqual(a.SwingCurve, b.SwingCurve);
+                Assert.AreEqual(a.Drift, b.Drift);
+                Assert.AreEqual(a.TurnDegrees, b.TurnDegrees);
+            }
+            var c = DeliveryMovement.For(Moving(DeliveryTypeData.LegSpin, 12346).ForBatter());
+            var d = DeliveryMovement.For(Moving(DeliveryTypeData.LegSpin, 12345).ForBatter());
+            Assert.AreNotEqual(c.VarTurn, d.VarTurn, "a different seed varies the ball");
+        }
+
+        [Test]
+        public void FactorsStayWithinTheVariationAndSpreadAcrossIt()
+        {
+            const float v = 0.15f;
+            var buckets = new int[3, 4];
+            for (int seed = 0; seed < 1000; seed++)
+            {
+                var f = DeliveryMovement.VariationFactors(seed * 7919 + 1, v);
+                for (int k = 0; k < 3; k++)
+                {
+                    Assert.That(f[k], Is.InRange(1f - v, 1f + v), $"seed {seed} factor {k}");
+                    buckets[k, Mathf.Clamp((int)((f[k] - (1f - v)) / (2f * v) * 4f), 0, 3)]++;
+                }
+            }
+            for (int k = 0; k < 3; k++)
+            for (int q = 0; q < 4; q++)
+                Assert.Greater(buckets[k, q], 180, $"factor {k} quarter {q} of the range: {buckets[k, q]} of 1000");
+        }
+
+        [Test]
+        public void ZeroVariationGivesExactlyTheNominalMovement()
+        {
+            foreach (var type in DeliveryTypeData.All)
+            {
+                var t = type;
+                t.variation = 0f;
+                for (float m = 0f; m <= 1f; m += 0.25f)
+                {
+                    var mv = DeliveryMovement.For(Moving(t, 999, m).ForBatter());
+                    Assert.AreEqual(1f, mv.VarSwing);
+                    Assert.AreEqual(1f, mv.VarDrift);
+                    Assert.AreEqual(1f, mv.VarTurn);
+                    Assert.AreEqual(t.swingDirection == 0 ? 0f : t.swingMin + m * (t.swingMax - t.swingMin), mv.SwingCurve, 1e-6f, t.displayName);
+                    Assert.AreEqual(t.turnDirection == 0 ? 0f : t.driftMin + m * (t.driftMax - t.driftMin), mv.Drift, 1e-6f, t.displayName);
+                    Assert.AreEqual(t.turnDirection == 0 ? 0f : t.turnMin + m * (t.turnMax - t.turnMin), mv.TurnDegrees, 1e-6f, t.displayName);
+                }
+            }
+            Assert.IsTrue(DeliveryMovement.For(DeliveryRequest.FromConfig(DeliveryConfig.Create("s", 80f, 0f, 6f)).ForBatter()).IsStill, "Stock does not move");
+        }
+
+        [Test]
+        public void VariationScalesOnlySwingDriftAndTurnAndKeepsTheirSigns()
+        {
+            var t = DeliveryTypeData.Googly;
+            var nominal = t; nominal.variation = 0f;
+            for (int seed = 0; seed < 50; seed++)
+            {
+                var left = DeliveryMovement.For(Moving(t, seed, 0.5f, Handedness.Left).ForBatter());
+                var right = DeliveryMovement.For(Moving(t, seed, 0.5f).ForBatter());
+                var n = DeliveryMovement.For(Moving(nominal, seed).ForBatter());
+                Assert.AreEqual(n.Drift * right.VarDrift, right.Drift, 1e-6f);
+                Assert.AreEqual(n.TurnDegrees * right.VarTurn, right.TurnDegrees, 1e-6f);
+                Assert.AreEqual(n.Dip, right.Dip, "dip is not varied");
+                Assert.AreEqual(n.BounceFactor, right.BounceFactor, "bounce factor is not varied");
+                Assert.AreEqual(right.TurnDegrees, left.TurnDegrees, "the same ball for either hand");
+                Assert.AreEqual(-right.TurnDirection, left.TurnDirection, "mirrored direction");
+                Assert.Greater(right.TurnDegrees, 0f);
+            }
+        }
     }
 }
