@@ -15,15 +15,25 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
 | AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
-| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode): automated + owner M6 test 1 | APK sha256 225a148…00ee7; E-030, E-031 | Superseded later by the virtual-field scorer; NetMode kept until then |
-| AC-07 | REQ-011, REQ-012 | Not run | None | M7 six-delivery loop |
-| AC-08 | REQ-013 | Not run | None | M7 restart checks |
-| AC-09 | REQ-014 | Not run | None | M7 interruption checks |
-| AC-10 | REQ-016 | Not run | None | M8 regression/profile |
+| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; run scoring superseded 2026-10-26 (REQ-009 amended) | APK sha256 225a148…00ee7; E-030, E-031 | Re-run the amended AC-06 (no runs) after T052 |
+| AC-07 | REQ-011, REQ-012, REQ-026 | Not run (re-planned: complete session, both modes) | None | M7 T051 |
+| AC-08 | REQ-013 | Not run (re-planned: play again / menu, both modes) | None | M7 T051 |
+| AC-09 | REQ-014 | Not run (both modes) | None | M7 T051 |
+| AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | Automated physics checks pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
 | AC-13 | REQ-021, REQ-022 | Automated rules + NetMode regression pass; headset run pending | APK sha256 c6b7ff9…0e41e; E-032 | Owner: M6.5 headset tests |
 | AC-14 | REQ-023 | Not run | None | M6.5 on-device performance (foveation on and off) |
+| AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
+| AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
+| AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
+| AC-18 | REQ-031 | Not run | None | M8 summary |
+| AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
+| AC-20 | REQ-034 | Not run | None | M9 fielding |
+| AC-21 | REQ-035 | Not run | None | M9 calibration replay |
+| AC-22 | REQ-036 | Not run | None | M10 scenarios |
+| AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
+| AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 
 ## Evidence entry template
 
@@ -574,6 +584,23 @@ Outcome: Pass (owner observation)
 Log or artifact path: none
 Remaining limitation / follow-up task: AC-12/AC-13 headset checks; AC-14 performance numbers
 ```
+
+## Re-plan note (2026-10-26)
+
+The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
+- **E-030 and E-031** stay valid for exactly-once finalization, event ordering, stale rejection and carry. Their **run-scoring** assertions are superseded (REQ-009 amended: Net Practice scores no runs).
+- **AC-07 to AC-10** were re-planned; no evidence existed for them.
+- **Planned check IDs:** E-034 = M6.5 Test 2 (AC-12/13); E-035 = AC-14 performance with foveation on and off; later IDs follow as checks run.
+
+## Two-mode evidence additions (AC-15 to AC-24)
+
+Use the standard template plus these fields:
+- **Start menu (AC-15):** which controls were used (ray / bat-tap), every option selected, whether the ray and bat were ever visible together.
+- **Record and log (AC-16):** CSV file name, row count vs finalized balls, empty fields per mode, solver redraw count per plan.
+- **Confidence (AC-17/18):** per shot: S, E, Δt, v_peak, α, λ, v_out, each component, overall, label, the owner's own feel; summary values vs CSV recomputation; settings before/after (plan.md §17).
+- **Scorer (AC-19..21):** test counts; calibration CSV row count; outcome histogram (dot / 1 / 2 / 3 / 4 / 6 / caught / dropped / played on); carry percentiles; each tuned setting before and after, with the reason.
+- **Chase (AC-23):** scenario seed, target / balls / wickets; the ball-by-ball log; the end condition; per ball, whether the visible ball matched the result and the sounds played; the PlayMode visible-vs-scored test result (landing and end-position differences).
+- **Performance (AC-24):** as AC-14, per mode.
 
 ## M6.5 evidence template (AC-11 to AC-14)
 
