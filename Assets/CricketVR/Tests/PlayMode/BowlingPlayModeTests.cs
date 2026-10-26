@@ -21,11 +21,13 @@ namespace CricketVR.Tests
 
         /// <summary>Where each ball pitched (T070 measurement).</summary>
         readonly List<(int id, Vector3 point)> _bounces = new List<(int, Vector3)>();
+        readonly List<(int id, PitchMeasurement pitch)> _pitches = new List<(int, PitchMeasurement)>();
         /// <summary>The PhysX first-contact report (the measurement before T070), kept for comparison.</summary>
         readonly List<(int id, Vector3 point)> _contacts = new List<(int, Vector3)>();
 
-        /// <summary>Stock bounce accuracy, measured where the ball pitched: 10 cm before T070, tightened to 1 cm once
-        /// every preset passed it (worst 0.21 cm, E-040).</summary>
+        /// <summary>Stock accuracy of the pitch point (where the incoming flight reaches the pitch): 10 cm before T070,
+        /// tightened to 1 cm once every preset and 60 planned deliveries passed it (E-040). PhysX's rebound start
+        /// scatters by up to one step of travel around this point; see PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep.</summary>
         public const float StockTolerance = 0.01f;
         readonly List<(int id, BallEndReason reason)> _ends = new List<(int, BallEndReason)>();
 
@@ -34,6 +36,7 @@ namespace CricketVR.Tests
         {
             _bounces.Clear(); // NUnit reuses the fixture instance across tests
             _contacts.Clear();
+            _pitches.Clear();
             _ends.Clear();
             _timeScale = Time.timeScale;
             Time.timeScale = 5f;
@@ -72,7 +75,7 @@ namespace CricketVR.Tests
 
             ballGo.SetActive(true);
             machineGo.SetActive(true);
-            _ball.Pitched += (id, p, t) => _bounces.Add((id, p));
+            _ball.Pitched += (id, p, t) => { _bounces.Add((id, p.Point)); _pitches.Add((id, p)); };
             _ball.FirstBounce += (id, p, t) => _contacts.Add((id, p));
             _ball.DeliveryEnded += (id, r) => _ends.Add((id, r));
         }
@@ -148,14 +151,49 @@ namespace CricketVR.Tests
                 int id = _bounces[_bounces.Count - 1].id;
                 var pitched = _bounces[_bounces.Count - 1].point;
                 var contact = _contacts.Find(c => c.id == id).point;
+                var pitch = _pitches.Find(c => c.id == id).pitch;
                 float error = Error(pitched, delivery), oldError = Error(contact, delivery);
                 worst = Mathf.Max(worst, error);
                 Debug.Log($"[CricketVR] T070 {delivery}: pitched ({pitched.x:F4}, {pitched.y:F4}, {pitched.z:F4}) error {error * 100f:F2} cm; " +
-                          $"contact report ({contact.x:F4}, {contact.z:F4}) error {oldError * 100f:F2} cm");
+                          $"contact report ({contact.x:F4}, {contact.z:F4}) error {oldError * 100f:F2} cm; " +
+                          $"rebound starts {pitch.ReboundOffset * 100f:+0.00;-0.00} cm along");
                 Assert.LessOrEqual(error, StockTolerance, delivery.label);
                 Assert.Less(error, oldError, $"{delivery.label}: the pitch point should be nearer the request than the contact report");
             }
             Debug.Log($"[CricketVR] T070 worst Stock pitch error {worst * 100f:F2} cm");
+        }
+
+        /// <summary>
+        /// T070 over planned deliveries (random speed, line and length, so every physics-step phase occurs): the pitch
+        /// point is within the Stock tolerance, and PhysX's rebound starts within one step of travel of it, before it
+        /// (speculative contact above the pitch) or after it (the ball sank in for a step). Logs the spread.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep()
+        {
+            var rng = new System.Random(70);
+            float worst = 0f, minOffset = float.MaxValue, maxOffset = float.MinValue;
+            int early = 0, late = 0, n = 0;
+            foreach (var plan in new[] { DeliveryPlanSettings.NetPractice, DeliveryPlanSettings.Hard })
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    var delivery = DeliveryPlanner.Draw(plan, rng, i % 2 == 1, null, out _);
+                    yield return BowlAndWaitForBounce(delivery);
+                    var pitch = _pitches[_pitches.Count - 1].pitch;
+                    float error = Error(pitch.Point, delivery);
+                    float step = Units.KmhToMs(delivery.speedKmh) * Time.fixedDeltaTime;
+                    worst = Mathf.Max(worst, error);
+                    minOffset = Mathf.Min(minOffset, pitch.ReboundOffset);
+                    maxOffset = Mathf.Max(maxOffset, pitch.ReboundOffset);
+                    if (pitch.ReboundOffset < 0f) early++; else late++;
+                    n++;
+                    Assert.LessOrEqual(error, StockTolerance, $"{delivery} pitch point");
+                    Assert.LessOrEqual(Mathf.Abs(pitch.ReboundOffset), step, $"{delivery}: rebound {pitch.ReboundOffset * 100f:F1} cm from the pitch point, one step is {step * 100f:F1} cm");
+                }
+            }
+            Debug.Log($"[CricketVR] T070 planned deliveries: {n} balls, worst pitch error {worst * 100f:F2} cm; rebound start " +
+                      $"{minOffset * 100f:+0.0;-0.0} to {maxOffset * 100f:+0.0;-0.0} cm from the pitch point ({early} before it, {late} after it)");
         }
 
         static float Error(Vector3 p, DeliveryConfig d) =>

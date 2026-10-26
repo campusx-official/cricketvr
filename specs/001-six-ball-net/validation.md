@@ -721,6 +721,7 @@ Actual result and measured values:
 Outcome: Pass (automated). Physics, pitch material and launch velocities unchanged (no change to DeliverySolver, materials or the ball's Rigidbody setup).
 Log or artifact path: scratchpad play.log / play.xml (not committed)
 Remaining limitation / follow-up task: (1) PhysX still lets the ball sink 0.8-2.5 cm into the pitch for one step and starts the rebound from there, up to one step past the touch; T078 (turn at the bounce) and T079 (arrival line) must model the rebound as PhysX produces it. (2) Device check not needed for a measurement change; the next AC-04 headset re-check (T075) uses the new readout.
+CORRECTION (2026-10-27, same day, found during T072; see E-042): the six presets all happened to fall in the "ball sinks in" step phase. Random planned deliveries also show the opposite phase, where PhysX's speculative contact turns the ball while its centre is still up to ~1.6 cm above contact height, BEFORE the pitch point; the T070 code then fell back to the lowest sample (4-5 cm early). So the statements above that the physical path is fine and that the old figure was only a measurement error are too strong: the old contact-report error was partly a real displacement of the rebound. The measurement was corrected (E-042), and the rebound displacement is now recorded separately.
 ```
 
 ```text
@@ -737,6 +738,44 @@ Actual result and measured values: EditMode 120/120 (9 new DeliveryTypeTests: se
 Outcome: Pass (automated)
 Log or artifact path: scratchpad test XML
 Remaining limitation / follow-up task: the scene builder regenerates Ground and NearPanel on every run (large scene diff with no functional change); the scene file was left as committed
+```
+
+```text
+Check ID / acceptance scenario: E-042 / T070 correction: pitch point in both PhysX step phases; rebound start recorded (AC-04 Stock calibration re-run)
+Requirement IDs: REQ-004, REQ-005, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072: ..."); no APK (measurement change only)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner, real PhysX at 144 Hz, shipped PitchSurface material
+Configuration: debug presets; 60 planned deliveries (30 Net Practice + 30 Hard, seed 70, alternating hands); session one-over test with random Net Practice draws
+Steps or exact command: the T072 session test's new bounce assertion failed (5.076 m vs 5.036 m requested); instrumented the session test temporarily; -runTests EditMode and PlayMode after the fix
+Expected result: the reported pitch point within 1 cm of the request for every delivery, not only the presets; the PhysX rebound behaviour measured, not hidden
+Actual result and measured values:
+  - Instrumented session (6 balls): 3 balls sank in (rebound past the pitch point); 3 were turned by speculative contact with the centre 0.5-1.6 cm above contact height (lowest sample y = 0.0517 / 0.0407 / 0.0502 vs 0.036), 1.8-5.3 cm before the pitch point. The T070 code reported the lowest sample in that case: 5.6 cm error.
+  - Fix (measurement only): the pitch point is always the incoming flight's crossing of contact height: interpolated when the ball sank in, extrapolated along the last step's straight line (a fraction of a step) when it turned above the pitch. The rebound start (lowest sample) and its signed offset along the travel are reported separately (PitchMeasurement; CSV rebound_offset_m).
+  - Presets: pitch error unchanged at 0.00-0.21 cm; rebound starts +2.20 / +2.56 / +5.57 / +5.81 / +8.14 / +10.29 cm past the pitch point (all sank in).
+  - 60 planned deliveries: worst pitch error 0.51 cm (the solver's 5 mm tolerance); rebound start -9.8 to +11.9 cm from the pitch point (25 before, 35 after), each within one physics step of travel (asserted).
+  - What this means: the incoming flight lands where requested to within 0.5 cm. PhysX then turns the ball up to one step (11-19 cm of travel at 80-100 km/h) away from that point, either side, depending on the step phase. The bounce looks right (the offset is under one rendered frame of motion), but the post-bounce path is displaced by that amount. That is a property of the unchanged physics, not of the measurement.
+  - Tests: EditMode 121/121 (pitch tests now cover the sink, turned-above and multi-step cases on recorded samples). PlayMode 46/46 (new PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep).
+Outcome: Pass (automated) for the pitch-point measurement and the 1 cm Stock tolerance on the pitch point. The rebound scatter is recorded as a known physics limitation, not a pass.
+Log or artifact path: scratchpad play.log (not committed)
+Remaining limitation / follow-up task: owner decision before Phase B (T078 turn at the bounce, T079 arrival line): keep PhysX's bounce (turn and arrival-line solver must model a rebound that starts up to one step either side of the pitch point; arrival-line accuracy then about ±3-5 cm) or resolve the pitch bounce in code at the pitch point (exact and deterministic, but changes the post-bounce path of every ball, Stock included, by up to ~12 cm, so it needs an AC-04 headset re-check). Not needed for Phase A (swing acts before the bounce).
+```
+
+```text
+Check ID / acceptance scenario: E-043 / T072 per-ball record and CSV columns for delivery types (AC-25 partial, AC-16)
+Requirement IDs: REQ-027, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner
+Configuration: defaults
+Steps or exact command: -runTests EditMode and PlayMode
+Expected result: new columns round-trip through the CSV; session records carry the type and the measured bounce
+Actual result and measured values: new columns type, movement, hand, line_ref, ball_seed, var_swing, var_drift, var_turn, pred_curve_m, curve_m, turn_deg, arrival_line_m, bounce_x/y/z, bounce_error_m, rebound_offset_m. EditMode: CSV round trip of every new field; Stock record leaves the movement measurements empty (NaN cells). PlayMode: the one-over session records Stock, movement 0, a measured bounce within 1 cm of the requested length and bounce error <= 1 cm for all 6 random balls. A ball hit before it pitched (full toss) no longer reports the hit ball's landing as the delivery's bounce. var_*, curve, turn and arrival line stay empty until T072a/T074/T078 fill them.
+Outcome: Pass (automated)
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: device CSV with the new columns comes with the next APK
 ```
 
 ```text

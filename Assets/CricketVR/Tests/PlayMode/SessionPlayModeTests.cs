@@ -119,6 +119,11 @@ namespace CricketVR.Tests
                 Assert.AreEqual(DeliveryOutcome.Miss, r.Result.Outcome, "nobody batting: every ball is a miss");
                 Assert.AreEqual(SessionMode.NetPractice, r.Mode);
                 Assert.IsFalse(string.IsNullOrEmpty(r.Delivery.label));
+                // T072: the delivery-type columns are filled from the request and the measured bounce.
+                Assert.AreEqual("Stock", r.DeliveryType);
+                Assert.AreEqual(0f, r.Movement);
+                Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, "measured bounce recorded");
+                Assert.LessOrEqual(r.BounceError, BowlingPlayModeTests.StockTolerance, $"{r.Delivery} pitched within the Stock tolerance");
             }
         }
 

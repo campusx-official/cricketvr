@@ -51,9 +51,10 @@ namespace CricketVR
         /// The contact point lies under the ball's sunk position at the end of the contact step, 6–10 cm past where it
         /// came down; use <see cref="Pitched"/> for where the ball bounced.</summary>
         public event Action<int, Vector3, float> FirstBounce;
-        /// <summary>Where the first bounce happened: (id, ball centre where the incoming flight reached the ground,
-        /// time since release). Raised a step or two after <see cref="FirstBounce"/>, once the ball turns upward.</summary>
-        public event Action<int, Vector3, float> Pitched;
+        /// <summary>Where the delivery pitched: (id, pitch point and rebound start, time since release at the pitch
+        /// point). Raised a step or two after <see cref="FirstBounce"/>, once the ball turns upward. Not raised for a
+        /// ball hit before it pitched (a full toss): its landing is a shot, not the delivery's bounce.</summary>
+        public event Action<int, PitchMeasurement, float> Pitched;
         /// <summary>Any collision during flight: (id, collision). Used by later milestones for stumps, nets and the bat.</summary>
         public event Action<int, Collision> Collided;
         public event Action<int, BallEndReason> DeliveryEnded;
@@ -125,6 +126,8 @@ namespace CricketVR
             _body.angularVelocity = Vector3.zero;
             _slowSince = -1f;
             _descentCount = 0; // the ball was moved: earlier samples are not part of its path any more
+            if (!_bounced)
+                _pitched = true; // hit before pitching: there is no delivery bounce to measure
             return true;
         }
 
@@ -231,9 +234,9 @@ namespace CricketVR
                 return;
 
             _pitched = true;
-            var point = BounceMeasurement.TouchPoint(_descent, _descentCount, _groundY + Radius, out float stepsBefore);
-            float time = _descentTimes[_descentCount - 1] - stepsBefore * Time.fixedDeltaTime;
-            Pitched?.Invoke(ActiveDeliveryId, point, time - _launchTime);
+            var pitch = BounceMeasurement.Measure(_descent, _descentCount, _groundY + Radius);
+            float time = _descentTimes[_descentCount - 1] - pitch.StepsBeforeLowest * Time.fixedDeltaTime;
+            Pitched?.Invoke(ActiveDeliveryId, pitch, time - _launchTime);
         }
 
         void OnCollisionEnter(Collision collision)

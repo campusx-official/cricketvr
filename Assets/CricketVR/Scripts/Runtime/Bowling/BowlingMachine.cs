@@ -25,6 +25,10 @@ namespace CricketVR
         public DeliverySolution LastSolution { get; private set; }
         /// <summary>Measured first bounce of the latest delivery, if it has bounced.</summary>
         public Vector3? LastBounce { get; private set; }
+        /// <summary>Distance (m) from the latest measured bounce to the requested point; NaN before it bounces.</summary>
+        public float LastBounceError { get; private set; } = float.NaN;
+        /// <summary>Where PhysX started the latest rebound relative to the pitch point (m, + = past it); NaN before it bounces.</summary>
+        public float LastReboundOffset { get; private set; } = float.NaN;
         public float LastFlightTime { get; private set; }
         public string LastError { get; private set; }
 
@@ -73,6 +77,8 @@ namespace CricketVR
             LastConfig = request;
             LastSolution = default;
             LastBounce = null;
+            LastBounceError = float.NaN;
+            LastReboundOffset = float.NaN;
             LastFlightTime = 0f;
             LastError = error;
             Debug.LogWarning($"[CricketVR] Delivery rejected ({request}): {error}");
@@ -94,6 +100,8 @@ namespace CricketVR
             LastConfig = request;
             LastSolution = solution;
             LastBounce = null;
+            LastBounceError = float.NaN;
+            LastReboundOffset = float.NaN;
             LastFlightTime = 0f;
 
             if (!solution.Reachable)
@@ -127,15 +135,18 @@ namespace CricketVR
             return id;
         }
 
-        // Where the ball pitched (T070), not the PhysX contact report, which lands 6-10 cm past it.
-        void OnPitched(int id, Vector3 point, float flightTime)
+        // Where the ball pitched (T070), not the PhysX contact report, which scatters a few cm around it.
+        void OnPitched(int id, PitchMeasurement pitch, float flightTime)
         {
             if (id != ball.ActiveDeliveryId)
                 return; // stale
+            var point = pitch.Point;
             LastBounce = point;
+            LastReboundOffset = pitch.ReboundOffset;
             LastFlightTime = flightTime;
             var target = LastSolution.Target;
             float error = Vector2.Distance(new Vector2(point.x, point.z), new Vector2(target.x, target.z));
+            LastBounceError = error;
 
             if (bounceMarker != null && config.delivery.showDebugMarkers)
             {
@@ -144,7 +155,7 @@ namespace CricketVR
             }
             if (config.delivery.logDeliveries)
                 Debug.Log($"[CricketVR] Delivery #{id} bounced at ({point.x:F3}, {point.z:F3}) after {flightTime:F3} s; " +
-                          $"{error * 100f:F1} cm from target");
+                          $"{error * 100f:F1} cm from target; rebound starts {pitch.ReboundOffset * 100f:+0.0;-0.0} cm along");
             BounceMeasured?.Invoke(id, point, error);
         }
 
