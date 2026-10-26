@@ -201,5 +201,38 @@ namespace CricketVR.Tests
                 Assert.AreEqual(D, maxDev, 0.002, $"lateness {p}");
             }
         }
+
+        // ---------- Seam visual (T074; AC-28 rate limit) ----------
+
+        [Test]
+        public void VisualSpinNeverExceedsTwentyFiveDegreesPerFrameAt72Hz()
+        {
+            foreach (var t in DeliveryTypeData.All)
+                Assert.LessOrEqual(BallSpinVisual.DegreesThisFrame(t.visualRevPerSecond, 1f / 72f), BallSpinVisual.MaxDegreesPerFrame, t.displayName);
+            Assert.AreEqual(25f, BallSpinVisual.DegreesThisFrame(5f, 1f / 72f), 1e-4f, "5 rev/s is exactly the cap");
+            Assert.AreEqual(25f, BallSpinVisual.DegreesThisFrame(30f, 1f / 72f), "a real 30 rev/s is shown at the cap");
+            Assert.AreEqual(15f, BallSpinVisual.DegreesThisFrame(3f, 1f / 72f), 1e-4f, "pace 3 rev/s");
+            Assert.AreEqual(25f, BallSpinVisual.DegreesThisFrame(3f, 0.5f), "a long frame is still capped");
+        }
+
+        [Test]
+        public void PaceSeamIsUprightWithBackspinAndAngledTowardFineLegOrSlip()
+        {
+            var travel = new Vector3(0.02f, -0.1f, -1f);
+            foreach (var swing in new[] { -1, 0, 1 })
+            {
+                var axis = BallSpinVisual.PaceSpinAxis(travel, swing);
+                Assert.AreEqual(1f, axis.magnitude, 1e-4f);
+                Assert.AreEqual(0f, axis.y, 1e-5f, "upright seam: horizontal spin axis");
+                var top = Quaternion.AngleAxis(5f, axis) * Vector3.up;
+                Assert.Greater(top.z - Vector3.up.z, 0f, $"swing {swing}: the top turns back toward the bowler (backspin)");
+                // The seam plane's horizontal direction is perpendicular to the axis; it leans toward x = swing.
+                var seam = Vector3.Cross(axis, Vector3.up);
+                if (seam.z > 0f) seam = -seam; // the end pointing down the pitch
+                float lean = seam.x - travel.normalized.x;
+                if (swing == 0) Assert.AreEqual(0f, lean, 0.01f, "Stock seam straight");
+                else Assert.AreEqual(swing, Mathf.Sign(lean), $"swing {swing}: seam toward {(swing < 0 ? "fine leg" : "slip")}");
+            }
+        }
     }
 }

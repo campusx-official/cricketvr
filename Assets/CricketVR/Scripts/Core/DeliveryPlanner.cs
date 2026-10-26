@@ -180,6 +180,14 @@ namespace CricketVR
 
         static float Range(System.Random rng, float min, float max) => min + (float)rng.NextDouble() * (max - min);
 
+        /// <summary>Reachability of a request (any type) as the machine will solve it.</summary>
+        public static Func<DeliveryRequest, bool> RequestSolverCheck(float gravity, float fixedDeltaTime, float ballRadius) =>
+            r =>
+            {
+                var world = r.ForBatter();
+                return DeliverySolver.Solve(world, DeliveryMovement.For(world), gravity, fixedDeltaTime, ballRadius).Reachable;
+            };
+
         /// <summary>The solver's reachability test at the game's physics settings.</summary>
         public static Func<DeliveryConfig, bool> SolverCheck(float gravity, float fixedDeltaTime, float ballRadius) =>
             d => DeliverySolver.Solve(d, gravity, fixedDeltaTime, ballRadius).Reachable;

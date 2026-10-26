@@ -130,4 +130,41 @@ namespace CricketVR
             return curve / (flightTime * flightTime * k);
         }
     }
+
+    /// <summary>
+    /// How the ball's seam is shown (DT-9, DT-10, D-4): a readable stand-in for the real rotation, never faster than
+    /// <see cref="MaxDegreesPerFrame"/> so the seam doesn't strobe at 72 Hz. The seam is the ball mesh's equator, so the
+    /// spin axis is the mesh's local up.
+    /// </summary>
+    public static class BallSpinVisual
+    {
+        /// <summary>5 rev/s at 72 Hz.</summary>
+        public const float MaxDegreesPerFrame = 25f;
+        /// <summary>How far a swinging ball's upright seam points off its line of travel (visual only).</summary>
+        public const float SwingSeamAngleDegrees = 15f;
+
+        /// <summary>Visual rotation for one rendered frame (degrees), capped.</summary>
+        public static float DegreesThisFrame(float revPerSecond, float deltaTime) =>
+            Mathf.Min(Mathf.Max(0f, revPerSecond) * 360f * Mathf.Max(0f, deltaTime), MaxDegreesPerFrame);
+
+        /// <summary>
+        /// Spin axis (world, unit) for a pace ball: the seam stands upright, angled toward fine leg (inswing, world
+        /// direction −1) or the slips (outswing, +1) off the horizontal travel direction; the axis is perpendicular
+        /// to the seam's plane and oriented for backspin (positive angle about it turns the top of the ball back
+        /// toward the bowler).
+        /// </summary>
+        public static Vector3 PaceSpinAxis(Vector3 travel, int swingDirection)
+        {
+            var forward = new Vector3(travel.x, 0f, travel.z);
+            forward = forward.sqrMagnitude > 1e-8f ? forward.normalized : Vector3.back;
+            // Turn the seam off the travel toward world x = swingDirection (fine leg for inswing, slip for outswing).
+            var seam = Quaternion.AngleAxis(-swingDirection * SwingSeamAngleDegrees, Vector3.up) * forward;
+            if (swingDirection != 0 && Mathf.Sign(seam.x - forward.x) != swingDirection)
+                seam = Quaternion.AngleAxis(swingDirection * SwingSeamAngleDegrees, Vector3.up) * forward;
+            var axis = Vector3.Cross(Vector3.up, seam).normalized;
+            // Orient by the effect, not by handedness conventions: a small positive turn must move the top backward.
+            var top = Quaternion.AngleAxis(1f, axis) * Vector3.up;
+            return Vector3.Dot(top - Vector3.up, -forward) >= 0f ? axis : -axis;
+        }
+    }
 }

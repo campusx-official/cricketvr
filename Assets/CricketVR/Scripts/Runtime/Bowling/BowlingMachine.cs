@@ -67,13 +67,40 @@ namespace CricketVR
         /// </summary>
         public int Bowl(DeliveryRequest delivery)
         {
+            if (config == null || ball == null)
+            {
+                Debug.LogError("[CricketVR] BowlingMachine is missing references; run CricketVR > Setup > 6. Build or Repair Main Scene.", this);
+                return 0;
+            }
             LastRequest = delivery;
             var world = delivery.ForBatter();
             LastMovement = DeliveryMovement.For(world);
-            if (!world.type.IsStill || world.lineReference != LineReference.AtBounce)
-                return Reject(world.ToConfig(), $"{world.type.displayName} deliveries are not available yet (M7.5 in progress)");
-            return BowlStill(world.ToConfig());
+            if (!LastMovement.IsStill && Flight == null)
+                return Reject(world.ToConfig(), "moving deliveries need a BallFlight on the ball; run the scene builder");
+            // A still ball takes the unchanged Stock solve; a moving one the movement-aware solve (plan.md §19).
+            var solution = DeliverySolver.Solve(world, LastMovement, -Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius);
+            return Launch(world, solution);
         }
+
+        BallFlight _flight;
+        bool _flightLooked;
+        BallFlight Flight
+        {
+            get
+            {
+                if (!_flightLooked && ball != null)
+                {
+                    _flight = ball.GetComponent<BallFlight>();
+                    _flightLooked = true;
+                }
+                return _flight;
+            }
+        }
+
+        /// <summary>The latest delivery's measured curve (m); NaN before it pitches or without a BallFlight.</summary>
+        public float LastMeasuredCurve => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.MeasuredCurve : float.NaN;
+        /// <summary>The latest delivery's x at the striker's popping crease (m); NaN if not reached unhit.</summary>
+        public float LastArrivalLine => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.ArrivalLine : float.NaN;
 
         int Reject(DeliveryConfig request, string error)
         {
@@ -89,17 +116,11 @@ namespace CricketVR
             return 0;
         }
 
-        /// <summary>Stock path, unchanged since M4: no movement, so the launch is the gravity-only solution.</summary>
-        int BowlStill(DeliveryConfig request)
+        /// <summary>Launches a solved delivery (the Stock part is unchanged since M4), or rejects it with the solver's reason.</summary>
+        int Launch(in DeliveryRequest world, DeliverySolution solution)
         {
-            if (config == null || ball == null)
-            {
-                Debug.LogError("[CricketVR] BowlingMachine is missing references; run CricketVR > Setup > 6. Build or Repair Main Scene.", this);
-                return 0;
-            }
-
             var settings = config.delivery;
-            var solution = DeliverySolver.Solve(request, -Physics.gravity.y, Time.fixedDeltaTime, settings.ballRadius);
+            var request = world.ToConfig();
             LastConfig = request;
             LastSolution = solution;
             LastBounce = null;
@@ -121,6 +142,8 @@ namespace CricketVR
 
             int id = _nextDeliveryId++;
             ball.Launch(id, request.releasePosition, solution.Velocity);
+            if (Flight != null)
+                Flight.Begin(id, request.releasePosition, solution.Velocity, solution.Plan, world.type);
 
             if (targetMarker != null && settings.showDebugMarkers)
             {
@@ -133,7 +156,8 @@ namespace CricketVR
             if (settings.logDeliveries)
                 Debug.Log($"[CricketVR] Delivery #{id} {request}: v0 {solution.Velocity.magnitude:F2} m/s " +
                           $"({Units.MsToKmh(solution.Velocity.magnitude):F1} km/h), elevation {solution.ElevationDegrees:F2} deg, " +
-                          $"predicted bounce ({solution.PredictedBounce.x:F3}, {solution.PredictedBounce.z:F3})");
+                          $"predicted bounce ({solution.PredictedBounce.x:F3}, {solution.PredictedBounce.z:F3})" +
+                          (solution.Plan.IsStill ? "" : $", {world.type.displayName} curve {solution.PredictedCurve:F2} m"));
             Bowled?.Invoke(id, request, solution);
             return id;
         }

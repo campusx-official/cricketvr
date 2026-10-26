@@ -566,6 +566,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
   - **pace:** backspin about the axis ⟂ to the seam plane, with the seam upright and angled toward fine leg (inswing) or slip (outswing);
   - **spin:** about the stock ball's axis (deceptive) or the true axis (honest), switching to the true axis at the bounce.
 - The rate is at most 25° per frame (real 20–30 rev/s would strobe at 72 Hz).
+- *As built (T074):* the seam is the sphere mesh's equator (generated texture), so the spin axis is the mesh's local up; `BallSpinVisual.PaceSpinAxis` gives the axis (seam upright, 15° toward fine leg or slip, backspin chosen by testing that a positive turn moves the top back toward the bowler). `BallFlight` sets the visual's world rotation in LateUpdate, independent of the Rigidbody.
 
 **Contact and after.** No change to the swept contact or the response; they read the ball's velocity, which already includes any movement. Incoming spin has no effect on the shot in v1 (D-5). The M9 scorer and the M10 simulated path are unaffected.
 

@@ -35,12 +35,12 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | Simulation pass (E-045); PlayMode and headset pending | E-045 | M7.5 T074–T076 |
+| AC-26 | REQ-042, REQ-044, REQ-047 | Automated pass at 115/125 km/h (E-045, E-046); 140 km/h (T075) and headset pending | E-045, E-046 | M7.5 T075, T076 |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
-| AC-28 | REQ-046 | Not run | None | M7.5 T080, T082 |
+| AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | Not run | None | M7.5 T075, T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
-| AC-31 | REQ-048 | Automated pass for the factors (E-044); path determinism in T073/T074 | E-044 | M7.5 T073/T074 |
+| AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 
 ## Evidence entry template
 
@@ -817,6 +817,29 @@ Actual result and measured values:
 Outcome: Pass (automated, simulation). Not yet run in PhysX (T074) or seen in the headset (T076).
 Log or artifact path: scratchpad edit.log
 Remaining limitation / follow-up task: owner decision on the swing size definition (plan.md open decision 4) before T076; the machine still rejects moving types until T074
+```
+
+```text
+Check ID / acceptance scenario: E-046 / T074 swing in PhysX with BallFlight; seam-up visual (AC-26 PlayMode; AC-28 rate limit; AC-31 path determinism)
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-046, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T074: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz; shipped DeliveryType assets (variation set to 0 on the copy) and PitchSurface material; MainSceneBuilder.BuildOrRepairBatch
+Configuration: Inswinger / Outswinger starting values (curve 0.2-0.6 m, lateness 1.5); 115 and 125 km/h (140 km/h waits for T075); seeded lines -0.1..0.3 m, lengths 3-8 m, movement 0-1, alternating hands
+Steps or exact command: BuildOrRepairBatch (adds BallFlight and the BallVisual child with the generated seam texture); -runTests EditMode and PlayMode
+Expected result: each ball pitches within the Stock tolerance (1 cm); measured curve within the type's range and equal to the solver's; swing toward -X/+X for a right-hander, mirrored for a left-hander; Stock unchanged with BallFlight present; same request = same ball, with or without variation; visual rate <= 25 deg per frame
+Actual result and measured values:
+  - PlayMode 50/50 (4 new SwingPlayModeTests). 40 swinging balls (2 types x 2 speeds x 10): worst pitch error 0.14 cm; measured curve vs solver at most 0.5 mm; curves 0.203-0.593 m; every ball swung the expected way for its hand.
+  - Same request twice (variation 0 and 0.15, seed 4242): identical pitch point and curve (1e-5 m) and the same recorded factor; the varied factor differs from 1.
+  - Stock presets with BallFlight on the ball: pitch within 1 cm, measured curve < 1 mm (no force applied).
+  - Arrival line: an inswinger at 120 km/h, movement 0.5, pitched on +0.20 m (outside off), reaches the popping crease at -0.61 m (down leg): the heading it gained in the air keeps carrying it after pitching (see the open swing-size decision).
+  - EditMode 135/135 (2 new: visual rate <= 25 deg per frame at 72 Hz for all 7 types, 5 rev/s exactly at the cap, long frames capped; pace seam upright with backspin, straight for Stock, leaning toward fine leg for inswing and slip for outswing).
+  - Records: predicted curve, measured curve and arrival line are now filled per ball (NaN predicted curve for still balls).
+  - Scene: Ball gains BallFlight and a BallVisual child (sphere mesh, BallSeam material with a generated 512 x 256 texture: white leather, a red equatorial seam with stitch rows; ASTC 6x6 on Android). The physics sphere's own renderer stays off.
+Outcome: Pass (automated). Not seen in the headset.
+Log or artifact path: scratchpad play.log; Assets/CricketVR/Generated/Ball/BallSeam.png
+Remaining limitation / follow-up task: T075 (140 km/h, AC-04 re-run, AC-05 extension, cap decision); T076 headset; owner decision on swing size; spin balls use the pace visual until T080
 ```
 
 ```text

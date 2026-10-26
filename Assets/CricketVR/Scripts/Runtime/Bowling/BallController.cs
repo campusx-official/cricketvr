@@ -41,6 +41,10 @@ namespace CricketVR
         bool _pitched;
 
         public int ActiveDeliveryId { get; private set; }
+        /// <summary>The bat has struck the active delivery.</summary>
+        public bool HasBeenHit { get; private set; }
+        /// <summary>The active delivery has touched the pitch or outfield.</summary>
+        public bool TouchedGround => _bounced;
         public bool InFlight { get; private set; }
         /// <summary>In flight and its result not yet decided: it can still be hit and still score.</summary>
         public bool IsLive => InFlight && !_dead;
@@ -109,6 +113,7 @@ namespace CricketVR
             _dead = false;
             _pitched = false;
             _descentCount = 0;
+            HasBeenHit = false;
             _launchTime = Time.time;
             _slowSince = -1f;
         }
@@ -125,6 +130,7 @@ namespace CricketVR
             _body.linearVelocity = velocity;
             _body.angularVelocity = Vector3.zero;
             _slowSince = -1f;
+            HasBeenHit = true;
             _descentCount = 0; // the ball was moved: earlier samples are not part of its path any more
             if (!_bounced)
                 _pitched = true; // hit before pitching: there is no delivery bounce to measure

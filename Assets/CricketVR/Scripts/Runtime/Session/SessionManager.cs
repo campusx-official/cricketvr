@@ -149,9 +149,8 @@ namespace CricketVR
                 : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
             var hand = handedness != null ? handedness.Current : Handedness.Right;
-            var solverCheck = DeliveryPlanner.SolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius);
             var delivery = DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
-                r => solverCheck(r.ForBatter().ToConfig()), out int redraws);
+                DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out int redraws);
             if (redraws > 0)
                 Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
             int id = machine.Bowl(delivery);
@@ -191,6 +190,9 @@ namespace CricketVR
                 VarSwing = machine.LastMovement.VarSwing,
                 VarDrift = machine.LastMovement.VarDrift,
                 VarTurn = machine.LastMovement.VarTurn,
+                PredictedCurve = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedCurve,
+                MeasuredCurve = machine.LastMeasuredCurve,
+                ArrivalLine = machine.LastArrivalLine,
                 Bounce = machine.LastBounce ?? BallRecord.NaN3,
                 BounceError = machine.LastBounceError,
                 ReboundOffset = machine.LastReboundOffset,
