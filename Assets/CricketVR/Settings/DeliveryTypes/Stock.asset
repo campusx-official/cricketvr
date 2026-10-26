@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73a64b4a15ee4fe3bb1ba334eb040b1, type: 3}
+  m_Name: Stock
+  m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.DeliveryType
+  data:
+    kind: 0
+    displayName: Stock
+    description: 'A straight ball: no swing or spin. Bowls exactly like the machine
+      before delivery types.'
+    style: 0
+    minSpeedKmh: 0
+    maxSpeedKmh: 0
+    swingDirection: 0
+    swingMin: 0
+    swingMax: 0
+    swingLateness: 0
+    turnDirection: 0
+    driftMin: 0
+    driftMax: 0
+    dip: 0
+    turnMin: 0
+    turnMax: 0
+    bounceFactor: 0
+    grip: 0
+    seamDegrees: 0
+    visualRevPerSecond: 3
+    looksLike: 0
+    variation: 0

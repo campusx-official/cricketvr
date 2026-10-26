@@ -18,7 +18,10 @@ namespace CricketVR
 
         int _nextDeliveryId = 1;
 
+        /// <summary>World-frame launch fields of the latest delivery.</summary>
         public DeliveryConfig LastConfig { get; private set; }
+        /// <summary>The latest request as received (batter frame, with its type, movement and seed).</summary>
+        public DeliveryRequest LastRequest { get; private set; }
         public DeliverySolution LastSolution { get; private set; }
         /// <summary>Measured first bounce of the latest delivery, if it has bounced.</summary>
         public Vector3? LastBounce { get; private set; }
@@ -49,8 +52,36 @@ namespace CricketVR
             SetMarkersVisible(false);
         }
 
-        /// <summary>Bowls one delivery. Returns the delivery id, or 0 if the request was rejected.</summary>
-        public int Bowl(DeliveryConfig request)
+        /// <summary>Bowls a Stock delivery from world-frame launch fields (pre-M7.5 callers and debug presets).</summary>
+        public int Bowl(DeliveryConfig config) => Bowl(DeliveryRequest.FromConfig(config));
+
+        /// <summary>
+        /// Bowls one delivery (REQ-040). The request is mirrored for its batter here, once (DT-7). Returns the
+        /// delivery id, or 0 if the request was rejected.
+        /// </summary>
+        public int Bowl(DeliveryRequest delivery)
+        {
+            LastRequest = delivery;
+            var world = delivery.ForBatter();
+            if (!world.type.IsStill || world.lineReference != LineReference.AtBounce)
+                return Reject(world.ToConfig(), $"{world.type.displayName} deliveries are not available yet (M7.5 in progress)");
+            return BowlStill(world.ToConfig());
+        }
+
+        int Reject(DeliveryConfig request, string error)
+        {
+            LastConfig = request;
+            LastSolution = default;
+            LastBounce = null;
+            LastFlightTime = 0f;
+            LastError = error;
+            Debug.LogWarning($"[CricketVR] Delivery rejected ({request}): {error}");
+            Rejected?.Invoke(request, error);
+            return 0;
+        }
+
+        /// <summary>Stock path, unchanged since M4: no movement, so the launch is the gravity-only solution.</summary>
+        int BowlStill(DeliveryConfig request)
         {
             if (config == null || ball == null)
             {

@@ -1,0 +1,222 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using NUnit.Framework;
+using UnityEngine;
+
+namespace CricketVR.Tests
+{
+    /// <summary>M7.5 T071 / AC-25: delivery types, the one request path, and Stock unchanged.</summary>
+    public class DeliveryTypeTests
+    {
+        static readonly System.Func<DeliveryConfig, bool> Solver = DeliveryPlanner.SolverCheck(9.81f, 1f / 144f, 0.036f);
+
+        static IEnumerable<DeliveryPlanSettings> StockPlans()
+        {
+            yield return DeliveryPlanSettings.NetPractice;
+            yield return DeliveryPlanSettings.Easy;
+            yield return DeliveryPlanSettings.Medium;
+            yield return DeliveryPlanSettings.Hard;
+        }
+
+        [Test]
+        public void SevenStartingTypesAreValidAndInKindOrder()
+        {
+            var all = DeliveryTypeData.All;
+            CollectionAssert.AreEqual(System.Enum.GetValues(typeof(DeliveryKind)), all.Select(t => t.kind).ToArray());
+            foreach (var t in all)
+                CollectionAssert.IsEmpty(t.Validate(), t.displayName);
+            Assert.IsTrue(DeliveryTypeData.Stock.IsStill, "Stock has no movement");
+            Assert.IsTrue(all.Skip(1).All(t => !t.IsStill), "every other type moves");
+        }
+
+        [Test]
+        public void ShippedTypeAssetsAreInRange()
+        {
+#if UNITY_EDITOR
+            var guids = UnityEditor.AssetDatabase.FindAssets("t:DeliveryType", new[] { "Assets/CricketVR/Settings/DeliveryTypes" });
+            var assets = guids.Select(g => UnityEditor.AssetDatabase.LoadAssetAtPath<DeliveryType>(UnityEditor.AssetDatabase.GUIDToAssetPath(g))).ToList();
+            Assert.AreEqual(7, assets.Count, "one asset per type; run the scene builder");
+            CollectionAssert.AreEquivalent(System.Enum.GetValues(typeof(DeliveryKind)), assets.Select(a => a.data.kind).ToArray());
+            foreach (var a in assets)
+                CollectionAssert.IsEmpty(a.data.Validate(), a.name);
+            var config = UnityEditor.AssetDatabase.LoadAssetAtPath<GameConfig>("Assets/CricketVR/Settings/GameConfig.asset");
+            Assert.AreEqual(7, config.delivery.deliveryTypes.Count(t => t != null), "GameConfig references every type");
+#endif
+        }
+
+        [Test]
+        public void ValidationCatchesOutOfRangeValues()
+        {
+            var t = DeliveryTypeData.LegSpin;
+            t.turnMax = 20f;
+            t.visualRevPerSecond = 25f;
+            t.driftMin = 0.2f; // above driftMax
+            var errors = t.Validate();
+            Assert.IsTrue(errors.Any(e => e.Contains("turnMax")));
+            Assert.IsTrue(errors.Any(e => e.Contains("visualRevPerSecond")));
+            Assert.IsTrue(errors.Any(e => e.Contains("driftMin > driftMax")));
+        }
+
+        [Test]
+        public void StockRequestIsTheExistingConfig()
+        {
+            var config = DeliveryConfig.Create("Good length", 80f, 0.1f, 6f);
+            var request = DeliveryRequest.FromConfig(config);
+            Assert.IsTrue(request.type.IsStill);
+            Assert.AreEqual(0f, request.movement);
+            Assert.AreEqual(Handedness.Right, request.handedness);
+            var back = request.ForBatter().ToConfig();
+            Assert.AreEqual(config.label, back.label);
+            Assert.AreEqual(config.speedKmh, back.speedKmh);
+            Assert.AreEqual(config.releasePosition, back.releasePosition);
+            Assert.AreEqual(config.line, back.line);
+            Assert.AreEqual(config.length, back.length);
+            Assert.AreEqual(config.ToString(), request.ToString());
+
+            var a = DeliverySolver.Solve(config, 9.81f, 1f / 144f, 0.036f);
+            var b = DeliverySolver.Solve(back, 9.81f, 1f / 144f, 0.036f);
+            Assert.AreEqual(a.Velocity, b.Velocity, "same launch");
+        }
+
+        [Test]
+        public void LeftHandedRequestsMirrorLineAndMovementExactly()
+        {
+            foreach (var type in DeliveryTypeData.All)
+            {
+                var right = new DeliveryRequest
+                {
+                    label = type.displayName, type = type, speedKmh = 85f, releasePosition = FieldDimensions.DefaultReleasePoint,
+                    line = 0.17f, length = 5.5f, movement = 0.4f, seed = 99, handedness = Handedness.Right,
+                };
+                var left = right;
+                left.handedness = Handedness.Left;
+                var r = right.ForBatter();
+                var l = left.ForBatter();
+                Assert.AreEqual(right.line, r.line, "right-hander: world = batter frame");
+                Assert.AreEqual(-r.line, l.line, type.displayName);
+                Assert.AreEqual(-r.type.swingDirection, l.type.swingDirection, type.displayName);
+                Assert.AreEqual(-r.type.turnDirection, l.type.turnDirection, type.displayName);
+                Assert.AreEqual(r.type.swingMax, l.type.swingMax);
+                Assert.AreEqual(r.type.turnMax, l.type.turnMax);
+                Assert.AreEqual(r.type.dip, l.type.dip);
+                Assert.AreEqual(r.speedKmh, l.speedKmh);
+                Assert.AreEqual(r.length, l.length);
+                Assert.AreEqual(r.movement, l.movement);
+                Assert.AreEqual(r.seed, l.seed);
+                var twice = l.ForBatter();
+                Assert.AreEqual(l.line, twice.line, "mirroring is applied once");
+                Assert.AreEqual(l.type.turnDirection, twice.type.turnDirection, "mirroring is applied once");
+            }
+        }
+
+        /// <summary>The pre-M7.5 draw (M7, E-036), reproduced verbatim, so Stock-only plans are proven unchanged.</summary>
+        static DeliveryConfig LegacyDraw(in DeliveryPlanSettings plan, System.Random rng, bool leftHanded)
+        {
+            float Range(float min, float max) => min + (float)rng.NextDouble() * (max - min);
+            float u = (float)rng.NextDouble();
+            string kind;
+            float length;
+            if (u < plan.yorkerShare) { kind = "Yorker"; length = Range(plan.yorkerMinLength, plan.yorkerMaxLength); }
+            else if (u < plan.yorkerShare + plan.shortShare) { kind = "Short"; length = Range(plan.shortMinLength, plan.shortMaxLength); }
+            else
+            {
+                length = Range(plan.minLength, plan.maxLength);
+                kind = length < 5f ? "Full" : length < 7.5f ? "Good length" : "Back of a length";
+            }
+            float speed = Mathf.Round(Range(plan.minSpeedKmh, plan.maxSpeedKmh));
+            float line = Range(plan.minLine, plan.maxLine);
+            if (leftHanded) line = -line;
+            return DeliveryConfig.Create($"{plan.label}: {kind}", speed, line, length);
+        }
+
+        [Test]
+        public void StockOnlyPlansDrawExactlyThePreM75Sequence()
+        {
+            foreach (var plan in StockPlans())
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            {
+                var legacy = new System.Random(5);
+                var current = new System.Random(5);
+                for (int i = 0; i < 1000; i++)
+                {
+                    var expected = LegacyDraw(plan, legacy, hand == Handedness.Left);
+                    var request = DeliveryPlanner.DrawRequest(plan, current, hand, null, null, out _);
+                    Assert.IsTrue(request.type.IsStill);
+                    Assert.AreEqual(hand, request.handedness);
+                    var got = request.ForBatter().ToConfig();
+                    Assert.AreEqual(expected.ToString(), got.ToString(), $"{plan.label} {hand} draw {i}");
+                    Assert.AreEqual(expected.line, got.line, $"{plan.label} {hand} draw {i}");
+                    Assert.AreEqual(expected.length, got.length);
+                }
+            }
+        }
+
+        [Test]
+        public void TypeMixDrawsEachTypeWithItsOwnSpeedsAndThePaceCap()
+        {
+            var plan = DeliveryPlanSettings.NetPractice;
+            plan.typeMix = DeliveryTypeData.All.Select(t => new TypeWeight { kind = t.kind, weight = 1f }).ToArray();
+            var rng = new System.Random(21);
+            var counts = new Dictionary<DeliveryKind, int>();
+            for (int i = 0; i < 7000; i++)
+            {
+                var r = DeliveryPlanner.DrawRequest(plan, rng, Handedness.Left, null, null, out _);
+                counts[r.type.kind] = counts.TryGetValue(r.type.kind, out int n) ? n + 1 : 1;
+                Assert.That(r.line, Is.InRange(plan.minLine, plan.maxLine), "requests stay in the batter's frame");
+                Assert.AreEqual(Handedness.Left, r.handedness);
+                if (r.type.UsesPlanSpeed)
+                    Assert.That(r.speedKmh, Is.InRange(plan.minSpeedKmh, plan.maxSpeedKmh), r.type.displayName);
+                else if (r.type.style == BowlingStyle.Pace)
+                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, DeliveryPlanSettings.DefaultPaceCapKmh), $"{r.type.displayName} capped (DT-5)");
+                else
+                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), r.type.displayName);
+                if (!r.type.IsStill)
+                    Assert.That(r.movement, Is.InRange(0f, 1f));
+            }
+            foreach (DeliveryKind kind in System.Enum.GetValues(typeof(DeliveryKind)))
+                Assert.AreEqual(1000f, counts[kind], 100f, $"{kind} share of an equal mix");
+
+            var a = DeliveryPlanner.DrawRequest(plan, new System.Random(8), Handedness.Right, null, null, out _);
+            var b = DeliveryPlanner.DrawRequest(plan, new System.Random(8), Handedness.Right, null, null, out _);
+            Assert.AreEqual(a.ToString(), b.ToString(), "same seed, same request");
+            Assert.AreEqual(a.seed, b.seed);
+        }
+
+        [Test]
+        public void StockOnlyPlansStayReachable()
+        {
+            foreach (var plan in StockPlans())
+            {
+                var rng = new System.Random(2);
+                for (int i = 0; i < 200; i++)
+                {
+                    var r = DeliveryPlanner.DrawRequest(plan, rng, Handedness.Right, null, x => Solver(x.ForBatter().ToConfig()), out _);
+                    Assert.IsTrue(Solver(r.ForBatter().ToConfig()), r.ToString());
+                }
+            }
+        }
+
+        /// <summary>
+        /// AC-25: no code outside the delivery-type module branches on a specific type. Behaviour must come from the
+        /// type's numbers, so a new or re-tuned type needs no code change elsewhere.
+        /// </summary>
+        [Test]
+        public void NoCodeOutsideTheModuleBranchesOnADeliveryType()
+        {
+            var module = new HashSet<string> { "DeliveryTypes.cs", "DeliveryType.cs", "DeliveryFlightModel.cs", "BallFlight.cs" };
+            var branching = new Regex(@"(==|!=)\s*DeliveryKind\.|DeliveryKind\.\w+\s*(==|!=)|case\s+DeliveryKind\.|is\s+DeliveryKind\.");
+            var offenders = new List<string>();
+            foreach (var path in Directory.GetFiles("Assets/CricketVR/Scripts", "*.cs", SearchOption.AllDirectories))
+            {
+                if (module.Contains(Path.GetFileName(path))) continue;
+                var lines = File.ReadAllLines(path);
+                for (int i = 0; i < lines.Length; i++)
+                    if (branching.IsMatch(lines[i]))
+                        offenders.Add($"{path}:{i + 1}: {lines[i].Trim()}");
+            }
+            CollectionAssert.IsEmpty(offenders, "type-specific code outside the module");
+        }
+    }
+}

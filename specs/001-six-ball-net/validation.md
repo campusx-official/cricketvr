@@ -724,6 +724,22 @@ Remaining limitation / follow-up task: (1) PhysX still lets the ball sink 0.8-2.
 ```
 
 ```text
+Check ID / acceptance scenario: E-041 / T071 delivery types, DeliveryRequest and plan type mix (AC-25 partial)
+Requirement IDs: REQ-028, REQ-040, REQ-041, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T071: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; MainSceneBuilder.BuildOrRepairBatch (creates the type assets)
+Configuration: seven DeliveryType assets under Assets/CricketVR/Settings/DeliveryTypes/ with the plan.md §19 starting values; GameConfig.delivery.deliveryTypes; plans Stock-only (empty typeMix); pace cap 120 km/h
+Steps or exact command: BuildOrRepairBatch; -runTests EditMode and PlayMode
+Expected result: Stock and every M7 plan unchanged; type values in range; exact left-hand mirror; no type-specific branching outside the module
+Actual result and measured values: EditMode 120/120 (9 new DeliveryTypeTests: seven starting types valid and in kind order; shipped assets = 7 distinct kinds, all in range, referenced by GameConfig; validation catches out-of-range values; Stock request <-> DeliveryConfig round trip with the same solver launch; left-hand ForBatter mirrors line, swing and turn exactly for all 7 types and is idempotent; Stock-only DrawRequest reproduces the pre-M7.5 draw (verbatim copy of the M7 algorithm) for 1,000 draws x 4 plans x both hands; an equal 7-type mix gives each type 1000 +/- 100 of 7,000 with pace capped at 120 km/h and spin in its own range; Stock plans reachable; source scan finds no DeliveryKind branching outside the module files). PlayMode 45/45 unchanged. The machine accepts DeliveryRequest; non-Stock requests are rejected with a reason until T073/T074 (none are drawn: plans are Stock-only).
+Outcome: Pass (automated)
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: the scene builder regenerates Ground and NearPanel on every run (large scene diff with no functional change); the scene file was left as committed
+```
+
+```text
 Check ID / acceptance scenario: E-050 / M7 headset re-check: AC-07 complete session, E-037 B-press control, E-038 ground-mode timing; AC-16 device CSV
 Requirement IDs: REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-026, REQ-027
 Date and tester: 2026-10-27 09:52-09:55, owner (headset); agent (install over adb, CSV pull and analysis)

@@ -33,6 +33,7 @@ namespace CricketVR
 
         SessionStateMachine _session;
         System.Random _rng;
+        DeliveryTypeData[] _types;
         string _sessionId = "";
         float _sessionStart;
         float _untrackedFor;
@@ -147,9 +148,10 @@ namespace CricketVR
             var plan = _mode == SessionMode.NetPractice ? DeliveryPlanSettings.NetPractice
                 : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
-            bool left = handedness != null && handedness.Current == Handedness.Left;
-            var delivery = DeliveryPlanner.Draw(plan, _rng, left,
-                DeliveryPlanner.SolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out int redraws);
+            var hand = handedness != null ? handedness.Current : Handedness.Right;
+            var solverCheck = DeliveryPlanner.SolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius);
+            var delivery = DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
+                r => solverCheck(r.ForBatter().ToConfig()), out int redraws);
             if (redraws > 0)
                 Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
             int id = machine.Bowl(delivery);
@@ -331,6 +333,7 @@ namespace CricketVR
                 : SessionOptions.MatchSimulation(Mathf.Max(1, config.session.matchPlaceholderBalls), seed);
             ApplyEnvironment(_mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode);
             _rng = new System.Random(seed);
+            _types = config.delivery.TypeCatalogue();
             _sessionId = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
             _sessionStart = Time.time;
             _lastResultLine = "";

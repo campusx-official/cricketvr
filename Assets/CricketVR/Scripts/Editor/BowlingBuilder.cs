@@ -16,12 +16,40 @@ namespace CricketVR.Editor
     {
         public const string BallLayer = "Ball";
         const string PhysicsFolder = "Assets/CricketVR/Settings/Physics";
+        public const string DeliveryTypesFolder = "Assets/CricketVR/Settings/DeliveryTypes";
         const string TmpEssentials = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
+
+        /// <summary>
+        /// M7.5: one DeliveryType asset per type with the plan.md §19 starting values. Existing assets are never
+        /// overwritten (they hold calibration); GameConfig's list is re-applied in DeliveryKind order.
+        /// </summary>
+        static void EnsureDeliveryTypes(GameConfig config, List<string> created)
+        {
+            Directory.CreateDirectory(DeliveryTypesFolder);
+            var defaults = DeliveryTypeData.All;
+            var assets = new DeliveryType[defaults.Length];
+            for (int i = 0; i < defaults.Length; i++)
+            {
+                string path = $"{DeliveryTypesFolder}/{defaults[i].kind}.asset";
+                var asset = AssetDatabase.LoadAssetAtPath<DeliveryType>(path);
+                if (asset == null)
+                {
+                    asset = ScriptableObject.CreateInstance<DeliveryType>();
+                    asset.data = defaults[i];
+                    AssetDatabase.CreateAsset(asset, path);
+                    created.Add(path);
+                }
+                assets[i] = asset;
+            }
+            config.delivery.deliveryTypes = assets;
+            EditorUtility.SetDirty(config);
+        }
 
         public static void Build(GameObject main, GameObject environment, GameConfig config, List<string> created)
         {
             PracticeNetBuilder.EnsureLayers(created, BallLayer, GroundBuilder.OutfieldLayer);
             ConfigureCollisionMatrix();
+            EnsureDeliveryTypes(config, created);
             ApplyPhysicsMaterials(environment, created);
 
             var gameplay = Child(main.transform, "Gameplay", created);

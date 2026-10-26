@@ -62,6 +62,9 @@ namespace CricketVR
             DeliveryConfig.Create("Unreachable test", 30f, 0f, 6f),
         };
 
+        [Tooltip("The seven delivery types (M7.5), one asset each; filled by the scene builder.")]
+        public DeliveryType[] deliveryTypes = new DeliveryType[0];
+
         [Header("Ball")]
         public float ballRadius = 0.036f;
         public float ballMass = 0.16f;
@@ -76,6 +79,17 @@ namespace CricketVR
         [Header("Debug")]
         public bool showDebugMarkers = true;
         public bool logDeliveries = true;
+
+        /// <summary>The configured types' settings (missing assets are skipped; the planner falls back to the code defaults when none are set).</summary>
+        public DeliveryTypeData[] TypeCatalogue()
+        {
+            if (deliveryTypes == null || deliveryTypes.Length == 0)
+                return DeliveryTypeData.All;
+            var list = new System.Collections.Generic.List<DeliveryTypeData>(deliveryTypes.Length);
+            foreach (var t in deliveryTypes)
+                if (t != null) list.Add(t.data);
+            return list.ToArray();
+        }
     }
 
     [Serializable]

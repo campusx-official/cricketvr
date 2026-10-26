@@ -95,6 +95,14 @@ MonoBehaviour:
       releasePosition: {x: 0, y: 2, z: 18.900002}
       line: 0
       length: 6
+    deliveryTypes:
+    - {fileID: 11400000, guid: 3d69826ce984444f0bb10dd1cc5d1faf, type: 2}
+    - {fileID: 11400000, guid: 77e46431c323e424ba529a07bc19861c, type: 2}
+    - {fileID: 11400000, guid: 674abd700b253415c91f5074a92255f0, type: 2}
+    - {fileID: 11400000, guid: b2a1eaf9b365d49ce81dc78a77e40b8c, type: 2}
+    - {fileID: 11400000, guid: a61463b6b41c14fc984d0720ed5c7ace, type: 2}
+    - {fileID: 11400000, guid: e07170cdf89164dcfa054ecee779bebc, type: 2}
+    - {fileID: 11400000, guid: cfdfc105300544a6bb645771dd367fc8, type: 2}
     ballRadius: 0.036
     ballMass: 0.16
     ballTimeout: 10

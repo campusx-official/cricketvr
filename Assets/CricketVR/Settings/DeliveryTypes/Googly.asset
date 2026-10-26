@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73a64b4a15ee4fe3bb1ba334eb040b1, type: 3}
+  m_Name: Googly
+  m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.DeliveryType
+  data:
+    kind: 6
+    displayName: Googly
+    description: 'The leg-spinner''s variation: looks like leg-spin but turns in,
+      dips more and bounces higher.'
+    style: 1
+    minSpeedKmh: 75
+    maxSpeedKmh: 90
+    swingDirection: 0
+    swingMin: 0
+    swingMax: 0
+    swingLateness: 0
+    turnDirection: -1
+    driftMin: 0.06
+    driftMax: 0.12
+    dip: 1.2
+    turnMin: 3.5
+    turnMax: 7.5
+    bounceFactor: 0.12
+    grip: 0.06
+    seamDegrees: 0
+    visualRevPerSecond: 4
+    looksLike: 4
+    variation: 0.15

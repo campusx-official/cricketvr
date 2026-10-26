@@ -116,7 +116,7 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 
 ### Phase 0 — Foundation
 - [x] T070 *(done, E-040: measured where the incoming flight reaches the pitch, worst Stock error 0.21 cm vs 2.2–10.1 cm before; tolerance tightened to 1 cm)* Bounce measured at the ball's lowest point (DT-3), as a measurement change only (physics, materials and launches unchanged). Re-run the Stock calibration tests and record the before/after accuracy per preset in validation.md, with the reason the old ~6 cm changed. Tighten the Stock tolerance to about 1 cm only if every preset passes it; otherwise record the measured accuracy and keep the tolerance.
-- [ ] T071 `DeliveryTypeData` / `DeliveryType` assets (seven types, starting values), `DeliveryRequest` (Stock ↔ `DeliveryConfig`, `ForBatter` mirroring), and plans with a type mix (existing plans Stock-only). EditMode tests: asset value ranges, exact mirror symmetry, Stock request = existing config.
+- [x] T071 *(done, E-041)* `DeliveryTypeData` / `DeliveryType` assets (seven types, starting values), `DeliveryRequest` (Stock ↔ `DeliveryConfig`, `ForBatter` mirroring), and plans with a type mix (existing plans Stock-only). EditMode tests: asset value ranges, exact mirror symmetry, Stock request = existing config.
 - [ ] T072 Record and CSV columns (type, movement, predicted/measured curve, turn, arrival line, measured bounce and error, variation factors). Round-trip test.
 - [ ] T072a Natural variation (REQ-048): seeded per-ball factors on swing, drift and turn (default ±15%), recorded; the solver applies them before solving. Tests (AC-31): same seed same ball; bounds over 1,000 seeds; 0 = nominal. Every other type test uses variation 0.
 
