@@ -25,7 +25,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
 | AC-15 | REQ-025 | **Pass on Quest** (owner, recorded 2026-10-27 at the owner's request; rest of the M7 re-check pending) | APK sha256 c71f726…2b30f0; E-036, E-039 | Re-check if the near panel, ray or bat-tap changes |
-| AC-16 | REQ-027, REQ-028 | Automated pass (E-036); device CSV collected and checked (E-050): complete except Δt / swing-peak / reset-age columns, which T053 (M8) fills; owner to choose: amend AC-16 for M7 or keep it open until M8 | APK sha256 c71f726…30f0; E-036, E-050 | M7 T048/T049 record, CSV, delivery plans |
+| AC-16 | REQ-027, REQ-028 | **Pass for M7** (automated E-036; device CSV E-050), under the owner's 2026-10-27 amendment: Δt / swing-peak / reset-age columns may be empty until T053 | APK sha256 c71f726…30f0; E-036, E-050 | Re-check those three columns in M8 T053 |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
 | AC-18 | REQ-031 | Not run | None | M8 summary |
 | AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
@@ -702,9 +702,9 @@ Actual result and measured values:
   - Balls finalized 1.1-2.6 s apart (Net) and 1.0-5.8 s apart (Match), i.e. each next ball came straight after the batter's press, including after ground-mode "scoring pending" hits (E-038 fix: no long wait for B).
   - AC-16 field check: one row per finalized ball; contact columns filled for every contacted ball (7/12 each session) and empty for misses; confidence and simulated-scorer columns empty as designed (M8/M9). swing_timing_offset_s, swing_peak_ms and tracking_reset_age_s are empty in every row: Δt is required by AC-16's text but implemented by T053 (M8). Conflict raised with the owner.
   - Not shown by this data: Play again / Menu from the countdown, an active ball and between balls (AC-08, five times per mode), and focus/tracking interruption (AC-09). Both sessions ran to the end and no pause is visible in the records.
-Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part pending the owner's choice on Δt; AC-08 and AC-09 pending the owner's confirmation that they were exercised
+Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part Pass (owner amended AC-16 on 2026-10-27: the Δt / swing-peak / reset-age columns may be empty until T053, M8); AC-08 and AC-09 pending the owner's confirmation that they were exercised
 Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
-Remaining limitation / follow-up task: owner to confirm AC-08/AC-09; owner choice on AC-16 Δt; then merge m7-session into main only on the owner's go-ahead
+Remaining limitation / follow-up task: owner to confirm AC-08/AC-09 (AC-16 Δt decided: amended); then merge m7-session into main only on the owner's go-ahead
 ```
 
 ## Re-plan note (2026-10-26)

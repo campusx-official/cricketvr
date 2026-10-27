@@ -206,6 +206,8 @@ With only the right controller, the owner selects each mode and each option by r
 
 In a development build, a session writes one CSV row per finalized ball with every field filled for its mode, including the swing timing offset Δt. No planned delivery is unreachable; redraws are logged.
 
+*Amended 2026-10-27 (owner):* until T053 (M8) the three swing-timing columns (`swing_timing_offset_s`, `swing_peak_ms`, `tracking_reset_age_s`) may be empty; M7 passes AC-16 without them. T053 must fill them for every contacted ball, and AC-16 is re-checked for those columns then.
+
 ### AC-17 — Shot Confidence (REQ-029, REQ-030)
 
 - **Automated:** fixed inputs give the documented component values; the edge cap applies; leaves are excluded; thresholds come from settings.

@@ -114,7 +114,7 @@ Dependency: M6.5 complete and merged. Requirements: REQ-008, REQ-011..014, REQ-0
 
 Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended), AC-17, AC-18.
 
-- [ ] T053 Swing-peak timestamp in BatController; per-contact swing data (v_peak, t_peak, Δt, reset age) in the contact report and the CSV for every contacted ball.
+- [ ] T053 Swing-peak timestamp in BatController; per-contact swing data (v_peak, t_peak, Δt, reset age) in the contact report and the CSV for every contacted ball. *(Completes AC-16's swing-timing columns, deferred from M7 by the owner on 2026-10-27.)*
 - [ ] T054 `ShotConfidence` and `ConfidenceSettings` (every plan.md §17 calibration setting, including the ±60 ms timing window). EditMode tests per component, edge cap, defensive renormalisation, labels.
 - [ ] T055 Leave / played-and-missed classification with the 0.20 m and 3 m/s thresholds as settings. Tests with recorded gap and bat-speed traces.
 - [ ] T056 Overs selection, per-ball confidence panel with breakdown, and the session summary (averages, best/worst, counts, per-over trend). Test: summary = values recomputed from records.
