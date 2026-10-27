@@ -36,7 +36,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
 | AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
-| AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Drift and dip automated pass (E-053); turn, arrival line and headset not run | E-053 | M7.5 T078, T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
@@ -967,6 +967,28 @@ Actual result and measured values (pitch-point error, worst; before = E-051 / la
 Outcome: Pass. The pitch point in the real scene is now within 0.02 cm of the request.
 Log or artifact path: batch test results (play.xml/edit.xml, scratchpad)
 Remaining limitation / follow-up task: no headset re-check (owner: not needed unless something visibly changes; a 0.01 deg launch change is not visible)
+```
+
+```text
+Check ID / acceptance scenario: E-053 / T077 drift and dip in the flight model and solver (AC-27 automated, before the bounce)
+Requirement IDs: REQ-043, REQ-044, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: shipped spin types; turn, bounce factor and grip zeroed in the tests (the turn at the bounce is T078, and the solver still rejects a turn); variation 0; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: spin speeds 75-95 km/h reach lengths 3-9 m on target; drift opposite to the turn for both hands; googly dips most; PhysX drift = solved
+Actual result and measured values:
+  - EditMode SpinSpeedsSeventyFiveToNinetyFiveReachLengthsThreeToNine: 1200 solves (4 types x 2 hands x 75/80/85/90/95 km/h x movement 0/1 x 5 lengths 3-9 m x 3 lines), all reachable; worst landing miss 0.033 mm; worst drift error 0.32 mm; largest drift acceleration 1.65 m/s^2.
+  - Drift direction: opposite to the type's turn for every type and both hands (left-hander mirrored).
+  - Dip at 85 km/h, 6 m (arrival angle below horizontal / launch elevation): Stock 14.85 / -2.12 deg; Off-spin and Doosra 15.22 / -1.72; Leg-spin 15.34 / -1.59; Googly 15.58 / -1.32. Googly arrives steepest and is launched highest.
+  - PlayMode SpinningBallsDriftAndDipAsSolved: 48 balls (4 types x 2 hands x 75/95 km/h x 3/6/9 m), worst pitch error 0.04 cm, measured drift = solved within 0.0 mm (rounded; tolerance 5 mm).
+  - Swing and Stock unchanged: T074 swing matrix 0.08 / 0.10 cm, swing 0.0 mm; AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; real scene 0.02 cm.
+  - Suites: EditMode 146/146, PlayMode 57/57.
+Outcome: Pass (automated, simulation and PhysX; before the bounce only)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: T078 turn at the bounce (lifts the solver's turn rejection); spin types are not bowled in play until then; headset AC-27 in T082
 ```
 
 ```text

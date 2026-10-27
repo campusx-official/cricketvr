@@ -518,7 +518,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | Effect | Formula | Notes |
 | --- | --- | --- |
 | Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the swing at the crease equals S(m) = min(f_swing·(S_min + m·(S_max − S_min)), 0.5 m): A = S·(p+1) / (T·(T/(p+2) + τ)), τ = time from the pitch point to the crease (negative for a yorker); the solver rescales A so the simulated swing matches exactly. p = 0 uniform, p = 2 late. Force applies in steps with step·dt ≤ T only (the solver's own count), never after the pitch. *(Swing was defined as the curve until 2026-10-27, with A = D / (T²·K(p)); see open decision 4.)* |
-| Drift (spin) | a = −s·τ·d · ŝ, constant before the bounce | τ = turn direction (−1 off-spin/googly, +1 leg-spin/doosra). Drift is opposite to the turn. d gives 0.05–0.15 m of drift by the bounce. |
+| Drift (spin) | a = −s·τ·d · ŝ, constant before the bounce | τ = turn direction (−1 off-spin/googly, +1 leg-spin/doosra). Drift is opposite to the turn. Drift d = the ball's distance at the pitch point from its release line (as built, T077); first guess a = 2d/T², and the solver's outer loop rescales it so the simulated drift equals d (like the swing). |
 | Dip (spin) | a = −k_dip · Ŷ, constant before the bounce | Top-spin dip. The solver compensates with a higher launch, so the ball arrives steeper and bounces higher. |
 | Turn at the bounce | v_h′ = R_Y(s·τ·θ(m)) · v_h · (1 − g_grip); v_y′ = v_y · (1 + b) | θ(m) = θ_min + m·(θ_max − θ_min); b = bounce-height factor; g_grip = speed lost to grip. Applied once, in the step after the physical bounce. |
 | Seam (pace, D-2) | v_h′ = R_Y(φ) · v_h | φ = 0 in v1. |
@@ -549,7 +549,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
   - Start from the no-movement solution.
   - Integrate gravity plus `Acceleration` with the same semi-implicit Euler step as PhysX (v += (g + a)·dt, then x += v·dt; a from the velocity at the step's start), down to the pitch point (crossing of contact height).
   - Inner loop: Newton steps on (yaw, elevation) from finite differences of the landing point, to < 0.1 mm.
-  - Outer loop: T = that flight's time to the pitch point, and the swing acceleration rescaled so the simulated swing at the crease equals S (within 0.5 mm). A few outer passes. (Updating swing and aim in one loop oscillated: the swing depends on the aim, so it is only meaningful once the ball lands on target.)
+  - Outer loop: T = that flight's time to the pitch point, and the swing and drift accelerations rescaled so the simulated swing at the crease equals S and the drift at the pitch point equals d (each within 0.5 mm). Dip needs no rescale: the aim (a higher launch) absorbs it (T077). A few outer passes. (Updating swing and aim in one loop oscillated: the swing depends on the aim, so it is only meaningful once the ball lands on target.)
   - Output: launch velocity and a `FlightPlan` (direction, A, p, T) that the runtime applies unchanged.
   - Rejected with a reason: Stock-unreachable speed, aim more than 0.5 rad off the line ("too much movement"), or no convergence.
 - *Arrival line (D-1):* the same, then continue through `TurnAtBounce` with the measured pitch restitution to z = 1.22 m and correct yaw on the arrival miss (tolerance about 3 cm).

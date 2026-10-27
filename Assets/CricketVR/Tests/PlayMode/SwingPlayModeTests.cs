@@ -185,6 +185,45 @@ namespace CricketVR.Tests
             }
         }
 
+        /// <summary>
+        /// T077: spin types' drift and dip in PhysX (turn, bounce and grip zeroed: the turn at the bounce is T078). The
+        /// ball pitches on target, and its drift (pitch point off the release line) is the solved drift, opposite to
+        /// the type's turn.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SpinningBallsDriftAndDipAsSolved()
+        {
+            float worstPitch = 0f, worstDrift = 0f;
+            int balls = 0;
+            foreach (var kind in new[] { DeliveryKind.OffSpin, DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            foreach (var kmh in new[] { 75f, 95f })
+            foreach (var length in new[] { 3f, 6f, 9f })
+            {
+                var type = Shipped(kind);
+                type.turnMin = type.turnMax = type.bounceFactor = type.grip = 0f;
+                var request = Request(type, kmh, 0.1f, length, 1f, hand);
+                int id = 0;
+                yield return BowlAndWaitForPitch(request, x => id = x);
+                var world = request.ForBatter();
+                var solution = _machine.LastSolution;
+                var p = _pitches[id].Point;
+                float pitchError = Vector2.Distance(new Vector2(p.x, p.z), new Vector2(world.line, world.length));
+                var release = world.releasePosition;
+                var v = solution.Velocity;
+                float drift = p.x - (release.x + v.x * (p.z - release.z) / v.z);
+                Assert.LessOrEqual(pitchError, BowlingPlayModeTests.StockTolerance, $"{request}: pitch error");
+                Assert.AreEqual(-world.type.turnDirection, (int)Mathf.Sign(drift), $"{request}: drift {drift:F3} m opposite to the turn");
+                Assert.AreEqual(solution.PredictedDrift, Mathf.Abs(drift), 0.005f, $"{request}: measured drift");
+                Assert.AreEqual(world.type.dip, solution.Plan.Dip, $"{request}: dip applied");
+                worstPitch = Mathf.Max(worstPitch, pitchError);
+                worstDrift = Mathf.Max(worstDrift, Mathf.Abs(Mathf.Abs(drift) - solution.PredictedDrift));
+                balls++;
+            }
+            Debug.Log($"[CricketVR] T077 spin PlayMode (drift and dip, no turn): {balls} balls, worst pitch error {worstPitch * 100f:F2} cm, " +
+                      $"worst measured-vs-solved drift {worstDrift * 1000f:F1} mm");
+        }
+
         [UnityTest]
         public IEnumerator StockWithBallFlightIsUnchanged()
         {

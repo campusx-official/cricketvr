@@ -58,6 +58,8 @@ namespace CricketVR
         public float PredictedSwing;
         /// <summary>Simulated curve (m): largest distance from the release-to-pitch line (diagnostic); 0 without swing.</summary>
         public float PredictedCurve;
+        /// <summary>Simulated drift (m): distance off the release line at the pitch point; 0 without drift.</summary>
+        public float PredictedDrift;
     }
 
     /// <summary>
@@ -187,10 +189,9 @@ namespace CricketVR
             if (worldRequest.lineReference != LineReference.AtBounce)
                 return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
                     "arrival-line requests are not available yet (T079)");
-            if (movement.Drift != 0f || movement.Dip != 0f || movement.TurnDegrees != 0f || movement.BounceFactor != 0f ||
-                movement.Grip != 0f || movement.SeamDegrees != 0f)
+            if (movement.TurnDegrees != 0f || movement.BounceFactor != 0f || movement.Grip != 0f || movement.SeamDegrees != 0f)
                 return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
-                    "spin movement is not available yet (M7.5 phase B)");
+                    "the turn at the bounce is not available yet (T078)");
             return SolveMoving(config, movement, gravity, fixedDeltaTime, ballRadius);
         }
 
@@ -198,9 +199,10 @@ namespace CricketVR
         /// Shooting solve on (yaw, elevation) at the requested speed. Integrates gravity plus
         /// <see cref="DeliveryFlightModel.Acceleration"/> exactly as PhysX steps the ball (velocity, then position)
         /// down to the pitch point. An inner Newton loop corrects yaw and elevation until it lands within 0.1 mm; an
-        /// outer loop then updates the planned flight time T and rescales the swing acceleration so the simulated swing
-        /// (distance off the release line at the popping crease) equals the requested one (the closed form is a
-        /// small-angle result). Converges in a few outer passes.
+        /// outer loop then updates the planned flight time T and rescales the swing and drift accelerations so the
+        /// simulated swing (distance off the release line at the popping crease) and drift (at the pitch point) equal
+        /// the requested ones (the closed forms are small-angle results). Dip needs no rescale: the aim absorbs it.
+        /// Converges in a few outer passes.
         /// </summary>
         static DeliverySolution SolveMoving(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float radius)
         {
@@ -220,6 +222,7 @@ namespace CricketVR
             float yaw = 0f, elevation = still.ElevationDegrees * Mathf.Deg2Rad;
             var start = Simulate(release, Launch(forward, side, speed, yaw, elevation), default, gravity, dt, contact, target);
             float swing = movement.Swing, scale = 1f;
+            float drift = movement.Drift, driftScale = 1f;
             // Time from the pitch point to the popping crease, for the closed-form first guess (negative for a yorker).
             float pitchToCrease = (config.length - FieldDimensions.PoppingCreaseOffset) /
                                   (speed * Mathf.Cos(elevation));
@@ -228,12 +231,15 @@ namespace CricketVR
                 SwingDirection = movement.SwingDirection,
                 SwingLateness = movement.SwingLateness,
                 PlannedTime = start.Time,
+                DriftDirection = drift > 0f ? -movement.TurnDirection : 0,
+                Dip = movement.Dip,
             };
 
             // Outer loop: swing strength and planned time from a flight that lands on target. Inner loop: aim.
             for (int outer = 0; outer < MaxMovingIterations; outer++)
             {
                 plan.SwingAcceleration = scale * DeliveryFlightModel.SwingAccelerationFor(swing, plan.PlannedTime, plan.SwingLateness, pitchToCrease);
+                plan.DriftAcceleration = driftScale * DeliveryFlightModel.DriftAccelerationFor(drift, plan.PlannedTime);
                 SimulatedFlight flight = default;
                 bool aimed = false;
                 for (int inner = 0; inner < MaxMovingIterations && !aimed; inner++)
@@ -271,7 +277,9 @@ namespace CricketVR
 
                 bool timed = Mathf.Abs(flight.Time - plan.PlannedTime) < 1e-4f;
                 float swung = Mathf.Abs(flight.Swing);
-                bool sized = swing <= 0f || Mathf.Abs(swung - swing) < MovingTolerance * 0.5f;
+                float drifted = Mathf.Abs(flight.Drift);
+                bool sized = (swing <= 0f || Mathf.Abs(swung - swing) < MovingTolerance * 0.5f) &&
+                             (drift <= 0f || Mathf.Abs(drifted - drift) < MovingTolerance * 0.5f);
                 if (timed && sized)
                 {
                     result.Velocity = Launch(forward, side, speed, yaw, elevation);
@@ -279,14 +287,17 @@ namespace CricketVR
                     result.PredictedBounce = flight.Bounce;
                     result.PredictedSwing = swung;
                     result.PredictedCurve = flight.Curve;
+                    result.PredictedDrift = drifted;
                     result.Plan = plan;
                     return result;
                 }
                 plan.PlannedTime = flight.Time;
                 if (swing > 0f && swung > 1e-4f)
                     scale *= swing / swung;
+                if (drift > 0f && drifted > 1e-4f)
+                    driftScale *= drift / drifted;
             }
-            return Fail(result, $"the swing for {config} did not settle within {MaxMovingIterations} passes");
+            return Fail(result, $"the movement for {config} did not settle within {MaxMovingIterations} passes");
         }
 
         static Vector3 Launch(Vector3 forward, Vector3 side, float speed, float yaw, float elevation)
@@ -312,6 +323,8 @@ namespace CricketVR
             /// its heading (PhysX's bounce of a ball with no sideways spin doesn't change it; measured in PlayMode).
             /// </summary>
             public float Swing;
+            /// <summary>Signed drift (m): ball x at the pitch point minus where the release line reaches that z.</summary>
+            public float Drift;
         }
 
         /// <summary>
@@ -349,6 +362,9 @@ namespace CricketVR
                     if (float.IsNaN(creaseX) && Mathf.Abs(v.z) > 1e-6f)
                         creaseX = result.Bounce.x + v.x * (creaseZ - result.Bounce.z) / v.z;
                     result.Swing = creaseX - releaseLineX;
+                    result.Drift = result.Bounce.x - (Mathf.Abs(velocity.z) > 1e-6f
+                        ? release.x + velocity.x * (result.Bounce.z - release.z) / velocity.z
+                        : release.x);
                     return result;
                 }
                 if (float.IsNaN(creaseX) && p.z > creaseZ && next.z <= creaseZ)

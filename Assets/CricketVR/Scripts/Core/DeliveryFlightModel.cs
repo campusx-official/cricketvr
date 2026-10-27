@@ -76,7 +76,8 @@ namespace CricketVR
 
     /// <summary>
     /// What the flight applies before the bounce, as solved for one ball: swing acceleration A along the side
-    /// direction, growing as (t/T)^p. Solved by <see cref="DeliverySolver"/>; the runtime flight applies exactly this.
+    /// direction, growing as (t/T)^p; a constant sideways drift; a constant downward dip. Solved by
+    /// <see cref="DeliverySolver"/>; the runtime flight applies exactly this.
     /// </summary>
     public struct FlightPlan
     {
@@ -87,8 +88,15 @@ namespace CricketVR
         public float SwingLateness;
         /// <summary>The solver's planned time from release to the pitch point (s).</summary>
         public float PlannedTime;
+        /// <summary>-1 = toward −X, +1 = toward +X, 0 = no drift (world); opposite to the turn.</summary>
+        public int DriftDirection;
+        /// <summary>Constant sideways drift acceleration before the bounce (m/s²).</summary>
+        public float DriftAcceleration;
+        /// <summary>Extra downward acceleration before the bounce (m/s², top-spin dip).</summary>
+        public float Dip;
 
-        public bool IsStill => SwingDirection == 0 || SwingAcceleration == 0f;
+        public bool IsStill => (SwingDirection == 0 || SwingAcceleration == 0f) &&
+                               (DriftDirection == 0 || DriftAcceleration == 0f) && Dip == 0f;
     }
 
     /// <summary>
@@ -99,24 +107,39 @@ namespace CricketVR
     {
         /// <summary>
         /// Extra acceleration (m/s², world, excluding gravity) for the step starting at time <paramref name="t"/>
-        /// after release, from the velocity at the start of that step. Swing acts sideways: perpendicular to the
-        /// horizontal velocity, on the side of the swing direction.
+        /// after release, from the velocity at the start of that step. Swing and drift act sideways: perpendicular to
+        /// the horizontal velocity, on the side of their direction. Dip acts straight down.
         /// </summary>
         public static Vector3 Acceleration(float t, Vector3 velocity, in FlightPlan plan)
         {
             if (plan.IsStill || !(plan.PlannedTime > 0f))
                 return Vector3.zero;
+            var a = new Vector3(0f, -plan.Dip, 0f);
             var side = new Vector3(-velocity.z, 0f, velocity.x);
             float length = side.magnitude;
             if (length < 1e-6f)
-                return Vector3.zero;
+                return a;
             side /= length;
-            if (side.x * plan.SwingDirection < 0f)
-                side = -side;
-            float u = Mathf.Max(0f, t / plan.PlannedTime);
-            float growth = plan.SwingLateness > 0f ? Mathf.Pow(u, plan.SwingLateness) : 1f;
-            return side * (plan.SwingAcceleration * growth);
+            if (side.x < 0f)
+                side = -side; // toward +X; each effect's direction picks the side
+            if (plan.SwingDirection != 0 && plan.SwingAcceleration != 0f)
+            {
+                float u = Mathf.Max(0f, t / plan.PlannedTime);
+                float growth = plan.SwingLateness > 0f ? Mathf.Pow(u, plan.SwingLateness) : 1f;
+                a += side * (plan.SwingDirection * plan.SwingAcceleration * growth);
+            }
+            if (plan.DriftDirection != 0)
+                a += side * (plan.DriftDirection * plan.DriftAcceleration);
+            return a;
         }
+
+        /// <summary>
+        /// Constant sideways acceleration that moves the ball <paramref name="drift"/> (m) off its release line by the
+        /// pitch point, <paramref name="flightTime"/> seconds after release: d = a T² / 2. The solver rescales it until
+        /// the simulated drift matches.
+        /// </summary>
+        public static float DriftAccelerationFor(float drift, float flightTime) =>
+            drift > 0f && flightTime > 0f ? 2f * drift / (flightTime * flightTime) : 0f;
 
         /// <summary>
         /// Swing acceleration A that puts the ball <paramref name="swing"/> (m) off its release line at the popping
