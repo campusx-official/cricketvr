@@ -1082,6 +1082,26 @@ Remaining limitation / follow-up task: AC-28 (spin seam visual, deception, strob
 ```
 
 ```text
+Check ID / acceptance scenario: E-059 / Net Practice Bowler choice: Pace / Off-spin / Leg-spin (owner request 2026-10-27)
+Requirement IDs: REQ-028, REQ-029, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch); scene builder
+Configuration: new menu row "Bowler" in NetOptions; Overs, Difficulty and Batting rows moved (110 / 30 / -50) and buttons 70 high to fit
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (twice: identical output), then both suites
+Expected result: Pace keeps the Stock-only plan; Off-spin / Leg-spin bowl only that type, from the type's speed range, always reachable; a session bowls the chosen spinner with the turn and crease height recorded
+Actual result and measured values:
+  - EditMode NetPracticeSpinBowlersDrawOnlyTheirTypeAndAreAlwaysReachable: 200 draws x 2 types x 2 hands, all of the chosen type, speeds within the type's range, lengths within 3.5-9 m, 0 redraws.
+  - PlayMode NetPracticeBowlsTheChosenSpinner: one over of off-spin then one of leg-spin: 6 records each, type recorded, turn toward leg (off-spin, -X) / off (leg-spin, +X) for a right-hander, crease height filled, pitched within 1 cm of its length.
+  - Scene: 31 new objects (label and three buttons); existing IDs kept; a second builder run is byte-identical.
+  - Suites: EditMode 152/152, PlayMode 61/61.
+Outcome: Pass (automated); headset not run
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: needs a new APK for the headset; the spin seam visual (T080) is not done, so a spinning ball still shows the pace seam setup
+```
+
+```text
 Check ID / acceptance scenario: E-058 / AC-08, AC-09 headset run (partial)
 Requirement IDs: REQ-013, REQ-014
 Date and tester: 2026-10-27 17:36-17:38, owner (headset); agent (install, log and CSV check)

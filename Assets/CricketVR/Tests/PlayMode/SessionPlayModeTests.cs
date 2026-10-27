@@ -100,6 +100,32 @@ namespace CricketVR.Tests
                 yield return null;
         }
 
+        /// <summary>Owner request 2026-10-27: Net Practice can bowl off-spin or leg-spin for the whole session.</summary>
+        [UnityTest]
+        public IEnumerator NetPracticeBowlsTheChosenSpinner()
+        {
+            foreach (var (button, type, turn) in new[] { ("BowlerOffSpin", "Off-spin", -1), ("BowlerLegSpin", "Leg-spin", +1) })
+            {
+                yield return null;
+                if (_session.Phase != SessionPhase.Menu) _session.Press("Menu");
+                yield return null;
+                _session.Press("NetPractice");
+                _session.Press(button);
+                _session.Press("Overs1");
+                _session.Press("Start");
+                yield return WaitFor(() => _session.Phase == SessionPhase.SessionEnd, 90f);
+                Assert.AreEqual(SessionPhase.SessionEnd, _session.Phase, $"{type}: stuck in {_session.Phase}");
+                Assert.AreEqual(6, _session.Session.Records.Count);
+                foreach (var r in _session.Session.Records)
+                {
+                    Assert.AreEqual(type, r.DeliveryType);
+                    Assert.AreEqual(turn, (int)Mathf.Sign(r.TurnDegrees), $"{type} turns toward {turn} for a right-hander ({r.TurnDegrees:F1} deg)");
+                    Assert.That(r.CreaseHeight, Is.InRange(0.1f, 1.5f), $"{type}: crease height");
+                    Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, $"{type}: pitched on its length");
+                }
+            }
+        }
+
         [UnityTest]
         public IEnumerator OneOverBowlsExactlySixBallsThenShowsTheEnd()
         {

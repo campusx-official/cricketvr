@@ -53,6 +53,7 @@ namespace CricketVR
             minLength = 3.5f, maxLength = 9f,
         };
 
+
         // Swing per difficulty (owner, 2026-10-27): Easy and Medium about 0.15-0.3 m, Hard up to the 0.5 m cap.
         public static DeliveryPlanSettings Easy => Match("Easy", 70f, 85f, 0.05f, 0.10f, 0.15f, 0.30f);
         public static DeliveryPlanSettings Medium => Match("Medium", 80f, 100f, 0.10f, 0.15f, 0.15f, 0.30f);

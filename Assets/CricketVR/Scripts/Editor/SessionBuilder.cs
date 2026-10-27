@@ -154,21 +154,26 @@ namespace CricketVR.Editor
             buttons.Add(MakeButton(tree, menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
 
             var net = Group(tree, menu, "NetOptions");
-            Label(tree, net, "Overs", new Vector2(-300f, 95f));
+            Label(tree, net, "Overs", new Vector2(-300f, 110f));
             int i = 0;
             foreach (var o in new[] { 1, 2, 3, 5 })
-                buttons.Add(MakeButton(tree, net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 95f), new Vector2(100f, 75f)));
+                buttons.Add(MakeButton(tree, net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 110f), new Vector2(100f, 70f)));
+            // Bowler (owner request 2026-10-27): pace (Stock) or one spin type for the whole session.
+            Label(tree, net, "Bowler", new Vector2(-300f, 30f));
+            i = 0;
+            foreach (var bowler in NetBowler.All)
+                buttons.Add(MakeButton(tree, net, bowler.Button, bowler.Label, new Vector2(-110f + 170f * i++, 30f), new Vector2(155f, 70f)));
 
             var match = Group(tree, menu, "MatchOptions");
-            Label(tree, match, "Difficulty", new Vector2(-300f, 95f));
+            Label(tree, match, "Difficulty", new Vector2(-300f, 110f));
             i = 0;
             foreach (var d in new[] { "Easy", "Medium", "Hard" })
-                buttons.Add(MakeButton(tree, match, d, d, new Vector2(-110f + 170f * i++, 95f), new Vector2(155f, 75f)));
+                buttons.Add(MakeButton(tree, match, d, d, new Vector2(-110f + 170f * i++, 110f), new Vector2(155f, 70f)));
 
-            Label(tree, menu, "Batting", new Vector2(-300f, -10f));
-            buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -10f), new Vector2(190f, 75f)));
-            buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -10f), new Vector2(190f, 75f)));
-            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -10f), new Vector2(190f, 75f)));
+            Label(tree, menu, "Batting", new Vector2(-300f, -50f));
+            buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -50f), new Vector2(190f, 70f)));
+            buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -50f), new Vector2(190f, 70f)));
+            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -50f), new Vector2(190f, 70f)));
             buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -150f), new Vector2(420f, 100f), StartColor));
 
             var end = Group(tree, panel.transform, "EndGroup");

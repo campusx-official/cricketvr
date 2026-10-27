@@ -265,5 +265,30 @@ namespace CricketVR.Tests
                 Assert.Greater(s.Plan.TurnDegrees, 0f, $"ball {i + 1} turns");
             }
         }
+
+        [Test]
+        public void NetPracticeSpinBowlersDrawOnlyTheirTypeAndAreAlwaysReachable()
+        {
+            var types = DeliveryTypeData.All;
+            var reachable = DeliveryPlanner.RequestSolverCheck(G, Dt, R);
+            Assert.AreEqual("BowlerPace", NetBowler.All[0].Button);
+            Assert.IsTrue(NetBowler.All[0].Plan().StockOnly, "Pace keeps the Stock-only plan");
+            foreach (var (bowler, kind) in new[] { (NetBowler.All[1], DeliveryKind.OffSpin), (NetBowler.All[2], DeliveryKind.LegSpin) })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            {
+                var plan = bowler.Plan();
+                var rng = new System.Random(7);
+                int redraws = 0;
+                for (int n = 0; n < 200; n++)
+                {
+                    var r = DeliveryPlanner.DrawRequest(plan, rng, hand, types, reachable, out int k);
+                    redraws += k;
+                    Assert.AreEqual(kind, r.type.kind, $"draw {n}: {r}");
+                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), $"draw {n}: the type's own speed");
+                    Assert.That(r.length, Is.InRange(plan.minLength, plan.maxLength));
+                }
+                Assert.AreEqual(0, redraws, $"{kind} {hand}: every draw reachable");
+            }
+        }
     }
 }

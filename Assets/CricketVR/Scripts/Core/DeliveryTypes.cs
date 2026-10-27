@@ -254,4 +254,34 @@ namespace CricketVR
             type.IsStill && movement == 0f ? ToConfig().ToString()
                 : $"{label} [{type.displayName}, movement {movement:F2}, {handedness}-handed]: {speedKmh:F0} km/h, line {line:+0.00;-0.00;0.00} m, length {length:F2} m";
     }
+
+    /// <summary>
+    /// A Net Practice bowler choice (owner request 2026-10-27; an early part of the M8 delivery-mix menu, REQ-029):
+    /// its menu button and the type mix it bowls for the whole session. The menu and the session only list these, so
+    /// nothing outside the module branches on a type.
+    /// </summary>
+    public struct NetBowler
+    {
+        /// <summary>Menu button name.</summary>
+        public string Button;
+        /// <summary>Button text, and the name on the menu board.</summary>
+        public string Label;
+        /// <summary>Empty = Stock only (the pace bowler, unchanged).</summary>
+        public TypeWeight[] Mix;
+
+        public static readonly NetBowler[] All =
+        {
+            new NetBowler { Button = "BowlerPace", Label = "Pace", Mix = new TypeWeight[0] },
+            new NetBowler { Button = "BowlerOffSpin", Label = "Off-spin", Mix = new[] { new TypeWeight { kind = DeliveryKind.OffSpin, weight = 1f } } },
+            new NetBowler { Button = "BowlerLegSpin", Label = "Leg-spin", Mix = new[] { new TypeWeight { kind = DeliveryKind.LegSpin, weight = 1f } } },
+        };
+
+        /// <summary>The Net Practice plan with this bowler: same lines and lengths; a spinner's speed comes from its type.</summary>
+        public DeliveryPlanSettings Plan()
+        {
+            var plan = DeliveryPlanSettings.NetPractice;
+            plan.typeMix = Mix != null && Mix.Length > 0 ? Mix : null;
+            return plan;
+        }
+    }
 }
