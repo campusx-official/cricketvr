@@ -158,6 +158,7 @@ namespace CricketVR
             AddF("speed_kmh", r => r.Delivery.speedKmh, (r, v) => r.Delivery.speedKmh = v);
             AddF("line_m", r => r.Delivery.line, (r, v) => r.Delivery.line = v);
             AddF("length_m", r => r.Delivery.length, (r, v) => r.Delivery.length = v);
+            AddF("release_x_m", r => r.Delivery.releasePosition.x, (r, v) => r.Delivery.releasePosition.x = v);
             Add("seed", r => r.Seed.ToString(CultureInfo.InvariantCulture), (r, s) => r.Seed = PI(s));
             Add("type", r => r.DeliveryType, (r, s) => r.DeliveryType = s);
             AddF("movement", r => r.Movement, (r, v) => r.Movement = v);

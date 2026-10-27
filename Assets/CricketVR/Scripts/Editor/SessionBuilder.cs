@@ -153,28 +153,34 @@ namespace CricketVR.Editor
             buttons.Add(MakeButton(tree, menu, "NetPractice", "Net Practice", new Vector2(-200f, 195f), new Vector2(370f, 80f)));
             buttons.Add(MakeButton(tree, menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
 
+            // Rows 65 apart (buttons 60 high): mode, overs/difficulty, bowler, wicket (Net Practice), batting, Start.
             var net = Group(tree, menu, "NetOptions");
-            Label(tree, net, "Overs", new Vector2(-300f, 110f));
+            Label(tree, net, "Overs", new Vector2(-300f, 120f));
             int i = 0;
             foreach (var o in new[] { 1, 2, 3, 5 })
-                buttons.Add(MakeButton(tree, net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 110f), new Vector2(100f, 70f)));
+                buttons.Add(MakeButton(tree, net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 120f), new Vector2(100f, 60f)));
             // Bowler (owner request 2026-10-27): pace (Stock) or one spin type for the whole session.
-            Label(tree, net, "Bowler", new Vector2(-300f, 30f));
+            Label(tree, net, "Bowler", new Vector2(-300f, 55f));
             i = 0;
             foreach (var bowler in NetBowler.All)
-                buttons.Add(MakeButton(tree, net, bowler.Button, bowler.Label, new Vector2(-110f + 170f * i++, 30f), new Vector2(155f, 70f)));
+                buttons.Add(MakeButton(tree, net, bowler.Button, bowler.Label, new Vector2(-110f + 170f * i++, 55f), new Vector2(155f, 60f)));
+            // Wicket (owner request 2026-10-27): a right-arm bowler's release, over or around the wicket.
+            Label(tree, net, "Wicket", new Vector2(-300f, -10f));
+            i = 0;
+            foreach (var side in WicketSide.All)
+                buttons.Add(MakeButton(tree, net, side.Button, side.Label, new Vector2(-110f + 170f * i++, -10f), new Vector2(155f, 60f)));
 
             var match = Group(tree, menu, "MatchOptions");
-            Label(tree, match, "Difficulty", new Vector2(-300f, 110f));
+            Label(tree, match, "Difficulty", new Vector2(-300f, 120f));
             i = 0;
             foreach (var d in new[] { "Easy", "Medium", "Hard" })
-                buttons.Add(MakeButton(tree, match, d, d, new Vector2(-110f + 170f * i++, 110f), new Vector2(155f, 70f)));
+                buttons.Add(MakeButton(tree, match, d, d, new Vector2(-110f + 170f * i++, 120f), new Vector2(155f, 60f)));
 
-            Label(tree, menu, "Batting", new Vector2(-300f, -50f));
-            buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -50f), new Vector2(190f, 70f)));
-            buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -50f), new Vector2(190f, 70f)));
-            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -50f), new Vector2(190f, 70f)));
-            buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -150f), new Vector2(420f, 100f), StartColor));
+            Label(tree, menu, "Batting", new Vector2(-300f, -75f));
+            buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -170f), new Vector2(420f, 90f), StartColor));
 
             var end = Group(tree, panel.transform, "EndGroup");
             buttons.Add(MakeButton(tree, end, "PlayAgain", "Play again", new Vector2(-260f, -215f), new Vector2(240f, 85f), StartColor));

@@ -274,6 +274,9 @@ namespace CricketVR
         /// <summary>A spinner's lengths (m): drawn from the triangle min..peak..max, labelled with the spin good-length
         /// band; 0 = Net Practice's pace lengths.</summary>
         public float MinLength, PeakLength, MaxLength;
+        /// <summary>A spinner's line range (batter frame, m) as where the ball reaches the crease (D-1), so it is
+        /// pitched where its turn takes it onto the stumps; 0..0 = Net Practice's pitch lines.</summary>
+        public float MinFinishLine, MaxFinishLine;
 
         // Spin lengths (owner feedback 2026-10-27, "almost all the balls are very short"): the pace range 3.5-9 m put
         // half the balls beyond 6 m, short for a spinner. Spin good length is about 4-6 m from the stumps.
@@ -283,22 +286,33 @@ namespace CricketVR
         public static readonly NetBowler[] All =
         {
             new NetBowler { Button = "BowlerPace", Label = "Pace", Mix = new TypeWeight[0] },
-            Spinner("BowlerOffSpin", "Off-spin", DeliveryKind.OffSpin),
-            Spinner("BowlerLegSpin", "Leg-spin", DeliveryKind.LegSpin),
+            // Finish lines (owner feedback 2026-10-27: pitched on middle, the off-spinner turned down the leg side).
+            // Off-spin turns in: finish from leg stump to just outside off. Leg-spin turns away: middle to outside off.
+            Spinner("BowlerOffSpin", "Off-spin", DeliveryKind.OffSpin, -0.10f, 0.25f),
+            Spinner("BowlerLegSpin", "Leg-spin", DeliveryKind.LegSpin, -0.05f, 0.35f),
         };
 
-        static NetBowler Spinner(string button, string label, DeliveryKind kind) => new NetBowler
+        static NetBowler Spinner(string button, string label, DeliveryKind kind, float minFinish, float maxFinish) => new NetBowler
         {
             Button = button, Label = label, Mix = new[] { new TypeWeight { kind = kind, weight = 1f } },
             MinLength = SpinMinLength, PeakLength = SpinPeakLength, MaxLength = SpinMaxLength,
+            MinFinishLine = minFinish, MaxFinishLine = maxFinish,
         };
 
-        /// <summary>The Net Practice plan with this bowler: Net Practice lines; a spinner's own lengths; its speed
-        /// (and so its flight) comes from its type.</summary>
-        public DeliveryPlanSettings Plan()
+        /// <summary>The Net Practice plan with this bowler, released from <paramref name="release"/> (zero = the
+        /// centred default): Net Practice lines and lengths for pace; a spinner's own lengths and finish lines; its
+        /// speed (and so its flight) comes from its type.</summary>
+        public DeliveryPlanSettings Plan(Vector3 release = default)
         {
             var plan = DeliveryPlanSettings.NetPractice;
+            plan.releasePosition = release;
             plan.typeMix = Mix != null && Mix.Length > 0 ? Mix : null;
+            if (MaxFinishLine > MinFinishLine)
+            {
+                plan.minLine = MinFinishLine;
+                plan.maxLine = MaxFinishLine;
+                plan.lineReference = LineReference.AtBatter;
+            }
             if (MaxLength > 0f)
             {
                 plan.minLength = MinLength;

@@ -104,13 +104,14 @@ namespace CricketVR.Tests
         [UnityTest]
         public IEnumerator NetPracticeBowlsTheChosenSpinner()
         {
-            foreach (var (button, type, turn) in new[] { ("BowlerOffSpin", "Off-spin", -1), ("BowlerLegSpin", "Leg-spin", +1) })
+            foreach (var (button, type, turn, side) in new[] { ("BowlerOffSpin", "Off-spin", -1, 0), ("BowlerLegSpin", "Leg-spin", +1, 1) })
             {
                 yield return null;
                 if (_session.Phase != SessionPhase.Menu) _session.Press("Menu");
                 yield return null;
                 _session.Press("NetPractice");
                 _session.Press(button);
+                _session.Press(WicketSide.All[side].Button);
                 _session.Press("Overs1");
                 _session.Press("Start");
                 yield return WaitFor(() => _session.Phase == SessionPhase.SessionEnd, 90f);
@@ -122,6 +123,9 @@ namespace CricketVR.Tests
                     Assert.AreEqual(turn, (int)Mathf.Sign(r.TurnDegrees), $"{type} turns toward {turn} for a right-hander ({r.TurnDegrees:F1} deg)");
                     Assert.That(r.CreaseHeight, Is.InRange(0.1f, 1.5f), $"{type}: crease height");
                     Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, $"{type}: pitched on its length");
+                    Assert.AreEqual(WicketSide.All[side].Release.x, r.Delivery.releasePosition.x, 1e-5f, $"{type}: released {WicketSide.All[side].Label} the wicket");
+                    Assert.AreEqual(LineReference.AtBatter, r.LineRef);
+                    Assert.AreEqual(r.Delivery.line, r.ArrivalLine, 0.03f, $"{type}: reached the crease on its finish line");
                 }
             }
         }

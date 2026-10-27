@@ -300,5 +300,46 @@ namespace CricketVR.Tests
                     Debug.Log($"[CricketVR] Net Practice {bowler.Label}: {draws} draws, full {full}, good length {good}, short {shortBalls}");
             }
         }
+
+        /// <summary>
+        /// Owner feedback 2026-10-27: off-spin pitched on middle turned down the leg side. Spinners now aim at where the
+        /// ball reaches the crease, released over or around the wicket; every draw is reachable and finishes on its line.
+        /// </summary>
+        [Test]
+        public void NetPracticeSpinnersFinishOnTheirLineFromOverAndAroundTheWicket()
+        {
+            var types = DeliveryTypeData.All;
+            var reachable = DeliveryPlanner.RequestSolverCheck(G, Dt, R);
+            foreach (var side in WicketSide.All)
+            foreach (var bowler in new[] { NetBowler.All[1], NetBowler.All[2] })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            {
+                var plan = bowler.Plan(side.Release);
+                var rng = new System.Random(11);
+                float pitchSum = 0f, finishSum = 0f, worst = 0f;
+                const int draws = 150;
+                for (int n = 0; n < draws; n++)
+                {
+                    var r = DeliveryPlanner.DrawRequest(plan, rng, hand, types, reachable, out int redraws);
+                    Assert.AreEqual(0, redraws, $"{side.Label} {bowler.Label} {hand} draw {n}: reachable");
+                    Assert.AreEqual(LineReference.AtBatter, r.lineReference);
+                    Assert.AreEqual(side.Release, r.releasePosition, "released from the chosen side");
+                    Assert.That(r.line, Is.InRange(bowler.MinFinishLine, bowler.MaxFinishLine));
+                    var world = r.ForBatter();
+                    var s = DeliverySolver.Solve(world, DeliveryMovement.For(world), G, Dt, R);
+                    Assert.IsTrue(s.Reachable, s.Error);
+                    worst = Mathf.Max(worst, Mathf.Abs(s.PredictedArrivalLine - world.line));
+                    float mirror = hand == Handedness.Left ? -1f : 1f; // back to the batter's frame
+                    pitchSum += mirror * s.Target.x;
+                    finishSum += r.line;
+                }
+                Assert.LessOrEqual(worst, 0.001f, "finishes on its line in simulation");
+                float turnSide = bowler.Mix[0].kind == DeliveryKind.OffSpin ? -1f : +1f; // batter frame: off-spin turns to leg
+                if (hand == Handedness.Right)
+                    Debug.Log($"[CricketVR] Net Practice {bowler.Label} {side.Label.ToLowerInvariant()} the wicket: average pitch line " +
+                              $"{pitchSum / draws:+0.00;-0.00} m, average finish {finishSum / draws:+0.00;-0.00} m");
+                Assert.Less(turnSide * (pitchSum - finishSum) / draws, 0f, $"{bowler.Label} {side.Label} {hand}: pitched on the far side of its finish, turning onto it");
+            }
+        }
     }
 }

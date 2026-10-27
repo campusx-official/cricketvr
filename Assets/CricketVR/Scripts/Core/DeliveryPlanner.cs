@@ -13,6 +13,24 @@ namespace CricketVR
     }
 
     /// <summary>
+    /// Where a Net Practice bowler releases from (owner request 2026-10-27): over or around the wicket, as a right-arm
+    /// bowler (<see cref="FieldDimensions.OverTheWicketRelease"/>).
+    /// </summary>
+    public struct WicketSide
+    {
+        /// <summary>Menu button name.</summary>
+        public string Button;
+        public string Label;
+        public Vector3 Release;
+
+        public static readonly WicketSide[] All =
+        {
+            new WicketSide { Button = "WicketOver", Label = "Over", Release = FieldDimensions.OverTheWicketRelease },
+            new WicketSide { Button = "WicketAround", Label = "Around", Release = FieldDimensions.AroundTheWicketRelease },
+        };
+    }
+
+    /// <summary>
     /// What a mode or difficulty bowls (REQ-028, spec.md "Two modes"). Lines are given for a right-hander (+ = off
     /// side) and mirrored for a left-hander. Lengths are bounce distances in front of the striker's stumps.
     /// </summary>
@@ -35,6 +53,10 @@ namespace CricketVR
         public float lengthPeak;
         [Tooltip("Good-length band for the ball's label (m); 0..0 = the pace band, 5-7.5 m.")]
         public float goodLengthMin, goodLengthMax;
+        [Tooltip("What the line range means: where the ball pitches (default) or where it reaches the batter's crease (D-1).")]
+        public LineReference lineReference;
+        [Tooltip("Release point (world, m); zero = the machine's default, centred over middle stump.")]
+        public Vector3 releasePosition;
         [Range(0f, 1f)] public float yorkerShare;
         public float yorkerMinLength;
         public float yorkerMaxLength;
@@ -108,8 +130,10 @@ namespace CricketVR
                 redraws++;
             }
             // Fallback: a Stock ball at the fastest speed and a middle length is the easiest to reach.
-            var fallback = DeliveryRequest.FromConfig(
-                DeliveryConfig.Create($"{plan.label} fallback", plan.maxSpeedKmh, 0f, (plan.minLength + plan.maxLength) * 0.5f));
+            var config = DeliveryConfig.Create($"{plan.label} fallback", plan.maxSpeedKmh, 0f, (plan.minLength + plan.maxLength) * 0.5f);
+            if (plan.releasePosition != Vector3.zero)
+                config.releasePosition = plan.releasePosition;
+            var fallback = DeliveryRequest.FromConfig(config);
             fallback.handedness = handedness;
             return fallback;
         }
@@ -151,8 +175,12 @@ namespace CricketVR
             float speed = Mathf.Round(Range(rng, minSpeed, maxSpeed));
             float line = Range(rng, plan.minLine, plan.maxLine);
 
-            var request = DeliveryRequest.FromConfig(DeliveryConfig.Create($"{plan.label}: {kind}", speed, line, length));
+            var config = DeliveryConfig.Create($"{plan.label}: {kind}", speed, line, length);
+            if (plan.releasePosition != Vector3.zero)
+                config.releasePosition = plan.releasePosition;
+            var request = DeliveryRequest.FromConfig(config);
             request.handedness = handedness;
+            request.lineReference = plan.lineReference;
             if (!type.IsStill)
             {
                 request.type = type;

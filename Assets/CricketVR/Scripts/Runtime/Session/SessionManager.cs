@@ -45,6 +45,7 @@ namespace CricketVR
         int _overs;
         string _difficulty = "Medium";
         int _netBowler; // index into NetBowler.All; 0 = pace
+        int _wicketSide; // index into WicketSide.All; 0 = over the wicket
 
         readonly Dictionary<int, BatContactReport> _contacts = new Dictionary<int, BatContactReport>();
         string _lastResultLine = "";
@@ -146,7 +147,7 @@ namespace CricketVR
 
         void Launch(int ballIndex)
         {
-            var plan = _mode == SessionMode.NetPractice ? NetBowler.All[_netBowler].Plan()
+            var plan = _mode == SessionMode.NetPractice ? NetBowler.All[_netBowler].Plan(WicketSide.All[_wicketSide].Release)
                 : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
             var hand = handedness != null ? handedness.Current : Handedness.Right;
@@ -315,6 +316,8 @@ namespace CricketVR
                 case "Easy": case "Medium": case "Hard": _difficulty = name; ShowMenu(); break;
                 case "BowlerPace": case "BowlerOffSpin": case "BowlerLegSpin":
                     _netBowler = Mathf.Max(0, System.Array.FindIndex(NetBowler.All, b => b.Button == name)); ShowMenu(); break;
+                case "WicketOver": case "WicketAround":
+                    _wicketSide = Mathf.Max(0, System.Array.FindIndex(WicketSide.All, w => w.Button == name)); ShowMenu(); break;
                 case "RightHanded": handedness?.Set(Handedness.Right); ShowMenu(); break;
                 case "LeftHanded": handedness?.Set(Handedness.Left); ShowMenu(); break;
                 case "BatSetup": EnterBatSetup(); break;
@@ -346,11 +349,12 @@ namespace CricketVR
             foreach (int o in new[] { 1, 2, 3, 5 }) ui.Select("Overs" + o, _overs == o);
             foreach (var d in new[] { "Easy", "Medium", "Hard" }) ui.Select(d, _difficulty == d);
             for (int b = 0; b < NetBowler.All.Length; b++) ui.Select(NetBowler.All[b].Button, _netBowler == b);
+            for (int w = 0; w < WicketSide.All.Length; w++) ui.Select(WicketSide.All[w].Button, _wicketSide == w);
             bool right = handedness == null || handedness.Current == Handedness.Right;
             ui.Select("RightHanded", right);
             ui.Select("LeftHanded", !right);
             ui.Board(_mode == SessionMode.NetPractice
-                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls), {BowlerName}\nNo runs: every ball gets a result." +
+                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls), {BowlerName}, {WicketSide.All[_wicketSide].Label.ToLowerInvariant()} the wicket\nNo runs: every ball gets a result." +
                   (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "") +
                   (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "")
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");

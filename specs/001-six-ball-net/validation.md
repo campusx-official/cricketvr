@@ -1147,6 +1147,27 @@ Log or artifact path: Docs/evidence/2026-10-27-net-spin/; batch test results (sc
 Remaining limitation / follow-up task: OWNER DECISION: tossed-up balls reach the crease at up to 1.0-1.2 m off a good length, above the earlier 0.5-0.9 m target (keep, or cap them). No air drag, so the ball arrives at its release speed (spin feels quicker through the air than a real one).
 ```
 
+```text
+Check ID / acceptance scenario: E-061 / Net Practice spin lines and release side (owner feedback 2026-10-27)
+Requirement IDs: REQ-028, REQ-044, REQ-045
+Date and tester: 2026-10-27 18:44-18:50 owner (headset, spinfeel APK sha256 d774cc8d…ae8e); agent (CSV analysis, change, tests)
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3 (owner session); then EditMode and PlayMode (Mac batch)
+Configuration: Net Practice, Off-spin, 8 sessions, 96 balls (Docs/evidence/2026-10-27-net-spin-2/)
+Steps or exact command: adb pull; change; scene builder twice (byte-identical); both suites
+Expected result: owner: the ball lands mostly on middle and turns down the leg side; the machine should release over or around the wicket like a bowler
+Actual result and measured values:
+  - Device: pitch lines uniform -0.10..+0.40 m (the pace range, a pitch-point line). Every ball pitched at or inside +0.10 m that reached the crease finished 0.13-0.62 m down the leg side (leg stump -0.11 m); only balls pitched about +0.17..+0.30 m finished on the stumps (all 13 bowled balls).
+  - Change: menu row Wicket (Over / Around); release x +0.35 m over, -0.80 m around (right-arm, world frame; not mirrored for a left-hander); the launcher moves to it. Spin lines are arrival lines: off-spin -0.10..+0.25, leg-spin -0.05..+0.35 (batter frame). New CSV column release_x_m. Menu rows re-spaced (65 apart, buttons 60 high).
+  - EditMode (150 draws per side x bowler x hand, all reachable, crease line within 1 mm): average pitch -> finish line (right-hander): off-spin over +0.33 -> +0.07 m, around +0.10 -> +0.07 m; leg-spin over -0.12 -> +0.14 m, around -0.36 -> +0.14 m.
+  - PlayMode session (off-spin over, leg-spin around): released from the chosen side, every ball reached the crease within 3 cm of its finish line.
+  - Suites: EditMode 153/153, PlayMode 62/62.
+Outcome: Pass (automated); headset re-check by the owner pending
+Log or artifact path: Docs/evidence/2026-10-27-net-spin-2/
+Remaining limitation / follow-up task: right-arm bowler only (no left-arm option yet); the Pace bowler in Net Practice now also releases over the wicket by default (was centred)
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
