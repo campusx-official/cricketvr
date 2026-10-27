@@ -128,7 +128,7 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 
 ### Phase B — Spin
 - [ ] T077 Drift and dip in the flight model and solver. Tests: drift opposite to turn; googly dips most; spin speeds 75–95 km/h reach lengths 3–9 m.
-- [ ] T078 Turn at the physical bounce (`TurnAtBounce`, bounce factor, grip), applied in the step after v_y > 0. PlayMode: 10 runs × 4 spin types × both hands: turn in range, direction correct, bounce point unchanged by the turn, googly bounces higher than leg-spin.
+- [ ] T078 *(Option A confirmed by the owner 2026-10-27: PhysX bounce kept)* Turn at the physical bounce (`TurnAtBounce`, bounce factor, grip), applied in the step after v_y > 0. PlayMode: 10 runs × 4 spin types × both hands: turn in range, direction correct, bounce point unchanged by the turn, googly bounces higher than leg-spin.
 - [ ] T079 Arrival-line requests (D-1). Test: crease line within about 3 cm for every type.
 - [ ] T080 Spin visual: seam texture, readable rate (≤ 25°/frame), deceptive/honest seam (D-3). Test: rate limit; the variation's display axis equals its stock ball's axis until the bounce.
 - [ ] T081 Contact matrix with spinning balls (AC-29); performance check with the ball visual (AC-30).
