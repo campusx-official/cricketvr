@@ -1168,6 +1168,27 @@ Log or artifact path: Docs/evidence/2026-10-27-net-spin-2/
 Remaining limitation / follow-up task: right-arm bowler only (no left-arm option yet); the Pace bowler in Net Practice now also releases over the wicket by default (was centred)
 ```
 
+```text
+Check ID / acceptance scenario: E-062 / Net Practice spin from over and around the wicket on device (follow-up to E-061)
+Requirement IDs: REQ-028, REQ-044, REQ-045
+Date and tester: 2026-10-27 19:47-19:56 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-wicket.apk sha256 5ad4c4c93f9d145cce98a9627bdbef1c416dbbc19b2fd54f2a2265759443f0f1, installed 19:43:47; app started 19:46:47
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice; Off-spin over the wicket (9 sessions), Off-spin around (3), Leg-spin around (3); one empty session file at 19:56:36
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-27-net-spin-wicket/)
+Expected result: release from the chosen side; balls finish on their requested line (about ±3 cm) instead of down the leg side
+Actual result and measured values (unhit balls that reached the crease):
+  - Off-spin over (+0.35 m), 108 balls (75 hit, 25 bowled, 8 missed): pitched +0.10..+0.55 m (average +0.34, outside off); finished on average +0.06 m (requested +0.07); 41 on the stumps, 22 just outside off, 0 outside leg; worst crease miss 1.2 cm.
+  - Off-spin around (-0.80 m), 36 balls (25 / 7 / 4): pitched -0.13..+0.28 (average +0.08); finished +0.09 average; 13 on the stumps, 8 outside off, 0 outside leg; worst 1.1 cm.
+  - Leg-spin around (-0.80 m), 36 balls (14 hit, 2 bowled, 20 missed): pitched -0.75..-0.09 (average -0.42, outside leg); finished +0.12 average; 15 on the stumps, 16 outside off, 0 outside leg; worst 1.9 cm.
+  - Lengths 2.8-7.2 m; crease height 0.29-1.09 m.
+  - Before (E-061, 96 off-spin balls from the centre): every ball pitched at or inside +0.10 m finished 0.13-0.62 m outside leg.
+Outcome: Pass for the line problem the owner reported (device). Leg-spin over the wicket not played.
+Log or artifact path: Docs/evidence/2026-10-27-net-spin-wicket/
+Remaining limitation / follow-up task: owner's view on the feel; open owner decision on tossed-up bounce height (E-060)
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
