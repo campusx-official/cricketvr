@@ -100,10 +100,10 @@ namespace CricketVR.Editor
             pitch.transform.SetParent(environment.transform, false);
             created.Add("Pitch");
 
-            // Surface: top face at y = 0.002 so it sits just above the outfield plane without z-fighting.
+            // Surface: top face at PitchSurfaceHeight so it sits just above the outfield plane without z-fighting.
             float length = FD.PitchEndZ - FD.PitchStartZ;
             var surface = CreateVisual(PrimitiveType.Cube, "Surface", pitch.transform,
-                new Vector3(0f, 0.002f - 0.05f, (FD.PitchStartZ + FD.PitchEndZ) * 0.5f),
+                new Vector3(0f, FD.PitchSurfaceHeight - 0.05f, (FD.PitchStartZ + FD.PitchEndZ) * 0.5f),
                 new Vector3(FD.PitchWidth, 0.1f, length), Mat("Pitch", new Color(0.78f, 0.70f, 0.52f)));
             surface.AddComponent<BoxCollider>();
             surface.layer = Layer(PitchLayer);

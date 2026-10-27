@@ -71,12 +71,17 @@ namespace CricketVR
 
         /// <param name="gravity">Downward acceleration magnitude (m/s², positive).</param>
         /// <param name="fixedDeltaTime">Physics step; used to correct for the step-wise integration (0 = skip).</param>
-        /// <param name="ballRadius">The bounce happens when the ball centre is this high above the ground.</param>
+        /// <summary>Height of the ball centre when it meets the pitch: the pitch's top surface plus one radius.</summary>
+        public static float ContactHeight(float ballRadius) => FieldDimensions.PitchSurfaceHeight + ballRadius;
+
+        /// <param name="ballRadius">The bounce happens when the ball centre is this high above the pitch surface
+        /// (<see cref="FieldDimensions.PitchSurfaceHeight"/>).</param>
         public static DeliverySolution Solve(DeliveryConfig config, float gravity, float fixedDeltaTime, float ballRadius)
         {
+            float contact = ContactHeight(ballRadius);
             var result = new DeliverySolution
             {
-                Target = new Vector3(config.line, ballRadius, config.length),
+                Target = new Vector3(config.line, contact, config.length),
             };
             float speed = Units.KmhToMs(config.speedKmh);
 
@@ -90,7 +95,7 @@ namespace CricketVR
             float dy = toTarget.y;
             if (d < 1f)
                 return Fail(result, $"bounce point is only {d:F2} m from the release point");
-            if (release.y <= ballRadius)
+            if (release.y <= contact)
                 return Fail(result, "release point is at or below ground level");
 
             // Slowest speed that reaches the target at all (the 45-degree-ish optimum), for the error message.
@@ -110,14 +115,14 @@ namespace CricketVR
             if (fixedDeltaTime > 0f)
             {
                 float lo = theta - 0.2f, hi = theta + 0.2f;
-                float landLo = SimulatedRange(release, speed, lo, gravity, fixedDeltaTime, ballRadius);
-                float landHi = SimulatedRange(release, speed, hi, gravity, fixedDeltaTime, ballRadius);
+                float landLo = SimulatedRange(release, speed, lo, gravity, fixedDeltaTime, contact);
+                float landHi = SimulatedRange(release, speed, hi, gravity, fixedDeltaTime, contact);
                 if (landLo <= d && landHi >= d)
                 {
                     for (int i = 0; i < MaxRefineIterations; i++)
                     {
                         float mid = 0.5f * (lo + hi);
-                        float land = SimulatedRange(release, speed, mid, gravity, fixedDeltaTime, ballRadius);
+                        float land = SimulatedRange(release, speed, mid, gravity, fixedDeltaTime, contact);
                         if (land < d) lo = mid; else hi = mid;
                         theta = mid;
                         if (Mathf.Abs(land - d) < RefineTolerance) break;
@@ -129,10 +134,10 @@ namespace CricketVR
             result.Velocity = dir * (speed * Mathf.Cos(theta)) + Vector3.up * (speed * Mathf.Sin(theta));
             result.ElevationDegrees = theta * Mathf.Rad2Deg;
             float landed = fixedDeltaTime > 0f
-                ? SimulatedRange(release, speed, theta, gravity, fixedDeltaTime, ballRadius)
+                ? SimulatedRange(release, speed, theta, gravity, fixedDeltaTime, contact)
                 : d;
             var predicted = release + dir * landed;
-            result.PredictedBounce = new Vector3(predicted.x, ballRadius, predicted.z);
+            result.PredictedBounce = new Vector3(predicted.x, contact, predicted.z);
             result.Reachable = true;
             return result;
         }
@@ -180,11 +185,11 @@ namespace CricketVR
             if (movement.IsStill)
                 return Solve(config, gravity, fixedDeltaTime, ballRadius);
             if (worldRequest.lineReference != LineReference.AtBounce)
-                return Fail(new DeliverySolution { Target = new Vector3(config.line, ballRadius, config.length) },
+                return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
                     "arrival-line requests are not available yet (T079)");
             if (movement.Drift != 0f || movement.Dip != 0f || movement.TurnDegrees != 0f || movement.BounceFactor != 0f ||
                 movement.Grip != 0f || movement.SeamDegrees != 0f)
-                return Fail(new DeliverySolution { Target = new Vector3(config.line, ballRadius, config.length) },
+                return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
                     "spin movement is not available yet (M7.5 phase B)");
             return SolveMoving(config, movement, gravity, fixedDeltaTime, ballRadius);
         }
@@ -200,6 +205,7 @@ namespace CricketVR
         static DeliverySolution SolveMoving(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float radius)
         {
             var still = Solve(config, gravity, dt, radius);
+            float contact = still.Target.y;
             if (!still.Reachable || !(dt > 0f))
                 return still.Reachable ? Fail(still, "a moving delivery needs the physics step") : still;
 
@@ -212,7 +218,7 @@ namespace CricketVR
             float speed = Units.KmhToMs(config.speedKmh);
 
             float yaw = 0f, elevation = still.ElevationDegrees * Mathf.Deg2Rad;
-            var start = Simulate(release, Launch(forward, side, speed, yaw, elevation), default, gravity, dt, radius, target);
+            var start = Simulate(release, Launch(forward, side, speed, yaw, elevation), default, gravity, dt, contact, target);
             float swing = movement.Swing, scale = 1f;
             // Time from the pitch point to the popping crease, for the closed-form first guess (negative for a yorker).
             float pitchToCrease = (config.length - FieldDimensions.PoppingCreaseOffset) /
@@ -232,7 +238,7 @@ namespace CricketVR
                 bool aimed = false;
                 for (int inner = 0; inner < MaxMovingIterations && !aimed; inner++)
                 {
-                    flight = Simulate(release, Launch(forward, side, speed, yaw, elevation), plan, gravity, dt, radius, target);
+                    flight = Simulate(release, Launch(forward, side, speed, yaw, elevation), plan, gravity, dt, contact, target);
                     if (!flight.Landed)
                         return Fail(result, $"{config.speedKmh:F0} km/h with this movement never comes down");
                     var miss = new Vector3(target.x - flight.Bounce.x, 0f, target.z - flight.Bounce.z);
@@ -244,8 +250,8 @@ namespace CricketVR
 
                     // Newton step on (yaw, elevation) from finite differences of the landing point (side, forward).
                     const float h = 1e-4f;
-                    var dYaw = Simulate(release, Launch(forward, side, speed, yaw + h, elevation), plan, gravity, dt, radius, target);
-                    var dEl = Simulate(release, Launch(forward, side, speed, yaw, elevation + h), plan, gravity, dt, radius, target);
+                    var dYaw = Simulate(release, Launch(forward, side, speed, yaw + h, elevation), plan, gravity, dt, contact, target);
+                    var dEl = Simulate(release, Launch(forward, side, speed, yaw, elevation + h), plan, gravity, dt, contact, target);
                     if (!dYaw.Landed || !dEl.Landed)
                         return Fail(result, $"{config.speedKmh:F0} km/h with this movement never comes down");
                     var basePoint = flight.Bounce;

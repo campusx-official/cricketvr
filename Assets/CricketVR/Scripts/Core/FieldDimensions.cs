@@ -14,6 +14,9 @@ namespace CricketVR
         public const float PitchWidth = 3.05f;
         public const float PitchStartZ = -1.5f;            // pitch surface extends a little past each set of stumps
         public const float PitchEndZ = 21.5f;
+        /// <summary>Top of the pitch collider. It sits 2 mm above the outfield (y = 0) so the pitch decides every bounce
+        /// on the strip; the delivery solver aims the ball centre at this height plus one radius (E-052).</summary>
+        public const float PitchSurfaceHeight = 0.002f;
 
         // Crease markings.
         public const float PoppingCreaseOffset = 1.22f;     // in front of each set of stumps

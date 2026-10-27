@@ -39,7 +39,7 @@ namespace CricketVR.Tests
                 "Assets/CricketVR/Settings/Physics/PitchSurface.physicMaterial"));
 #endif
             Assert.IsNotNull(_pitchMaterial, "PitchSurface physics material missing; run the scene builder");
-            var ground = Box("Ground", "Pitch", new Vector3(0f, -0.5f, 10f), new Vector3(20f, 1f, 50f));
+            var ground = Box("Ground", "Pitch", new Vector3(0f, FD.PitchSurfaceHeight - 0.5f, 10f), new Vector3(20f, 1f, 50f));
             ground.GetComponent<Collider>().sharedMaterial = _pitchMaterial;
             Box("Stumps", "Stumps", new Vector3(0f, FD.StumpHeight * 0.5f, 0f), new Vector3(FD.StumpSetWidth, FD.StumpHeight, FD.StumpDiameter));
 

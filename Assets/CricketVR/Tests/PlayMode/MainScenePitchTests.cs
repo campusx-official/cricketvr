@@ -28,9 +28,9 @@ namespace CricketVR.Tests
             }
         }
 
+        /// <summary>Before the solver aimed at <see cref="FieldDimensions.PitchSurfaceHeight"/> these balls met the pitch
+        /// 0.75 cm (120 km/h) to 1.02 cm (140 km/h) early (E-051, E-052).</summary>
         [UnityTest]
-        [Ignore("Owner decision pending (E-051): the solver aims at contact height above y = 0, but Main's pitch top is at " +
-                "y = 0.002, so balls meet the pitch 0.75 cm (120 km/h) to 1.02 cm (140 km/h) early. Un-ignore once decided.")]
         public IEnumerator SwingCheckBallsPitchWithinTheStockToleranceInTheMainScene()
         {
 #if UNITY_EDITOR

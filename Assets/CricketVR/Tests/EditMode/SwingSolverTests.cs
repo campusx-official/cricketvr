@@ -32,7 +32,7 @@ namespace CricketVR.Tests
         }
 
         static DeliverySolver.SimulatedFlight Fly(DeliveryRequest world, DeliverySolution s) =>
-            DeliverySolver.Simulate(world.releasePosition, s.Velocity, s.Plan, G, Dt, R, s.Target);
+            DeliverySolver.Simulate(world.releasePosition, s.Velocity, s.Plan, G, Dt, s.Target.y, s.Target);
 
         [Test]
         public void SwingingBallsLandWithinOneMillimetreAndSwingAsRequested()

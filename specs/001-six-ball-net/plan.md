@@ -449,7 +449,7 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | Visual spin rate | DeliveryType.visualRevPerSecond | 4 (spin) / 3 (pace) | Owner: reads as spinning the right way, no strobing | AC-28 |
 | Pace speed cap | DeliveryPlanSettings.DefaultPaceCapKmh | 120 → **140 km/h** (T075, E-047) | AC-04 re-run and AC-05 matrix extension; on failure stay at 120 and scale the swing targets down | AC-29 |
 | Natural variation | DeliveryTypeData.variation | ±15% | Owner: balls feel varied but each type stays recognisable | AC-31, AC-26/27 |
-| Stock bounce tolerance (pitch point) | AC-04 tests (`BowlingPlayModeTests.StockTolerance`) | 10 cm → **1 cm** (worst 0.21 cm on the presets, 0.51 cm over 60 planned balls; E-040, E-042) | T070 pitch measurement over the presets and planned deliveries | AC-04, T070 |
+| Stock bounce tolerance (pitch point) | AC-04 tests (`BowlingPlayModeTests.StockTolerance`) | 10 cm → **1 cm** (worst 0.21 cm on the presets, 0.51 cm over 60 planned balls; E-040, E-042) | T070 pitch measurement over the presets and planned deliveries; since E-052 the solver aims at `FieldDimensions.PitchSurfaceHeight` + radius (real scene 1.02 → 0.02 cm) | AC-04, T070 |
 
 ## 18. Virtual-field scorer and simulated ball path (M9–M10, T058–T066)
 
@@ -688,3 +688,4 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | 2026-10-27 | Swing = distance off the release line at the popping crease, 0.1–0.5 m, capped at 0.5 m after variation; Easy/Medium 0.15–0.3 m, Hard 0.2–0.5 m | Owner decision on open decision 4: the curve definition (0.2–0.6 m) gave up to 1.4 m off the release line; real big swing is about 0.5 m | REQ-042, AC-26, DeliveryTypeData, DeliveryPlanSettings, T076 |
 | 2026-10-27 | Scene builders rebuild generated parts in place (`GeneratedTree`: find by name, keep object IDs and order, remove what is no longer generated) instead of deleting and recreating Ground and NearPanel | Owner request: commits show only real scene changes; two consecutive runs now leave Main.unity byte-identical | Editor builders |
 | 2026-10-27 | Spin bounce: PhysX keeps the pitch bounce; the turn is applied in the step after the rebound (Option A) | Owner decision: Stock untouched; a few cm of scatter (≤ ~2 cm at the crease) is fine for arcade play | REQ-043, T078, T079 |
+| 2026-10-27 | Solver aims at the real pitch top (`FieldDimensions.PitchSurfaceHeight` = 0.002 m, shared by the builders, the solver and the test rigs) | Owner decision 1(a): the pitch box top was 2 mm above the height the solver aimed at, so in the real scene balls pitched 0.75–1.02 cm short (E-051). Every launch changes by ~0.01°, Stock included; approved as a correctness fix. Real-scene worst 0.02 cm (E-052) | REQ-004, REQ-044 |

@@ -41,7 +41,7 @@ namespace CricketVR.Tests
             ground.layer = LayerMask.NameToLayer("Pitch");
             ground.transform.SetParent(_root.transform);
             ground.transform.localScale = new Vector3(10f, 1f, 40f);
-            ground.transform.position = new Vector3(0f, -0.5f, 10f);
+            ground.transform.position = new Vector3(0f, FieldDimensions.PitchSurfaceHeight - 0.5f, 10f); // top at the real pitch height
             ground.GetComponent<Collider>().sharedMaterial = _pitchMaterial;
 
             var ballGo = GameObject.CreatePrimitive(PrimitiveType.Sphere);

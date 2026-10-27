@@ -13,7 +13,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-01 | REQ-001 | Partial: 4/5 owner checks pass; left controller not working (cause not isolated) | APK sha256 2076861…a47fe; E-001–E-004 | Owner: test left controller in Quest Home, then in CricketVR |
 | AC-02 | REQ-002, REQ-015 | **Pass** | APK sha256 f35ebef…f8192; E-005, E-006 | Re-check if the stance, net or scoreboard moves (M3/M7) |
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
-| AC-04 | REQ-004, REQ-005 | **Pass on Quest**; automated tolerance tightened to 1 cm with the T070 pitch measurement (E-040) | APK sha256 b8f7d8d…9ace3; E-015–E-019, E-040 | Re-check if physics rate or pitch material changes; re-run at 100/120/140 km/h in T075 |
+| AC-04 | REQ-004, REQ-005 | **Pass on Quest**; automated tolerance tightened to 1 cm with the T070 pitch measurement (E-040); solver aims at the real pitch top, real-scene worst 1.02 → 0.02 cm (E-052) | APK sha256 b8f7d8d…9ace3; E-015–E-019, E-040, E-052 | Re-check if physics rate or pitch material changes; re-run at 100/120/140 km/h in T075 |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
 | AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
@@ -35,7 +35,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-051 | Pitch-surface offset found in E-051 (owner decision) |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
@@ -946,7 +946,27 @@ Actual result and measured values:
   - Suites: PlayMode 55/55 run + 1 ignored; EditMode 139/139.
 Outcome: AC-26 headset Pass (owner observation, right-handed). Pitch-point tolerance in the real scene: open (owner decision on the 2 mm offset).
 Log or artifact path: Docs/evidence/2026-10-27-t076-swing/; adb logcat lines "Delivery #129-#132 ... rebound starts +0.0 cm"
-Remaining limitation / follow-up task: owner decision on the pitch-surface offset; left-handed swing pending hardware
+Remaining limitation / follow-up task: owner decision on the pitch-surface offset (decided and fixed, E-052); left-handed swing pending hardware
+```
+
+```text
+Check ID / acceptance scenario: E-052 / Solver aims at the real pitch top (owner decision 1(a), 2026-10-27); AC-04 Stock calibration, swing calibration and the real-scene pitch test re-run
+Requirement IDs: REQ-004, REQ-005, REQ-042, REQ-044
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch); Main.unity loaded for MainScenePitchTests
+Configuration: new FieldDimensions.PitchSurfaceHeight = 0.002 m, used by PracticeNetBuilder (pitch box top), GroundBuilder (strip and crease marks), DeliverySolver.ContactHeight (= PitchSurfaceHeight + ball radius) and the PlayMode rigs (ground top moved from 0 to 0.002, outfield to 0 as built). Pitch top value unchanged, so Main.unity is unchanged
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: every Stock and swing calibration test within its tolerance; MainScenePitchTests (un-ignored) within the 1 cm Stock tolerance; new MainSceneLayoutTests.PitchColliderTopIsTheHeightTheSolverAimsAt passes
+Actual result and measured values (pitch-point error, worst; before = E-051 / last run before the change, after = this run):
+  - Real scene, swing-check balls, 120 km/h: 0.75 cm -> 0.00 cm; 140 km/h: 1.02 cm -> 0.02 cm (0.0002 m).
+  - Rig (ground moved to the same height, so the solver-vs-ground relation is the same as before; results are expected and found unchanged): AC-04 ten identical 80 km/h: spread 0.00 cm, max error 0.16 -> 0.16 cm. AC-04 re-run (AC-29) 100/120/140 km/h: 0.21/0.19/0.12 -> 0.21/0.19/0.12 cm. M6.5 ground calibration presets: 0.0-0.2 cm, outfield shift 0.00 cm. T074 swing matrix: pitch 0.08 / 0.10 cm, measured-vs-solved swing 0.0 mm; off-stump cap 0.496 m.
+  - Launch change: elevation +0.01 deg (e.g. 80 km/h good length -1.29 -> -1.28 deg, 100 km/h -3.93 -> -3.92 deg); speed and line unchanged.
+  - Suites: EditMode 140/140, PlayMode 56/56 (none ignored).
+Outcome: Pass. The pitch point in the real scene is now within 0.02 cm of the request.
+Log or artifact path: batch test results (play.xml/edit.xml, scratchpad)
+Remaining limitation / follow-up task: no headset re-check (owner: not needed unless something visibly changes; a 0.01 deg launch change is not visible)
 ```
 
 ```text

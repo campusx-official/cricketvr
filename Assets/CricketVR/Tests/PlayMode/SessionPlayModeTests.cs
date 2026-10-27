@@ -41,7 +41,7 @@ namespace CricketVR.Tests
             pitch = Object.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<PhysicsMaterial>("Assets/CricketVR/Settings/Physics/PitchSurface.physicMaterial"));
 #endif
             _owned.Add(pitch);
-            Box("Ground", "Pitch", new Vector3(0f, -0.5f, 10f), new Vector3(20f, 1f, 40f)).GetComponent<Collider>().sharedMaterial = pitch;
+            Box("Ground", "Pitch", new Vector3(0f, FD.PitchSurfaceHeight - 0.5f, 10f), new Vector3(20f, 1f, 40f)).GetComponent<Collider>().sharedMaterial = pitch;
             var rear = Box("RearWall", "Boundary", new Vector3(0f, 2f, FD.NetRearZ - 0.05f), new Vector3(3.6f, 4f, 0.1f));
             rear.AddComponent<NetWall>().side = WallSide.Rear;
 

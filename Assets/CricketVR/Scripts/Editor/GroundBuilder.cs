@@ -191,7 +191,7 @@ namespace CricketVR.Editor
             var c = def.GroundCentre;
             float t = def.outfieldColliderThickness;
             var box = go.GetComponent<BoxCollider>();
-            // Top at y = 0, just under the pitch collider's top (0.002), so the pitch decides every bounce on the strip.
+            // Top at y = 0, just under the pitch collider's top (FieldDimensions.PitchSurfaceHeight), so the pitch decides every bounce on the strip.
             box.center = new Vector3(c.x, -t * 0.5f, c.z);
             box.size = new Vector3(2f * (def.boundaryRadiusX + def.outfieldColliderBeyondRope), t, 2f * (def.boundaryRadiusZ + def.outfieldColliderBeyondRope));
             box.sharedMaterial = OutfieldPhysics(def, created);
@@ -340,7 +340,7 @@ namespace CricketVR.Editor
         static Mesh PitchStrip(GroundDefinition def)
         {
             var m = new MeshBuilder();
-            const float y = 0.003f; // 1 mm above the pitch collider top (0.002)
+            const float y = FieldDimensions.PitchSurfaceHeight + 0.001f; // 1 mm above the pitch collider top
             float hw = def.pitchWidth * 0.5f, length = def.pitchEndZ - def.pitchStartZ;
             const int rows = 23;
             int[] prev = null;
@@ -364,7 +364,7 @@ namespace CricketVR.Editor
         {
             var m = new MeshBuilder();
             float hw = def.pitchWidth * 0.5f, half = def.poppingCreaseHalfLength, w = def.creaseLineWidth * 0.5f;
-            const float y = 0.002f;
+            const float y = FieldDimensions.PitchSurfaceHeight;
             var white = def.creaseColor;
             if (half > hw)
                 foreach (float z in new[] { def.poppingCreaseOffset, def.pitchLength - def.poppingCreaseOffset })

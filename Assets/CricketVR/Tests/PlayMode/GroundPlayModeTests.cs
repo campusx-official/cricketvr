@@ -58,12 +58,12 @@ namespace CricketVR.Tests
             };
             _owned.Add(grass);
 
-            // Pitch as the shipped calibration test uses it (top at 0); the outfield 2 mm lower and 1 m thick.
+            // As the builder makes them: pitch top at PitchSurfaceHeight, the outfield top at 0 and 1 m thick.
             float length = FD.PitchEndZ - FD.PitchStartZ;
-            Box("Pitch", "Pitch", new Vector3(0f, -0.05f, (FD.PitchStartZ + FD.PitchEndZ) * 0.5f), new Vector3(FD.PitchWidth, 0.1f, length)).sharedMaterial = pitch;
+            Box("Pitch", "Pitch", new Vector3(0f, FD.PitchSurfaceHeight - 0.05f, (FD.PitchStartZ + FD.PitchEndZ) * 0.5f), new Vector3(FD.PitchWidth, 0.1f, length)).sharedMaterial = pitch;
             float t = _ground.outfieldColliderThickness, c = _ground.GroundCentre.z;
             float size = 2f * (_ground.boundaryRadiusX + _ground.outfieldColliderBeyondRope);
-            Box("Outfield", "Outfield", new Vector3(0f, -0.002f - t * 0.5f, c), new Vector3(size, t, size)).sharedMaterial = grass;
+            Box("Outfield", "Outfield", new Vector3(0f, -t * 0.5f, c), new Vector3(size, t, size)).sharedMaterial = grass;
             Box("Stumps", "Stumps", new Vector3(0f, FD.StumpHeight * 0.5f, 0f), new Vector3(FD.StumpSetWidth, FD.StumpHeight, FD.StumpDiameter));
 
             var ballGo = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -168,7 +168,7 @@ namespace CricketVR.Tests
                 // Tunnelling = passing through, or ending up under, the outfield. PhysX CCD can let a 45 m/s ball dip
                 // into the 1 m-thick box for one 7 ms step before pushing it out (measured up to ~18 cm); that is
                 // logged as evidence and bounded well inside the box, but it is not tunnelling.
-                const float top = -0.002f;
+                const float top = 0f;
                 float bottom = top - _ground.outfieldColliderThickness;
                 Debug.Log($"[CricketVR] M6.5 outfield {angle:F0} deg at 45 m/s: deepest centre {lowest:F3} m (dip {(top + r - lowest) * 100f:F1} cm), end height {_ball.Body.position.y:F3} m");
                 Assert.Greater(lowest, bottom + 0.5f, $"{angle:F0} deg: the ball went {top - lowest:F3} m into the outfield");
@@ -194,7 +194,7 @@ namespace CricketVR.Tests
         public IEnumerator RollingOnThePitchIsUntouchedByTheDrag()
         {
             float r = _config.delivery.ballRadius;
-            Launch(new Vector3(0f, r, 1.5f), new Vector3(0f, 0f, 5f));
+            Launch(new Vector3(0f, FD.PitchSurfaceHeight + r, 1.5f), new Vector3(0f, 0f, 5f));
             yield return WaitUntil(() => false, 1.0f); // sliding turns into rolling
             float early = Horizontal(_ball.Body.linearVelocity);
             yield return WaitUntil(() => false, 1.0f);

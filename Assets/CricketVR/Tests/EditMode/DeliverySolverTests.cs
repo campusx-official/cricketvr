@@ -33,9 +33,9 @@ namespace CricketVR.Tests
         public void ContinuousSolutionLandsOnTarget()
         {
             var s = Solve(80f, 0f, 6f, dt: 0f);
-            // Integrate the exact projectile to y = R.
+            // Integrate the exact projectile down to contact height (pitch top plus R).
             var p0 = FieldDimensions.DefaultReleasePoint;
-            float vy = s.Velocity.y, a = -0.5f * G, b = vy, c = p0.y - R;
+            float vy = s.Velocity.y, a = -0.5f * G, b = vy, c = p0.y - DeliverySolver.ContactHeight(R);
             float t = (-b - Mathf.Sqrt(b * b - 4f * a * c)) / (2f * a);
             var land = p0 + s.Velocity * t;
             Assert.AreEqual(6f, land.z, 0.005f);
