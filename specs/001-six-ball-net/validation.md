@@ -1066,6 +1066,22 @@ Remaining limitation / follow-up task: (1) Stock (and so swing) reaches the crea
 ```
 
 ```text
+Check ID / acceptance scenario: E-057 / T082 spin-check headset build (AC-27 headset; AC-28 spin visual not in this build: T080 not done)
+Requirement IDs: REQ-043, REQ-045, REQ-047
+Date and tester: 2026-10-27 17:26, agent
+Git commit or build identifier: branch m7.5-delivery 5ebb240 (+ b83a30f config field); Builds/CricketVR-T082-spincheck.apk sha256 730739f8fa546306eb5b19f43944800bb971eed6b6b1a7687794ec0bb6b0cdea
+Unity and package versions: as E-001
+Environment: APK build (batch, -cricketvrSpinCheck)
+Configuration: Net Practice bowls the fixed spin-check sequence: balls 1-4 off-spin, doosra, leg-spin, googly at good length (6 m); 5-8 full (4 m); 9-12 short (8 m); 85 km/h; pitched on off stump; movement 0.5; no variation. Flag restored to off after the build
+Steps or exact command: Unity -batchmode -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrSpinCheck -quit
+Expected result: build succeeds; committed GameConfig keeps spinCheck off
+Actual result and measured values: Build Succeeded, 0 errors, 0 warnings, OpenXR validation 0/0; GameConfig spinCheck: 0. Suites before the build: EditMode 151/151, PlayMode 60/60
+Outcome: Build pass; headset pending (owner, after the AC-08/AC-09 run)
+Log or artifact path: Builds/CricketVR-T082-spincheck.apk (gitignored)
+Remaining limitation / follow-up task: AC-28 (spin seam visual, deception, strobing, 72 Hz) needs T080 and a later build
+```
+
+```text
 Check ID / acceptance scenario: E-058 / AC-08, AC-09 headset run (partial)
 Requirement IDs: REQ-013, REQ-014
 Date and tester: 2026-10-27 17:36-17:38, owner (headset); agent (install, log and CSV check)
