@@ -215,7 +215,7 @@ namespace CricketVR.Tests
                 Assert.LessOrEqual(pitchError, BowlingPlayModeTests.StockTolerance, $"{request}: pitch error");
                 Assert.AreEqual(-world.type.turnDirection, (int)Mathf.Sign(drift), $"{request}: drift {drift:F3} m opposite to the turn");
                 Assert.AreEqual(solution.PredictedDrift, Mathf.Abs(drift), 0.005f, $"{request}: measured drift");
-                Assert.AreEqual(world.type.dip, solution.Plan.Dip, $"{request}: dip applied");
+                Assert.AreEqual(DeliveryMovement.FlightDip(world.type, kmh), solution.Plan.Dip, 1e-6f, $"{request}: dip applied (more for a slower, tossed-up ball)");
                 worstPitch = Mathf.Max(worstPitch, pitchError);
                 worstDrift = Mathf.Max(worstDrift, Mathf.Abs(Mathf.Abs(drift) - solution.PredictedDrift));
                 balls++;
@@ -289,12 +289,12 @@ namespace CricketVR.Tests
         class SpinRun
         {
             public Vector3 Pitch, Arrival, AfterTurn, Later;
-            public float Applied, PeakAfterBounce;
+            public float Applied, PeakAfterBounce, CreaseHeight = float.NaN;
         }
 
         /// <summary>Bowls one ball and follows it to just past the bounce: arrival velocity (last step before it met
         /// the ground), the turn, the velocity 10 steps later, and the peak height of the rebound.</summary>
-        IEnumerator BowlSpin(DeliveryRequest request, SpinRun run)
+        IEnumerator BowlSpin(DeliveryRequest request, SpinRun run, System.Action<Vector3> onStep = null)
         {
             yield return new WaitForFixedUpdate();
             int id = _machine.Bowl(request);
@@ -302,10 +302,15 @@ namespace CricketVR.Tests
             float until = Time.time + 5f;
             int after = -1;
             bool turns = _machine.LastSolution.Plan.ActsAtBounce;
+            bool wantCrease = onStep != null;
             while (Time.time < until)
             {
                 yield return new WaitForFixedUpdate();
                 var v = _ball.Body.linearVelocity;
+                if (!_ball.TouchedGround)
+                    onStep?.Invoke(_ball.Body.position);
+                if (!float.IsNaN(_flight.CreaseHeight))
+                    run.CreaseHeight = _flight.CreaseHeight;
                 if (!_ball.TouchedGround)
                 {
                     run.Arrival = v;
@@ -322,8 +327,8 @@ namespace CricketVR.Tests
                 run.PeakAfterBounce = Mathf.Max(run.PeakAfterBounce, _ball.Body.position.y);
                 if (++after == 10)
                     run.Later = v;
-                if (after >= 10 && _pitches.ContainsKey(id) && v.y <= 0f)
-                    break; // past the rebound's peak
+                if (after >= 10 && _pitches.ContainsKey(id) && v.y <= 0f && (!wantCrease || !float.IsNaN(_flight.CreaseHeight)))
+                    break; // past the rebound's peak (and the crease, when asked)
             }
             Assert.IsTrue(_pitches.ContainsKey(id), $"{request}: never pitched");
             Assert.GreaterOrEqual(after, 10, $"{request}: no rebound followed");
@@ -393,15 +398,54 @@ namespace CricketVR.Tests
             }
             Debug.Log(table.ToString());
 
+            // Since the flight change (owner feedback 2026-10-27: "more flight", "bounce keeping low") a tossed-up ball
+            // at the slow end bounces higher, up to about 1.2 m; the average and flat balls stay about knee to waist.
+            // Whether tossed-up balls may go above 0.9 m is an open owner decision (E-060).
             foreach (var kind in new[] { DeliveryKind.OffSpin, DeliveryKind.Doosra, DeliveryKind.LegSpin, DeliveryKind.Googly })
-            foreach (var kmh in new[] { 75f, 85f, 95f })
-                Assert.That(heights[(kind, 6f, kmh)], Is.InRange(0.5f, 0.9f), $"{kind} at 6 m, {kmh} km/h: crease height");
+            {
+                foreach (var kmh in new[] { 75f, 85f, 95f })
+                    Assert.That(heights[(kind, 6f, kmh)], Is.InRange(0.5f, 1.25f), $"{kind} at 6 m, {kmh} km/h: crease height");
+                foreach (var kmh in new[] { 85f, 95f })
+                    Assert.That(heights[(kind, 6f, kmh)], Is.InRange(0.5f, 1.0f), $"{kind} at 6 m, {kmh} km/h (average or flat): crease height");
+            }
             foreach (var length in new[] { 4f, 6f, 8f })
             foreach (var kmh in new[] { 75f, 85f, 95f })
             {
                 Assert.Greater(heights[(DeliveryKind.Googly, length, kmh)], heights[(DeliveryKind.LegSpin, length, kmh)], $"{length} m {kmh} km/h: googly higher than leg-spin");
                 Assert.Less(heights[(DeliveryKind.Doosra, length, kmh)], heights[(DeliveryKind.OffSpin, length, kmh)], $"{length} m {kmh} km/h: doosra lower than off-spin");
             }
+        }
+
+        /// <summary>
+        /// Spin character (owner feedback 2026-10-27 after the Net Practice spin session): for each spin type at its
+        /// slowest and fastest speed, the launch angle, the highest point above the release, the arrival angle, the
+        /// horizontal speed kept through the bounce, and the height at the crease; Stock for reference.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SpinCharacterTable()
+        {
+            var table = new System.Text.StringBuilder("[CricketVR] Spin character, right-handed, line +0.1 m, length 5 m, movement 0.5:");
+            foreach (var kind in new[] { DeliveryKind.Stock, DeliveryKind.OffSpin, DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly })
+            {
+                var type = Shipped(kind);
+                var speeds = type.UsesPlanSpeed ? new[] { 75f, 90f }
+                    : new[] { type.minSpeedKmh, Mathf.Round(0.5f * (type.minSpeedKmh + type.maxSpeedKmh)), type.maxSpeedKmh };
+                foreach (var kmh in speeds)
+                {
+                    var request = Request(type, kmh, 0.1f, 5f, 0.5f, Handedness.Right);
+                    var run = new SpinRun();
+                    float apex = float.MinValue;
+                    yield return BowlSpin(request, run, p => apex = Mathf.Max(apex, p.y));
+                    var v0 = _machine.LastSolution.Velocity;
+                    float launch = Mathf.Atan2(v0.y, Flat(v0).magnitude) * Mathf.Rad2Deg;
+                    float arrive = Mathf.Atan2(-run.Arrival.y, Flat(run.Arrival).magnitude) * Mathf.Rad2Deg;
+                    float kept = Flat(run.Later).magnitude / Flat(run.Arrival).magnitude;
+                    table.Append($"\n  {kind,-8} {kmh,3:F0} km/h: launch {launch:+0.0;-0.0} deg, top {apex - request.releasePosition.y:+0.00;-0.00} m vs release, " +
+                                 $"arrives {arrive:F1} deg at {Flat(run.Arrival).magnitude * 3.6f:F0} km/h, leaves at {Flat(run.Later).magnitude * 3.6f:F0} km/h ({kept * 100f:F0}%), " +
+                                 $"crease height {run.CreaseHeight:F2} m, dip {_machine.LastSolution.Plan.Dip:F1}, grip {_machine.LastSolution.Plan.Grip:F2}");
+                }
+            }
+            Debug.Log(table.ToString());
         }
 
         [UnityTest]

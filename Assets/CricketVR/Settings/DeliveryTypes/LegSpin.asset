@@ -17,7 +17,7 @@ MonoBehaviour:
     displayName: Leg-spin
     description: Drifts in, then turns away from leg to off after pitching.
     style: 1
-    minSpeedKmh: 75
+    minSpeedKmh: 72
     maxSpeedKmh: 90
     swingDirection: 0
     swingMin: 0
@@ -26,11 +26,12 @@ MonoBehaviour:
     turnDirection: 1
     driftMin: 0.06
     driftMax: 0.12
-    dip: 0.8
+    dip: 1.2
+    flightDip: 5.5
     turnMin: 4
     turnMax: 9
     bounceFactor: -0.19
-    grip: 0.06
+    grip: 0.12
     seamDegrees: 0
     visualRevPerSecond: 4
     looksLike: 4

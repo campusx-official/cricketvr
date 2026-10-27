@@ -18,7 +18,7 @@ MonoBehaviour:
     description: 'The off-spinner''s variation: looks like off-spin but turns the
       other way, away from a right-hander.'
     style: 1
-    minSpeedKmh: 80
+    minSpeedKmh: 75
     maxSpeedKmh: 92
     swingDirection: 0
     swingMin: 0
@@ -27,11 +27,12 @@ MonoBehaviour:
     turnDirection: 1
     driftMin: 0.05
     driftMax: 0.1
-    dip: 0.6
+    dip: 1
+    flightDip: 5
     turnMin: 2.5
     turnMax: 5
     bounceFactor: -0.23
-    grip: 0.05
+    grip: 0.10
     seamDegrees: 0
     visualRevPerSecond: 4
     looksLike: 3

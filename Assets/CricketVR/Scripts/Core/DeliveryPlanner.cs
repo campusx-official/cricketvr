@@ -31,6 +31,10 @@ namespace CricketVR
         [Tooltip("Lengths of a normal ball (m).")]
         public float minLength;
         public float maxLength;
+        [Tooltip("Most likely normal length (m): lengths are drawn from a triangle min..peak..max. 0 = uniform (as before).")]
+        public float lengthPeak;
+        [Tooltip("Good-length band for the ball's label (m); 0..0 = the pace band, 5-7.5 m.")]
+        public float goodLengthMin, goodLengthMax;
         [Range(0f, 1f)] public float yorkerShare;
         public float yorkerMinLength;
         public float yorkerMaxLength;
@@ -130,8 +134,12 @@ namespace CricketVR
             }
             else
             {
-                length = Range(rng, plan.minLength, plan.maxLength);
-                kind = length < 5f ? "Full" : length < 7.5f ? "Good length" : "Back of a length";
+                length = plan.lengthPeak > 0f
+                    ? Triangular(rng, plan.minLength, plan.lengthPeak, plan.maxLength)
+                    : Range(rng, plan.minLength, plan.maxLength);
+                bool ownBand = plan.goodLengthMax > 0f;
+                float good = ownBand ? plan.goodLengthMin : 5f, beyond = ownBand ? plan.goodLengthMax : 7.5f;
+                kind = length < good ? "Full" : length < beyond ? "Good length" : ownBand ? "Short" : "Back of a length";
             }
             float minSpeed = plan.minSpeedKmh, maxSpeed = plan.maxSpeedKmh;
             if (!type.UsesPlanSpeed)
@@ -197,6 +205,18 @@ namespace CricketVR
         }
 
         static float Range(System.Random rng, float min, float max) => min + (float)rng.NextDouble() * (max - min);
+
+        /// <summary>One draw from the triangular distribution min..peak..max (one random number, like <see cref="Range"/>).</summary>
+        static float Triangular(System.Random rng, float min, float peak, float max)
+        {
+            float u = (float)rng.NextDouble();
+            if (!(max > min)) return min;
+            peak = Mathf.Clamp(peak, min, max);
+            float f = (peak - min) / (max - min);
+            return u < f
+                ? min + Mathf.Sqrt(u * (max - min) * (peak - min))
+                : max - Mathf.Sqrt((1f - u) * (max - min) * (max - peak));
+        }
 
         // ---------- T076 headset swing check (AC-26) ----------
 

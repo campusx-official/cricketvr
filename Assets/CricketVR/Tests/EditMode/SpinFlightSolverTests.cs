@@ -278,16 +278,26 @@ namespace CricketVR.Tests
             {
                 var plan = bowler.Plan();
                 var rng = new System.Random(7);
-                int redraws = 0;
-                for (int n = 0; n < 200; n++)
+                int redraws = 0, full = 0, good = 0, shortBalls = 0;
+                const int draws = 400;
+                for (int n = 0; n < draws; n++)
                 {
                     var r = DeliveryPlanner.DrawRequest(plan, rng, hand, types, reachable, out int k);
                     redraws += k;
                     Assert.AreEqual(kind, r.type.kind, $"draw {n}: {r}");
                     Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), $"draw {n}: the type's own speed");
-                    Assert.That(r.length, Is.InRange(plan.minLength, plan.maxLength));
+                    Assert.That(r.length, Is.InRange(2.5f, 7.5f), $"draw {n}: spin lengths");
+                    if (r.length < NetBowler.SpinGoodLengthMin) { full++; StringAssert.Contains("Full", r.label); }
+                    else if (r.length < NetBowler.SpinGoodLengthMax) { good++; StringAssert.Contains("Good length", r.label); }
+                    else { shortBalls++; StringAssert.Contains("Short", r.label); }
                 }
                 Assert.AreEqual(0, redraws, $"{kind} {hand}: every draw reachable");
+                // Triangle 2.5..4.75..7.5: about 20% full, 64% good length, 16% short.
+                Assert.Greater(good, draws * 55 / 100, $"{kind}: mostly good length ({full}/{good}/{shortBalls})");
+                Assert.Greater(full, draws / 10, $"{kind}: some full balls");
+                Assert.Greater(shortBalls, draws / 12, $"{kind}: some short balls");
+                if (hand == Handedness.Right)
+                    Debug.Log($"[CricketVR] Net Practice {bowler.Label}: {draws} draws, full {full}, good length {good}, short {shortBalls}");
             }
         }
     }

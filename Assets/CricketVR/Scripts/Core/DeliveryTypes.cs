@@ -45,8 +45,10 @@ namespace CricketVR
         public int turnDirection;
         [Tooltip("Air drift by the bounce (m) at movement 0 and 1.")]
         public float driftMin, driftMax;
-        [Tooltip("Extra downward acceleration before the bounce (m/s²).")]
+        [Tooltip("Extra downward acceleration before the bounce (m/s²) at the type's fastest speed (the flattest ball).")]
         public float dip;
+        [Tooltip("Dip (m/s²) at the type's slowest speed: the most tossed-up ball. Each ball's dip goes from this to dip as its speed rises, so flight varies with pace; 0 = dip at every speed.")]
+        public float flightDip;
         [Tooltip("Turn at the bounce (degrees) at movement 0 and 1.")]
         public float turnMin, turnMax;
         [Tooltip("Bounce-height factor: vertical speed after the bounce × (1 + b).")]
@@ -67,7 +69,7 @@ namespace CricketVR
         public float variation;
 
         /// <summary>No swing, spin, dip or bounce change: the type bowls exactly like the pre-M7.5 machine.</summary>
-        public bool IsStill => swingDirection == 0 && turnDirection == 0 && dip == 0f && bounceFactor == 0f &&
+        public bool IsStill => swingDirection == 0 && turnDirection == 0 && dip == 0f && flightDip == 0f && bounceFactor == 0f &&
                                grip == 0f && seamDegrees == 0f;
 
         public bool UsesPlanSpeed => maxSpeedKmh <= 0f;
@@ -102,10 +104,11 @@ namespace CricketVR
             L("driftMin", d => d.driftMin, 0f, 0.3f),
             L("driftMax", d => d.driftMax, 0f, 0.3f),
             L("dip", d => d.dip, 0f, 3f),
+            L("flightDip", d => d.flightDip, 0f, 8f),
             L("turnMin", d => d.turnMin, 0f, 15f),
             L("turnMax", d => d.turnMax, 0f, 15f),
             L("bounceFactor", d => d.bounceFactor, -0.5f, 0.3f),
-            L("grip", d => d.grip, 0f, 0.2f),
+            L("grip", d => d.grip, 0f, 0.4f),
             L("seamDegrees", d => d.seamDegrees, -5f, 5f),
             L("visualRevPerSecond", d => d.visualRevPerSecond, 0f, MaxVisualRevPerSecond),
             L("variation", d => d.variation, 0f, 0.5f),
@@ -150,16 +153,16 @@ namespace CricketVR
         public static DeliveryTypeData Outswinger => Swing(DeliveryKind.Outswinger, "Outswinger", +1,
             "Curves away from a right-hander toward the slips before pitching.");
 
-        public static DeliveryTypeData OffSpin => Spin(DeliveryKind.OffSpin, "Off-spin", -1, 80f, 92f, 0.05f, 0.10f, 0.6f, 3f, 6f, -0.21f, 0.05f,
+        public static DeliveryTypeData OffSpin => Spin(DeliveryKind.OffSpin, "Off-spin", -1, 75f, 92f, 0.05f, 0.10f, 1.0f, 5.0f, 3f, 6f, -0.21f, 0.10f,
             DeliveryKind.OffSpin, "Drifts away, then turns in from off to leg (toward a right-hander) after pitching.");
 
-        public static DeliveryTypeData LegSpin => Spin(DeliveryKind.LegSpin, "Leg-spin", +1, 75f, 90f, 0.06f, 0.12f, 0.8f, 4f, 9f, -0.19f, 0.06f,
+        public static DeliveryTypeData LegSpin => Spin(DeliveryKind.LegSpin, "Leg-spin", +1, 72f, 90f, 0.06f, 0.12f, 1.2f, 5.5f, 4f, 9f, -0.19f, 0.12f,
             DeliveryKind.LegSpin, "Drifts in, then turns away from leg to off after pitching.");
 
-        public static DeliveryTypeData Doosra => Spin(DeliveryKind.Doosra, "Doosra", +1, 80f, 92f, 0.05f, 0.10f, 0.6f, 2.5f, 5f, -0.23f, 0.05f,
+        public static DeliveryTypeData Doosra => Spin(DeliveryKind.Doosra, "Doosra", +1, 75f, 92f, 0.05f, 0.10f, 1.0f, 5.0f, 2.5f, 5f, -0.23f, 0.10f,
             DeliveryKind.OffSpin, "The off-spinner's variation: looks like off-spin but turns the other way, away from a right-hander.");
 
-        public static DeliveryTypeData Googly => Spin(DeliveryKind.Googly, "Googly", -1, 75f, 90f, 0.06f, 0.12f, 1.2f, 3.5f, 7.5f, -0.16f, 0.06f,
+        public static DeliveryTypeData Googly => Spin(DeliveryKind.Googly, "Googly", -1, 72f, 90f, 0.06f, 0.12f, 1.8f, 6.0f, 3.5f, 7.5f, -0.14f, 0.12f,
             DeliveryKind.LegSpin, "The leg-spinner's variation: looks like leg-spin but turns in, dips more and bounces higher.");
 
         /// <summary>The seven starting types, in <see cref="DeliveryKind"/> order.</summary>
@@ -174,11 +177,11 @@ namespace CricketVR
         };
 
         static DeliveryTypeData Spin(DeliveryKind kind, string name, int turn, float minKmh, float maxKmh, float driftMin, float driftMax,
-            float dip, float turnMin, float turnMax, float bounce, float grip, DeliveryKind looksLike, string description) => new DeliveryTypeData
+            float dip, float flightDip, float turnMin, float turnMax, float bounce, float grip, DeliveryKind looksLike, string description) => new DeliveryTypeData
         {
             kind = kind, displayName = name, description = description, style = BowlingStyle.Spin, looksLike = looksLike,
             minSpeedKmh = minKmh, maxSpeedKmh = maxKmh,
-            turnDirection = turn, driftMin = driftMin, driftMax = driftMax, dip = dip, turnMin = turnMin, turnMax = turnMax,
+            turnDirection = turn, driftMin = driftMin, driftMax = driftMax, dip = dip, flightDip = flightDip, turnMin = turnMin, turnMax = turnMax,
             bounceFactor = bounce, grip = grip, visualRevPerSecond = 4f, variation = 0.15f,
         };
     }
@@ -268,19 +271,42 @@ namespace CricketVR
         public string Label;
         /// <summary>Empty = Stock only (the pace bowler, unchanged).</summary>
         public TypeWeight[] Mix;
+        /// <summary>A spinner's lengths (m): drawn from the triangle min..peak..max, labelled with the spin good-length
+        /// band; 0 = Net Practice's pace lengths.</summary>
+        public float MinLength, PeakLength, MaxLength;
+
+        // Spin lengths (owner feedback 2026-10-27, "almost all the balls are very short"): the pace range 3.5-9 m put
+        // half the balls beyond 6 m, short for a spinner. Spin good length is about 4-6 m from the stumps.
+        const float SpinMinLength = 2.5f, SpinPeakLength = 4.75f, SpinMaxLength = 7.5f;
+        public const float SpinGoodLengthMin = 4f, SpinGoodLengthMax = 6f;
 
         public static readonly NetBowler[] All =
         {
             new NetBowler { Button = "BowlerPace", Label = "Pace", Mix = new TypeWeight[0] },
-            new NetBowler { Button = "BowlerOffSpin", Label = "Off-spin", Mix = new[] { new TypeWeight { kind = DeliveryKind.OffSpin, weight = 1f } } },
-            new NetBowler { Button = "BowlerLegSpin", Label = "Leg-spin", Mix = new[] { new TypeWeight { kind = DeliveryKind.LegSpin, weight = 1f } } },
+            Spinner("BowlerOffSpin", "Off-spin", DeliveryKind.OffSpin),
+            Spinner("BowlerLegSpin", "Leg-spin", DeliveryKind.LegSpin),
         };
 
-        /// <summary>The Net Practice plan with this bowler: same lines and lengths; a spinner's speed comes from its type.</summary>
+        static NetBowler Spinner(string button, string label, DeliveryKind kind) => new NetBowler
+        {
+            Button = button, Label = label, Mix = new[] { new TypeWeight { kind = kind, weight = 1f } },
+            MinLength = SpinMinLength, PeakLength = SpinPeakLength, MaxLength = SpinMaxLength,
+        };
+
+        /// <summary>The Net Practice plan with this bowler: Net Practice lines; a spinner's own lengths; its speed
+        /// (and so its flight) comes from its type.</summary>
         public DeliveryPlanSettings Plan()
         {
             var plan = DeliveryPlanSettings.NetPractice;
             plan.typeMix = Mix != null && Mix.Length > 0 ? Mix : null;
+            if (MaxLength > 0f)
+            {
+                plan.minLength = MinLength;
+                plan.lengthPeak = PeakLength;
+                plan.maxLength = MaxLength;
+                plan.goodLengthMin = SpinGoodLengthMin;
+                plan.goodLengthMax = SpinGoodLengthMax;
+            }
             return plan;
         }
     }

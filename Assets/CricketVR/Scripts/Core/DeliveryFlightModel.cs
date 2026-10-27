@@ -48,7 +48,7 @@ namespace CricketVR
                 SwingLateness = t.swingLateness,
                 TurnDirection = t.turnDirection,
                 Drift = t.turnDirection == 0 ? 0f : Mathf.Lerp(t.driftMin, t.driftMax, m) * factors.y,
-                Dip = t.dip,
+                Dip = FlightDip(t, request.speedKmh),
                 TurnDegrees = t.turnDirection == 0 ? 0f : Mathf.Lerp(t.turnMin, t.turnMax, m) * factors.z,
                 BounceFactor = t.bounceFactor,
                 Grip = t.grip,
@@ -57,6 +57,19 @@ namespace CricketVR
                 VarDrift = factors.y,
                 VarTurn = factors.z,
             };
+        }
+
+        /// <summary>
+        /// A spinner's dip at this speed (owner feedback 2026-10-27: more flight, and varying): the slowest ball of the
+        /// type's range is the most tossed up (<see cref="DeliveryTypeData.flightDip"/>), the fastest the flattest
+        /// (<see cref="DeliveryTypeData.dip"/>). The solver launches a ball that dips more higher, so it loops and
+        /// arrives steeper.
+        /// </summary>
+        public static float FlightDip(in DeliveryTypeData t, float speedKmh)
+        {
+            if (!(t.flightDip > 0f) || t.UsesPlanSpeed || !(t.maxSpeedKmh > t.minSpeedKmh))
+                return t.dip;
+            return Mathf.Lerp(t.flightDip, t.dip, Mathf.InverseLerp(t.minSpeedKmh, t.maxSpeedKmh, speedKmh));
         }
 
         /// <summary>

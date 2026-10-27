@@ -18,7 +18,7 @@ MonoBehaviour:
     description: 'The leg-spinner''s variation: looks like leg-spin but turns in,
       dips more and bounces higher.'
     style: 1
-    minSpeedKmh: 75
+    minSpeedKmh: 72
     maxSpeedKmh: 90
     swingDirection: 0
     swingMin: 0
@@ -27,11 +27,12 @@ MonoBehaviour:
     turnDirection: -1
     driftMin: 0.06
     driftMax: 0.12
-    dip: 1.2
+    dip: 1.8
+    flightDip: 6
     turnMin: 3.5
     turnMax: 7.5
-    bounceFactor: -0.16
-    grip: 0.06
+    bounceFactor: -0.14
+    grip: 0.12
     seamDegrees: 0
     visualRevPerSecond: 4
     looksLike: 4

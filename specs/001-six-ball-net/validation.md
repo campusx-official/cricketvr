@@ -1122,6 +1122,31 @@ Log or artifact path: Docs/evidence/2026-10-27-m7-ac08-partial/
 Remaining limitation / follow-up task: complete the remaining checklist rows on the M7 APK; then merge m7-session into main on the owner's go-ahead
 ```
 
+```text
+Check ID / acceptance scenario: E-060 / Spin feel in Net Practice: length, speed off the pitch, flight (owner feedback 2026-10-27)
+Requirement IDs: REQ-028, REQ-043, REQ-045
+Date and tester: 2026-10-27 18:01-18:04 owner (headset, netbowler APK sha256 96f924c3…76e7); agent (CSV analysis, change, tests)
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3 (owner session); then EditMode and PlayMode (Mac batch)
+Configuration: Net Practice, Bowler = Leg-spin (3 sessions, 36 balls) then Off-spin (3 sessions, 36 balls)
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-27-net-spin/); SwingPlayModeTests.SpinCharacterTable before and after; full suites
+Expected result: owner: (1) vary the length, not almost all short; (2) the ball slows after pitching; (3) more flight, and varying
+Actual result and measured values:
+  - Device CSVs: lengths drawn uniformly 3.7-8.8 m (pace range 3.5-9 m), so about half beyond 6 m, short for a spinner. Crease heights 0.38-0.83 m; turns off-spin -2.7..-6.5 deg, leg-spin 4.6..9.4 deg.
+  - Before (PlayMode, 5 m, movement 0.5): launch -1.7..+2.1 deg, highest point at most +0.02 m above the release (flat as Stock); horizontal speed kept through the bounce 71-80% (Stock 75-76%).
+  - Change 1, length: spin bowlers draw from a triangle 2.5..4.75..7.5 m; labels full < 4 m, good length 4-6 m, short > 6 m. EditMode 400 draws: full 92, good length 248 (62%), short 60; 0 redraws. Pace unchanged (uniform path and random sequence).
+  - Change 2, speed off the pitch: grip off-spin/doosra 0.05 -> 0.10, leg-spin/googly 0.06 -> 0.12 (limit 0.2 -> 0.4). Kept through the bounce: off-spin 54% (tossed up) / 62% / 76% (flat); leg-spin 60 / 65 / 66%; googly 66-67%; Stock 75-76%. (0.15/0.18 was tried: 51-71%, more than "a bit".)
+  - Change 3, flight: new DeliveryTypeData.flightDip, the dip at the type's slowest speed, falling to dip at its fastest: off-spin/doosra 5.0 -> 1.0 m/s^2 over 75-92 km/h (was 0.6 at 80-92), leg-spin 5.5 -> 1.2 over 72-90 (was 0.8 at 75-90), googly 6.0 -> 1.8 over 72-90 (was 1.2). Launch: off-spin +5.8 / +1.3 / -1.4 deg at 75 / 84 / 92 km/h, highest point +0.14 / +0.01 / 0.00 m; leg-spin +7.5 / +2.4 / -1.0 deg, +0.22 m at 72; googly +8.1 deg, +0.24 m at 72. Arrival 14-23 deg (Stock 14-16.5).
+  - Crease height (m; 4 / 6 / 8 m at 75 / 85 / 95 km/h): Off-spin 0.89 0.63 0.49 | 1.03 0.82 0.70 | 1.04 0.88 0.86; Doosra 0.86 0.61 0.48 | 0.98 0.79 0.68 | 0.99 0.83 0.82; Leg-spin 0.91 0.65 0.52 | 1.06 0.85 0.74 | 1.07 0.91 0.91; Googly 0.95 0.72 0.57 | 1.22 0.96 0.83 | 1.23 1.06 1.04 (googly bounce -0.16 -> -0.14 to stay above leg-spin at 4 m 75 km/h). Googly above leg-spin and doosra below off-spin at every length and speed.
+  - Height test bounds changed: 6 m all speeds 0.5-1.25 m; 85/95 km/h 0.5-1.0 m (was 0.5-0.9 everywhere): tossed-up balls now go above 0.9 m.
+  - Unchanged: Stock and swing (AC-04 0.16 cm; AC-29 0.21/0.19/0.12; T074 0.08/0.10 cm; Main 0.02 cm); T077 drift 0.0 mm, T078 turn within 0.018 deg, T079 spin 2.25 cm.
+  - Suites: EditMode 152/152, PlayMode 62/62.
+Outcome: Pass (automated); headset re-check by the owner pending
+Log or artifact path: Docs/evidence/2026-10-27-net-spin/; batch test results (scratchpad)
+Remaining limitation / follow-up task: OWNER DECISION: tossed-up balls reach the crease at up to 1.0-1.2 m off a good length, above the earlier 0.5-0.9 m target (keep, or cap them). No air drag, so the ball arrives at its release speed (spin feels quicker through the air than a real one).
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
