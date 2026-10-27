@@ -162,7 +162,8 @@ namespace CricketVR
                           (solution.Plan.IsStill ? "" : $", {world.type.displayName} swing {solution.PredictedSwing:F2} m (curve {solution.PredictedCurve:F2} m)" +
                            (solution.Plan.DriftDirection == 0 ? "" : $", drift {solution.PredictedDrift:F2} m") +
                            (solution.Plan.Dip == 0f ? "" : $", dip {solution.Plan.Dip:F1} m/s²") +
-                           (solution.Plan.TurnDirection == 0 ? "" : $", turn {solution.Plan.TurnDegrees:F1} deg toward {(solution.Plan.TurnDirection > 0 ? "+X" : "-X")}")));
+                           (solution.Plan.TurnDirection == 0 ? "" : $", turn {solution.Plan.TurnDegrees:F1} deg toward {(solution.Plan.TurnDirection > 0 ? "+X" : "-X")}")) +
+                          (float.IsNaN(solution.PredictedArrivalLine) ? "" : $", finishes at x {solution.PredictedArrivalLine:+0.000;-0.000} m at the crease"));
             Bowled?.Invoke(id, request, solution);
             return id;
         }

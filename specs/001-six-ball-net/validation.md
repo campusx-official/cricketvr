@@ -36,7 +36,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
 | AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
-| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053) and turn at the bounce (E-054) automated pass; arrival line and headset not run | E-053, E-054 | M7.5 T079, T082 |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053), turn at the bounce (E-054) and arrival line (E-055) automated pass; headset not run | E-053–E-055 | Spin bounce height (owner request), then M7.5 T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
@@ -1011,6 +1011,25 @@ Actual result and measured values:
 Outcome: Pass (automated)
 Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: (1) crease position after the turn carries PhysX's rebound offset (up to about 2 cm, owner-accepted); T079 arrival-line solve. (2) Spin types are not in any default plan's mix yet (T065), so they are not bowled in normal play. (3) The rebound peaks (1.3-1.5 m off a good length at 82 km/h) come from the existing pitch material; review in T083 calibration. (4) Headset AC-27 in T082.
+```
+
+```text
+Check ID / acceptance scenario: E-055 / T079 arrival-line requests (D-1, REQ-044: crease line within about 3 cm for every type)
+Requirement IDs: REQ-044, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: lineReference AtBatter; all 7 types; both hands; variation 0; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: simulation reaches the requested crease line within 1 mm; PhysX within about 3 cm for every type; bounce-line requests unchanged
+Actual result and measured values:
+  - EditMode: 336 solves (7 types x 2 hands x lengths 1/3/6/8 m x lines -0.1/+0.1/+0.3 x movement 0/1), all reachable; worst crease miss 0.995 mm; pitch line up to 0.73 m from the arrival line. Off-spin asked to finish on middle (right-hander) pitches outside off. Bounce-line requests: no arrival line, target unchanged.
+  - PlayMode ArrivalLineRequestsReachTheCreaseLineWithinThreeCentimetres: 84 balls (7 types x 2 hands x 4/6/8 m x lines 0/+0.2, movement 0.7): spin worst 2.35 cm (PhysX rebound offset at the turn's pivot, as predicted for Option A); Stock and swing 0.00 cm.
+  - Other results unchanged (T074/T077/T078, AC-04, AC-29, Main 0.02 cm). Suites: EditMode 150/150, PlayMode 59/59.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: spin bounce height at the crease (owner request before T082)
 ```
 
 ```text

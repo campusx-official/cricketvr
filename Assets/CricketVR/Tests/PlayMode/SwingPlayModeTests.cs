@@ -331,6 +331,40 @@ namespace CricketVR.Tests
             _ball.Cancel();
         }
 
+        /// <summary>
+        /// T079 (REQ-044, D-1): arrival-line requests in PhysX. Every type, both hands, three lengths and lines, shipped
+        /// types without variation: the ball crosses the popping crease within about 3 cm of the requested line
+        /// (spin balls carry PhysX's rebound offset at the turn's pivot, plan.md §19).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator ArrivalLineRequestsReachTheCreaseLineWithinThreeCentimetres()
+        {
+            float worstOther = 0f, worstSpin = 0f;
+            int balls = 0;
+            foreach (var kind in new[] { DeliveryKind.Stock, DeliveryKind.Inswinger, DeliveryKind.Outswinger, DeliveryKind.OffSpin,
+                         DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            foreach (var length in new[] { 4f, 6f, 8f })
+            foreach (var line in new[] { 0f, 0.2f })
+            {
+                var type = Shipped(kind);
+                float kmh = type.UsesPlanSpeed ? 90f : Mathf.Round(0.5f * (type.minSpeedKmh + type.maxSpeedKmh));
+                var request = Request(type, kmh, line, length, 0.7f, hand);
+                request.lineReference = LineReference.AtBatter;
+                int id = 0;
+                yield return BowlAndWaitForPitch(request, x => id = x, untilCrease: true);
+                var world = request.ForBatter();
+                float miss = Mathf.Abs(_flight.ArrivalLine - world.line);
+                Assert.LessOrEqual(miss, 0.03f, $"{request}: reached the crease at {_flight.ArrivalLine:+0.000} m, {miss * 100f:F1} cm off " +
+                                                $"(solver {_machine.LastSolution.PredictedArrivalLine:+0.000}, pitched at {_pitches[id].Point.x:+0.000})");
+                if (type.style == BowlingStyle.Spin) worstSpin = Mathf.Max(worstSpin, miss);
+                else worstOther = Mathf.Max(worstOther, miss);
+                balls++;
+            }
+            Debug.Log($"[CricketVR] T079 arrival line PlayMode: {balls} balls, worst crease miss: spin {worstSpin * 100f:F2} cm, " +
+                      $"Stock and swing {worstOther * 100f:F2} cm");
+        }
+
         [UnityTest]
         public IEnumerator StockWithBallFlightIsUnchanged()
         {

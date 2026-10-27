@@ -60,6 +60,9 @@ namespace CricketVR
         public float PredictedCurve;
         /// <summary>Simulated drift (m): distance off the release line at the pitch point; 0 without drift.</summary>
         public float PredictedDrift;
+        /// <summary>Simulated x at the striker's popping crease, after the turn (m, world); NaN unless the request's line
+        /// is <see cref="LineReference.AtBatter"/>.</summary>
+        public float PredictedArrivalLine;
     }
 
     /// <summary>
@@ -84,6 +87,7 @@ namespace CricketVR
             var result = new DeliverySolution
             {
                 Target = new Vector3(config.line, contact, config.length),
+                PredictedArrivalLine = float.NaN,
             };
             float speed = Units.KmhToMs(config.speedKmh);
 
@@ -184,16 +188,65 @@ namespace CricketVR
         public static DeliverySolution Solve(in DeliveryRequest worldRequest, in DeliveryMovement movement, float gravity, float fixedDeltaTime, float ballRadius)
         {
             var config = worldRequest.ToConfig();
-            if (movement.IsStill)
-                return Solve(config, gravity, fixedDeltaTime, ballRadius);
-            if (worldRequest.lineReference != LineReference.AtBounce)
-                return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
-                    "arrival-line requests are not available yet (T079)");
-            if (movement.SeamDegrees != 0f)
+            if (!movement.IsStill && movement.SeamDegrees != 0f)
                 return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
                     "seam movement is not available (D-2: 0 in v1)");
-            return SolveMoving(config, movement, gravity, fixedDeltaTime, ballRadius);
+            return worldRequest.lineReference == LineReference.AtBatter
+                ? SolveAtBatter(config, movement, gravity, fixedDeltaTime, ballRadius)
+                : SolveAtBounce(config, movement, gravity, fixedDeltaTime, ballRadius);
         }
+
+        /// <summary>The line is where the ball pitches: Stock's unchanged solve, or the movement-aware one.</summary>
+        static DeliverySolution SolveAtBounce(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float ballRadius) =>
+            movement.IsStill ? Solve(config, gravity, dt, ballRadius) : SolveMoving(config, movement, gravity, dt, ballRadius);
+
+        const float ArrivalTolerance = 0.001f; // metres at the crease, in simulation
+
+        /// <summary>
+        /// Arrival-line request (D-1, T079): <c>config.line</c> is the x where the ball should reach the striker's
+        /// popping crease. Solves the pitch line by secant steps: each pass solves an ordinary pitch-point request
+        /// (same length, trial line) and simulates on to the crease along the arrival heading turned by the plan's turn
+        /// (PhysX's bounce keeps the heading; the turn pivots at the pitch point, so the runtime's rebound offset
+        /// adds up to about 2 cm, plan.md §19).
+        /// </summary>
+        static DeliverySolution SolveAtBatter(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float ballRadius)
+        {
+            float want = config.line;
+            if (!(dt > 0f))
+                return Fail(new DeliverySolution { Target = new Vector3(want, ContactHeight(ballRadius), config.length) },
+                    "an arrival-line request needs the physics step");
+            float pitchX = want, lastPitch = float.NaN, lastArrival = float.NaN;
+            DeliverySolution s = default;
+            for (int i = 0; i < MaxMovingIterations; i++)
+            {
+                var trial = config;
+                trial.line = pitchX;
+                s = SolveAtBounce(trial, movement, gravity, dt, ballRadius);
+                if (!s.Reachable)
+                    return s;
+                var flight = Simulate(trial.releasePosition, s.Velocity, s.Plan, gravity, dt, s.Target.y, s.Target);
+                if (!flight.Landed || float.IsNaN(flight.CreaseX))
+                    return Fail(s, $"{config.speedKmh:F0} km/h at length {config.length:F2} m never reaches the crease");
+                s.PredictedArrivalLine = flight.CreaseX;
+                float miss = want - flight.CreaseX;
+                if (Mathf.Abs(miss) < ArrivalTolerance)
+                    return s;
+                // Secant on crease x(pitch x); the first step assumes the crease moves one-for-one with the pitch.
+                float slope = 1f;
+                if (!float.IsNaN(lastPitch) && Mathf.Abs(pitchX - lastPitch) > 1e-6f)
+                    slope = (flight.CreaseX - lastArrival) / (pitchX - lastPitch);
+                if (!(slope > 0.1f))
+                    slope = 1f;
+                lastPitch = pitchX;
+                lastArrival = flight.CreaseX;
+                pitchX += miss / slope;
+                if (Mathf.Abs(pitchX - want) > MaxArrivalOffset)
+                    return Fail(s, $"too much movement to finish on line {want:+0.00;-0.00} m (would pitch {pitchX:+0.00;-0.00} m)");
+            }
+            return Fail(s, $"no pitch line finishes on {want:+0.00;-0.00} m within {ArrivalTolerance * 1000f:F0} mm");
+        }
+
+        const float MaxArrivalOffset = 2f; // metres between the pitch line and the arrival line
 
         /// <summary>
         /// Shooting solve on (yaw, elevation) at the requested speed. Integrates gravity plus
@@ -330,6 +383,9 @@ namespace CricketVR
             public float Swing;
             /// <summary>Signed drift (m): ball x at the pitch point minus where the release line reaches that z.</summary>
             public float Drift;
+            /// <summary>Ball x at the popping crease (m, world): from the flight if it gets there before pitching,
+            /// otherwise along the arrival heading turned by the plan's turn at the pitch point.</summary>
+            public float CreaseX;
         }
 
         /// <summary>
@@ -363,9 +419,16 @@ namespace CricketVR
                     result.Time = (step + f) * dt;
                     result.ArrivalVelocity = v;
                     // Not at the crease yet: the ball carries on along its arrival heading (the same straight segment
-                    // when the crease falls inside this step).
-                    if (float.IsNaN(creaseX) && Mathf.Abs(v.z) > 1e-6f)
-                        creaseX = result.Bounce.x + v.x * (creaseZ - result.Bounce.z) / v.z;
+                    // when the crease falls inside this step), turned at the pitch point for a spinning ball.
+                    if (float.IsNaN(creaseX))
+                    {
+                        var heading = v;
+                        if (plan.TurnDirection != 0 && plan.TurnDegrees > 0f)
+                            heading = Quaternion.AngleAxis(DeliveryFlightModel.TurnAngle(v, plan), Vector3.up) * v;
+                        if (Mathf.Abs(heading.z) > 1e-6f)
+                            creaseX = result.Bounce.x + heading.x * (creaseZ - result.Bounce.z) / heading.z;
+                    }
+                    result.CreaseX = creaseX;
                     result.Swing = creaseX - releaseLineX;
                     result.Drift = result.Bounce.x - (Mathf.Abs(velocity.z) > 1e-6f
                         ? release.x + velocity.x * (result.Bounce.z - release.z) / velocity.z

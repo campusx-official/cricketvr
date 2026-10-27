@@ -182,5 +182,69 @@ namespace CricketVR.Tests
             Assert.AreEqual(0f, a.y);
             Assert.AreEqual(-12f * Mathf.Pow(0.75f, 1.5f), Vector3.Dot(a, side), 1e-4f);
         }
+
+        // ---------- T079: arrival-line requests (D-1) ----------
+
+        static readonly DeliveryTypeData[] AllMoving =
+        {
+            DeliveryTypeData.Stock, DeliveryTypeData.Inswinger, DeliveryTypeData.Outswinger, DeliveryTypeData.OffSpin,
+            DeliveryTypeData.LegSpin, DeliveryTypeData.Doosra, DeliveryTypeData.Googly,
+        };
+
+        static DeliveryRequest AtBatter(DeliveryTypeData type, float kmh, float line, float length, float movement, Handedness hand)
+        {
+            var r = Request(type, kmh, line, length, movement, hand);
+            r.lineReference = LineReference.AtBatter;
+            return r;
+        }
+
+        [Test]
+        public void ArrivalLineRequestsReachTheirCreaseLineInSimulation()
+        {
+            int solved = 0;
+            float worst = 0f, widest = 0f;
+            foreach (var type in AllMoving)
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            foreach (var length in new[] { 1f, 3f, 6f, 8f })
+            foreach (var line in new[] { -0.1f, 0.1f, 0.3f })
+            foreach (var movement in new[] { 0f, 1f })
+            {
+                float kmh = type.UsesPlanSpeed ? 90f : Mathf.Round(0.5f * (type.minSpeedKmh + type.maxSpeedKmh));
+                var world = AtBatter(type, kmh, line, length, movement, hand).ForBatter();
+                var s = DeliverySolver.Solve(world, DeliveryMovement.For(world), G, Dt, R);
+                Assert.IsTrue(s.Reachable, $"{world}: {s.Error}");
+                var flight = Fly(world, s);
+                float miss = Mathf.Abs(flight.CreaseX - world.line);
+                Assert.LessOrEqual(miss, 0.001f, $"{world}: finishes {miss * 1000f:F2} mm off its line");
+                Assert.AreEqual(flight.CreaseX, s.PredictedArrivalLine, 1e-5f);
+                // Stock keeps its own unchanged solve, which lands within 5 mm along the ground (RefineTolerance).
+                Assert.AreEqual(world.length, flight.Bounce.z, type.IsStill ? 0.005f : 0.001f, $"{world}: still pitches at its length");
+                worst = Mathf.Max(worst, miss);
+                widest = Mathf.Max(widest, Mathf.Abs(s.Target.x - world.line));
+                solved++;
+            }
+            Debug.Log($"[CricketVR] T079: {solved} arrival-line solves (7 types, lengths 1-8 m), worst crease miss {worst * 1000f:F3} mm, " +
+                      $"largest pitch-to-crease line difference {widest:F2} m");
+        }
+
+        [Test]
+        public void OffSpinnerPitchedOutsideOffTurnsInToFinishOnMiddle()
+        {
+            // Right-hander, off-spin turns toward −X (leg): asking to finish on middle pitches it outside off.
+            var world = AtBatter(DeliveryTypeData.OffSpin, 85f, 0f, 6f, 1f, Handedness.Right).ForBatter();
+            var s = DeliverySolver.Solve(world, DeliveryMovement.For(world), G, Dt, R);
+            Assert.IsTrue(s.Reachable, s.Error);
+            Assert.Greater(s.Target.x, 0.1f, $"pitches at {s.Target.x:+0.00} m, outside off");
+            Assert.AreEqual(0f, s.PredictedArrivalLine, 0.001f);
+        }
+
+        [Test]
+        public void BounceLineRequestsHaveNoArrivalLineAndAreUnchanged()
+        {
+            var world = Request(DeliveryTypeData.LegSpin, 85f, 0.1f, 6f, 0.5f).ForBatter();
+            var s = DeliverySolver.Solve(world, DeliveryMovement.For(world), G, Dt, R);
+            Assert.IsTrue(float.IsNaN(s.PredictedArrivalLine));
+            Assert.AreEqual(0.1f, s.Target.x, 1e-6f);
+        }
     }
 }
