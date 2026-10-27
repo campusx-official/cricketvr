@@ -1210,6 +1210,24 @@ Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: flighted balls bounce to 1.1-1.35 m at the crease off 4.75-6 m (open owner decision on bounce height, E-060); leg-spin, doosra and googly have no flighted variation yet
 ```
 
+```text
+Check ID / acceptance scenario: E-064 / Flighted off-spin on device (follow-up to E-063)
+Requirement IDs: REQ-043, REQ-044, REQ-045
+Date and tester: 2026-10-27 20:14-20:20 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-flighted.apk sha256 fc6c4b54166b3cf5529dfcab7141c796abbe8020f043ceaf8ad2bf61219f5334, installed 20:14:01; app started 20:14:37
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice, Off-spin, over the wicket; 9 sessions, 108 balls (Docs/evidence/2026-10-27-flighted-offspin/)
+Steps or exact command: owner played; adb pull
+Expected result: about a quarter flighted, 70-80 km/h, launched 4-10 deg; still on length and line
+Actual result and measured values:
+  - Flighted: 20 of 108 (19%; 25% expected, within chance for 108 balls); 70-80 km/h; launched +4.2..+9.8 deg; 13 hit, 7 missed, 0 bowled; crease height 0.60-1.14 m (7 unhit balls); worst pitch error 0.19 cm; worst finish-line miss 1.1 cm.
+  - Flat: 88; 75-92 km/h; launched -2.8..+8.5 deg (the slowest flat balls, by the speed-linked dip); 53 hit, 14 bowled, 21 missed; crease height 0.38-0.98 m; worst pitch error 0.20 cm; worst finish miss 1.4 cm.
+Outcome: Pass (device data matches the design); owner's feel pending
+Log or artifact path: Docs/evidence/2026-10-27-flighted-offspin/
+Remaining limitation / follow-up task: open owner decision on bounce height (E-060); flighted variation for the other spin types
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
