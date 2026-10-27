@@ -17,8 +17,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
 | AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
-| AC-08 | REQ-013 | Automated pass (E-036, covers the five repeats per the owner's 2026-10-27 amendment); headset once per button × point × mode pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
-| AC-09 | REQ-014 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-08 | REQ-013 | Automated pass (E-036, covers the five repeats per the owner's 2026-10-27 amendment); headset partial (E-058: Menu from the Net end screen, Play again from the Match end screen) | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-09 | REQ-014 | Automated pass (E-036); headset partial (E-058: pause in a countdown, no resume yet) | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
@@ -705,6 +705,27 @@ Actual result and measured values:
 Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part Pass (owner amended AC-16 on 2026-10-27: the Δt / swing-peak / reset-age columns may be empty until T053, M8); AC-08 and AC-09 pending the owner's confirmation that they were exercised
 Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
 Remaining limitation / follow-up task: owner to confirm AC-08/AC-09 (AC-16 Δt decided: amended); then merge m7-session into main only on the owner's go-ahead
+```
+
+```text
+Check ID / acceptance scenario: E-058 / AC-08, AC-09 headset run (partial)
+Requirement IDs: REQ-013, REQ-014
+Date and tester: 2026-10-27 17:36-17:38, owner (headset); agent (install, log and CSV check)
+Git commit or build identifier: Builds/CricketVR-M7-recheck.apk sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0, installed 17:32:14; app started 17:36:02
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults
+Steps or exact command: owner run per the amended AC-08 (once per button x point x mode) and AC-09; adb logcat and CSV pull
+Expected result: every row of the AC-08/AC-09 checklist exercised, with matching log lines
+Actual result and measured values (device log and CSVs, Docs/evidence/2026-10-27-m7-ac08-partial/):
+  - Net Practice 12 balls straight through (17:36:20-17:36:55); end screen -> Menu -> Match Simulation.
+  - Match Simulation 12 balls straight through (17:37:03-17:37:48); end screen -> Play again (new session 17:37:51).
+  - 17:37:53 tracking lost; 17:38:05 "Session paused: The headset lost focus / The app was paused" during that session's countdown, before ball 1; no ball bowled while paused. No resume afterwards (still paused at 17:39:53).
+  - Not exercised: Play again / Menu from the countdown, a ball in flight and between balls (both modes); Play again from the end screen (Net); Menu from the end screen (Match); pause mid-ball; resume and the ready confirmation; headset off mid-ball. The owner's results template was not returned.
+  - Earlier the same day the M7 APK installed at 17:17 was never started (no app start in the log), and the 15:37 and 16:47 sessions ran on the T076 build.
+Outcome: Partial. Seen working: Menu from the end screen (Net), Play again from the end screen (Match), pause in a countdown without bowling. AC-08 and AC-09 remain open
+Log or artifact path: Docs/evidence/2026-10-27-m7-ac08-partial/
+Remaining limitation / follow-up task: complete the remaining checklist rows on the M7 APK; then merge m7-session into main on the owner's go-ahead
 ```
 
 ## Re-plan note (2026-10-26)
