@@ -71,12 +71,11 @@ namespace CricketVR.Editor
                 AssetDatabase.Refresh();
             }
 
-            var old = environment.transform.Find("Ground");
-            if (old != null)
-                Object.DestroyImmediate(old.gameObject);
-            var root = new GameObject("Ground");
-            root.transform.SetParent(environment.transform, false);
-            created.Add("Ground (regenerated)");
+            // Rebuilt in place (stable object IDs): an unchanged definition leaves the scene file unchanged.
+            var tree = new GeneratedTree(environment.transform, "Ground");
+            var root = tree.Root;
+            if (tree.CreatedRoot)
+                created.Add("Ground");
 
             var outfieldTex = SaveTexture("OutfieldStripes", OutfieldTexture(def), TextureWrapMode.Repeat, 8);
             var pitchTex = SaveTexture("PitchStrip", PitchTexture(def), TextureWrapMode.Clamp, 8);
@@ -91,26 +90,29 @@ namespace CricketVR.Editor
             var standsMat = GroundMaterial("Stands", crowdTex);
             var skyMat = Material("Sky", Shader.Find("CricketVR/SkyGradient"));
 
-            Piece(root, "Outfield", Outfield(def), outfieldMat, receiveShadows: true);
-            Piece(root, "PitchStrip", PitchStrip(def), pitchMat, receiveShadows: true);
-            Piece(root, "CreaseExtensions", CreaseExtensions(def), markingsMat);
-            Piece(root, "FieldingCircleMarkers", CircleMarkers(def), markingsMat);
-            Piece(root, "BoundaryRope", Rope(def), plainMat);
-            Piece(root, "SightScreens", SightScreens(def), screenMat);
-            Piece(root, "AdvertisingBoards", Boards(def), plainMat);
-            Piece(root, "Stands", Stands(def), standsMat);
-            Piece(root, "Sky", SkyDome(def), skyMat);
+            Piece(tree, root, "Outfield", Outfield(def), outfieldMat, receiveShadows: true);
+            Piece(tree, root, "PitchStrip", PitchStrip(def), pitchMat, receiveShadows: true);
+            Piece(tree, root, "CreaseExtensions", CreaseExtensions(def), markingsMat);
+            Piece(tree, root, "FieldingCircleMarkers", CircleMarkers(def), markingsMat);
+            Piece(tree, root, "BoundaryRope", Rope(def), plainMat);
+            Piece(tree, root, "SightScreens", SightScreens(def), screenMat);
+            Piece(tree, root, "AdvertisingBoards", Boards(def), plainMat);
+            Piece(tree, root, "Stands", Stands(def), standsMat);
+            Piece(tree, root, "Sky", SkyDome(def), skyMat);
 
-            var fielders = new GameObject("Fielders");
-            fielders.transform.SetParent(root.transform, false);
-            var right = Piece(fielders, "RightHanded", Fielders(def, field, false), plainMat);
-            var left = Piece(fielders, "LeftHanded", Fielders(def, field, true), plainMat);
+            var fielders = tree.Child(root, "Fielders");
+            var right = Piece(tree, fielders, "RightHanded", Fielders(def, field, false), plainMat);
+            var left = Piece(tree, fielders, "LeftHanded", Fielders(def, field, true), plainMat);
             var batT = main.transform.Find("Player/Bat");
             BatController bat = null;
             if (batT != null) batT.TryGetComponent(out bat);
-            fielders.AddComponent<FielderDisplay>().Configure(field, bat, right, left);
+            if (!fielders.TryGetComponent<FielderDisplay>(out var display))
+                display = fielders.AddComponent<FielderDisplay>();
+            display.Configure(field, bat, right, left);
+            EditorUtility.SetDirty(display);
 
-            EnsureOutfieldCollider(root, def, created);
+            EnsureOutfieldCollider(tree, root, def, created);
+            tree.RemoveUnused();
             root.SetActive(false); // NetMode is the scene default; EnvironmentModeSwitch shows the ground in GroundMode
 
             Wire(main, environment, root, config, def, created);
@@ -182,13 +184,13 @@ namespace CricketVR.Editor
             EditorUtility.SetDirty(modeSwitch);
         }
 
-        static void EnsureOutfieldCollider(GameObject root, GroundDefinition def, List<string> created)
+        static void EnsureOutfieldCollider(GeneratedTree tree, GameObject root, GroundDefinition def, List<string> created)
         {
-            var go = new GameObject("OutfieldCollider") { layer = LayerMask.NameToLayer(OutfieldLayer) };
-            go.transform.SetParent(root.transform, false);
+            var go = tree.Child(root, "OutfieldCollider", typeof(BoxCollider));
+            go.layer = LayerMask.NameToLayer(OutfieldLayer);
             var c = def.GroundCentre;
             float t = def.outfieldColliderThickness;
-            var box = go.AddComponent<BoxCollider>();
+            var box = go.GetComponent<BoxCollider>();
             // Top at y = 0, just under the pitch collider's top (0.002), so the pitch decides every bounce on the strip.
             box.center = new Vector3(c.x, -t * 0.5f, c.z);
             box.size = new Vector3(2f * (def.boundaryRadiusX + def.outfieldColliderBeyondRope), t, 2f * (def.boundaryRadiusZ + def.outfieldColliderBeyondRope));
@@ -788,12 +790,11 @@ namespace CricketVR.Editor
             return mat;
         }
 
-        static GameObject Piece(GameObject parent, string name, Mesh mesh, Material material, bool receiveShadows = false)
+        static GameObject Piece(GeneratedTree tree, GameObject parent, string name, Mesh mesh, Material material, bool receiveShadows = false)
         {
-            var go = new GameObject(name);
-            go.transform.SetParent(parent.transform, false);
-            go.AddComponent<MeshFilter>().sharedMesh = SaveMesh(mesh);
-            var r = go.AddComponent<MeshRenderer>();
+            var go = tree.Child(parent, name, typeof(MeshFilter), typeof(MeshRenderer));
+            go.GetComponent<MeshFilter>().sharedMesh = SaveMesh(mesh);
+            var r = go.GetComponent<MeshRenderer>();
             r.sharedMaterial = material;
             r.shadowCastingMode = ShadowCastingMode.Off;
             r.receiveShadows = receiveShadows;

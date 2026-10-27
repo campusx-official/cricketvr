@@ -103,6 +103,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: a61463b6b41c14fc984d0720ed5c7ace, type: 2}
     - {fileID: 11400000, guid: e07170cdf89164dcfa054ecee779bebc, type: 2}
     - {fileID: 11400000, guid: cfdfc105300544a6bb645771dd367fc8, type: 2}
+    swingCheck: 0
     ballRadius: 0.036
     ballMass: 0.16
     ballTimeout: 10
