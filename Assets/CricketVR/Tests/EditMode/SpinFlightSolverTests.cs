@@ -246,5 +246,24 @@ namespace CricketVR.Tests
             Assert.IsTrue(float.IsNaN(s.PredictedArrivalLine));
             Assert.AreEqual(0.1f, s.Target.x, 1e-6f);
         }
+
+        [Test]
+        public void SpinCheckSequenceIsReachableAndInOrder()
+        {
+            var types = DeliveryTypeData.All;
+            for (int i = 0; i < 12; i++)
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            {
+                var request = DeliveryPlanner.SpinCheckRequest(i, hand, types);
+                var world = request.ForBatter();
+                var mv = DeliveryMovement.For(world);
+                var s = DeliverySolver.Solve(world, mv, G, Dt, R);
+                Assert.IsTrue(s.Reachable, $"{world}: {s.Error}");
+                Assert.AreEqual(DeliveryPlanner.SpinCheckTypes[i % 4], request.type.kind, $"ball {i + 1}");
+                Assert.AreEqual(DeliveryPlanner.SpinCheckLengths[i / 4], request.length, $"ball {i + 1}");
+                Assert.AreEqual(1f, mv.VarTurn, "no natural variation");
+                Assert.Greater(s.Plan.TurnDegrees, 0f, $"ball {i + 1} turns");
+            }
+        }
     }
 }

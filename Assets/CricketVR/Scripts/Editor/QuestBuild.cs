@@ -13,7 +13,8 @@ namespace CricketVR.Editor
     ///   Unity -batchmode -projectPath . -executeMethod CricketVR.Editor.QuestBuild.Build -quit
     /// Add -cricketvrGround for a GroundMode build (plan.md §15); GameConfig.environment is restored afterwards.
     /// Add -cricketvrSwingCheck for the T076 headset build (Net Practice bowls the fixed swing-check sequence); the
-    /// flag is restored afterwards too, so the committed GameConfig never has it on.
+    /// flag is restored afterwards too, so the committed GameConfig never has it on. -cricketvrSpinCheck does the same
+    /// for the T082 spin-check build.
     /// </summary>
     public static class QuestBuild
     {
@@ -31,6 +32,9 @@ namespace CricketVR.Editor
         [MenuItem("CricketVR/Build/Quest APK (Development, T076 swing check)")]
         public static void BuildSwingCheckMenu() => Run(development: true, autoRun: false, swingCheck: true);
 
+        [MenuItem("CricketVR/Build/Quest APK (Development, T082 spin check)")]
+        public static void BuildSpinCheckMenu() => Run(development: true, autoRun: false, spinCheck: true);
+
         [MenuItem("CricketVR/Build/Quest APK (Ground mode, foveation A-B measurement)")]
         public static void BuildGroundAbMenu() => Run(development: true, autoRun: false, EnvironmentMode.GroundMode, foveationAbSeconds: 30f);
 
@@ -41,12 +45,12 @@ namespace CricketVR.Editor
             bool development = !args.Contains("-cricketvrRelease");
             var mode = args.Contains("-cricketvrGround") ? EnvironmentMode.GroundMode : EnvironmentMode.NetMode;
             var report = Run(development, autoRun: false, mode, args.Contains("-cricketvrFoveationAB") ? 30f : 0f,
-                args.Contains("-cricketvrSwingCheck"));
+                args.Contains("-cricketvrSwingCheck"), args.Contains("-cricketvrSpinCheck"));
             EditorApplication.Exit(report != null && report.summary.result == BuildResult.Succeeded ? 0 : 1);
         }
 
         static BuildReport Run(bool development, bool autoRun, EnvironmentMode mode = EnvironmentMode.NetMode, float foveationAbSeconds = 0f,
-            bool swingCheck = false)
+            bool swingCheck = false, bool spinCheck = false)
         {
             var config = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
             if (config == null)
@@ -56,16 +60,17 @@ namespace CricketVR.Editor
             }
             var previous = config.environment;
             float previousAb = config.foveationAbSeconds;
-            bool previousSwingCheck = config.delivery.swingCheck;
+            bool previousSwingCheck = config.delivery.swingCheck, previousSpinCheck = config.delivery.spinCheck;
             config.environment = mode;
             config.foveationAbSeconds = foveationAbSeconds;
             config.delivery.swingCheck = swingCheck;
+            config.delivery.spinCheck = spinCheck;
             EditorUtility.SetDirty(config);
             AssetDatabase.SaveAssets();
             try
             {
                 Debug.Log($"[CricketVR] Building in {mode}" + (foveationAbSeconds > 0f ? $", foveation A/B every {foveationAbSeconds} s" : "") +
-                          (swingCheck ? ", T076 swing check" : ""));
+                          (swingCheck ? ", T076 swing check" : "") + (spinCheck ? ", T082 spin check" : ""));
                 return RunBuild(development, autoRun);
             }
             finally
@@ -73,11 +78,13 @@ namespace CricketVR.Editor
                 // The build unloads and reloads assets, so the GameConfig object loaded above may be destroyed: reload it.
                 var reloaded = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
                 if (reloaded != null && (reloaded.environment != previous || reloaded.foveationAbSeconds != previousAb ||
-                                         reloaded.delivery.swingCheck != previousSwingCheck))
+                                         reloaded.delivery.swingCheck != previousSwingCheck ||
+                                         reloaded.delivery.spinCheck != previousSpinCheck))
                 {
                     reloaded.environment = previous;
                     reloaded.foveationAbSeconds = previousAb;
                     reloaded.delivery.swingCheck = previousSwingCheck;
+                    reloaded.delivery.spinCheck = previousSpinCheck;
                     EditorUtility.SetDirty(reloaded);
                     AssetDatabase.SaveAssets();
                 }

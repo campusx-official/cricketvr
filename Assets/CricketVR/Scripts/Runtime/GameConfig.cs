@@ -66,6 +66,8 @@ namespace CricketVR
         public DeliveryType[] deliveryTypes = new DeliveryType[0];
         [Tooltip("T076 headset build only (set by CricketVR > Build > swing check, then restored): Net Practice bowls the fixed swing-check sequence.")]
         public bool swingCheck;
+        [Tooltip("T082 headset build only (set by CricketVR > Build > spin check, then restored): Net Practice bowls the fixed spin-check sequence.")]
+        public bool spinCheck;
 
         [Header("Ball")]
         public float ballRadius = 0.036f;

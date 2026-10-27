@@ -150,8 +150,8 @@ namespace CricketVR
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
             var hand = handedness != null ? handedness.Current : Handedness.Right;
             int redraws = 0;
-            var delivery = SwingCheck
-                ? DeliveryPlanner.SwingCheckRequest(ballIndex, hand, _types)
+            var delivery = SpinCheck ? DeliveryPlanner.SpinCheckRequest(ballIndex, hand, _types)
+                : SwingCheck ? DeliveryPlanner.SwingCheckRequest(ballIndex, hand, _types)
                 : DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
                     DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out redraws);
             if (redraws > 0)
@@ -162,6 +162,8 @@ namespace CricketVR
 
         /// <summary>T076 (AC-26) build: Net Practice bowls the fixed swing-check sequence.</summary>
         bool SwingCheck => _mode == SessionMode.NetPractice && config.delivery.swingCheck;
+        /// <summary>T082 (AC-27, AC-28) build: Net Practice bowls the fixed spin-check sequence.</summary>
+        bool SpinCheck => _mode == SessionMode.NetPractice && config.delivery.spinCheck;
 
         /// <summary>The delivery type and its measured swing, shown after a moving ball (nothing for Stock).</summary>
         static string MovementLine(BallRecord r)
@@ -343,7 +345,8 @@ namespace CricketVR
             ui.Select("LeftHanded", !right);
             ui.Board(_mode == SessionMode.NetPractice
                 ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls)\nNo runs: every ball gets a result." +
-                  (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "")
+                  (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "") +
+                  (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "")
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");
             pointer?.SetVisible(true);
         }

@@ -228,6 +228,36 @@ namespace CricketVR
             return request;
         }
 
+        // ---------- T082 headset spin check (AC-27, AC-28) ----------
+
+        /// <summary>Order within each group of four: each spinner's stock ball, then its variation.</summary>
+        public static readonly DeliveryKind[] SpinCheckTypes = { DeliveryKind.OffSpin, DeliveryKind.Doosra, DeliveryKind.LegSpin, DeliveryKind.Googly };
+        /// <summary>Lengths (m) of the three groups of four: good, full, short.</summary>
+        public static readonly float[] SpinCheckLengths = { 6f, 4f, 8f };
+        public const float SpinCheckKmh = 85f;
+        public const float SpinCheckMovement = 0.5f;
+
+        /// <summary>
+        /// A fixed sequence for the spin headset check (T082 build only): balls 1-4 off-spin, doosra, leg-spin, googly
+        /// at a good length (6 m), balls 5-8 the same at full (4 m), balls 9-12 at short (8 m), then repeat. 85 km/h,
+        /// pitched on off stump, movement 0.5, no natural variation.
+        /// </summary>
+        public static DeliveryRequest SpinCheckRequest(int ballIndex, Handedness handedness, IReadOnlyList<DeliveryTypeData> types)
+        {
+            int i = ballIndex % (SpinCheckTypes.Length * SpinCheckLengths.Length);
+            var type = Find(SpinCheckTypes[i % SpinCheckTypes.Length], types);
+            type.variation = 0f;
+            float length = SpinCheckLengths[i / SpinCheckTypes.Length];
+            string name = length < 5f ? "full" : length < 7.5f ? "good length" : "short";
+            var request = DeliveryRequest.FromConfig(DeliveryConfig.Create(
+                $"Spin check: {type.displayName}, {name}", SpinCheckKmh, OffStumpLine, length));
+            request.type = type;
+            request.handedness = handedness;
+            request.seed = ballIndex + 1;
+            request.movement = SpinCheckMovement;
+            return request;
+        }
+
         /// <summary>Reachability of a request (any type) as the machine will solve it.</summary>
         public static Func<DeliveryRequest, bool> RequestSolverCheck(float gravity, float fixedDeltaTime, float ballRadius) =>
             r =>
