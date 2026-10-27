@@ -16,7 +16,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
-| AC-07 | REQ-011, REQ-012, REQ-026 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
 | AC-08 | REQ-013 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-09 | REQ-014 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
@@ -25,7 +25,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
 | AC-15 | REQ-025 | **Pass on Quest** (owner, recorded 2026-10-27 at the owner's request; rest of the M7 re-check pending) | APK sha256 c71f726…2b30f0; E-036, E-039 | Re-check if the near panel, ray or bat-tap changes |
-| AC-16 | REQ-027, REQ-028 | Automated pass for record, CSV and plans (E-036); device CSV pending | APK sha256 e0ff087…0d792; E-036 | M7 T048/T049 record, CSV, delivery plans |
+| AC-16 | REQ-027, REQ-028 | Automated pass (E-036); device CSV collected and checked (E-050): complete except Δt / swing-peak / reset-age columns, which T053 (M8) fills; owner to choose: amend AC-16 for M7 or keep it open until M8 | APK sha256 c71f726…30f0; E-036, E-050 | M7 T048/T049 record, CSV, delivery plans |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
 | AC-18 | REQ-031 | Not run | None | M8 summary |
 | AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
@@ -684,6 +684,27 @@ Actual result and measured values: owner: "record AC-15 (menu) as passed for now
 Outcome: Pass (owner observation)
 Log or artifact path: none
 Remaining limitation / follow-up task: the rest of the M7 re-check (AC-07, AC-08, AC-09, AC-16 device CSV, and the E-037/E-038 changes) is still pending with the owner
+```
+
+```text
+Check ID / acceptance scenario: E-050 / M7 headset re-check: AC-07 complete session, E-037 B-press control, E-038 ground-mode timing; AC-16 device CSV
+Requirement IDs: REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-026, REQ-027
+Date and tester: 2026-10-27 09:52-09:55, owner (headset); agent (install over adb, CSV pull and analysis)
+Git commit or build identifier: branch m7-session (b3e7438 code); Builds/CricketVR-M7-recheck.apk sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0, installed 09:52:37
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults (waitForReady true, readyDelay 0 s, groundHitDecisionSeconds 1.5)
+Steps or exact command: adb install -r; owner played Net Practice and Match Simulation; adb pull of the session CSVs
+Expected result: AC-07 exactly 12 balls then the end screen; each ball only on B (E-037); on the ground a hit's result and B come within the played-on window (E-038); one CSV row per finalized ball
+Actual result and measured values:
+  - Owner: "i played normally and watched the balls. all fine".
+  - Device CSVs (Docs/evidence/2026-10-27-m7-recheck/): cricketvr_20261027_095317.csv Net Practice, 12 rows, delivery ids 1-12 (7 Hit, 5 Miss); cricketvr_20261027_095349.csv Match Simulation, 12 rows, ids 13-24 (7 ScoringPending, 5 Miss). No partial session files (no session abandoned part-way).
+  - Balls finalized 1.1-2.6 s apart (Net) and 1.0-5.8 s apart (Match), i.e. each next ball came straight after the batter's press, including after ground-mode "scoring pending" hits (E-038 fix: no long wait for B).
+  - AC-16 field check: one row per finalized ball; contact columns filled for every contacted ball (7/12 each session) and empty for misses; confidence and simulated-scorer columns empty as designed (M8/M9). swing_timing_offset_s, swing_peak_ms and tracking_reset_age_s are empty in every row: Δt is required by AC-16's text but implemented by T053 (M8). Conflict raised with the owner.
+  - Not shown by this data: Play again / Menu from the countdown, an active ball and between balls (AC-08, five times per mode), and focus/tracking interruption (AC-09). Both sessions ran to the end and no pause is visible in the records.
+Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part pending the owner's choice on Δt; AC-08 and AC-09 pending the owner's confirmation that they were exercised
+Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
+Remaining limitation / follow-up task: owner to confirm AC-08/AC-09; owner choice on AC-16 Δt; then merge m7-session into main only on the owner's go-ahead
 ```
 
 ## Re-plan note (2026-10-26)
