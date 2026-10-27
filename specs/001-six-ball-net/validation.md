@@ -17,7 +17,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
 | AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
-| AC-08 | REQ-013 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-08 | REQ-013 | Automated pass (E-036, covers the five repeats per the owner's 2026-10-27 amendment); headset once per button × point × mode pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-09 | REQ-014 | Automated pass (E-036); headset pending | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |

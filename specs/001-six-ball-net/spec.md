@@ -160,6 +160,8 @@ A Net Practice session of 2 overs delivers exactly 12 balls, then the end screen
 
 From the countdown, an active ball, between balls and the end screen, "Play again" and "Menu" each leave no stale ball or callback. Repeat five times per mode.
 
+*Amended 2026-10-27 (owner):* the five repeats are covered by the automated restart tests (E-036). On the headset, each button is pressed once from each of the four points, in each mode.
+
 ### AC-09 — Interruption (REQ-014)
 
 Given a countdown or active delivery in either mode, when app focus or required tracking is lost, then bowling stops. Any active incomplete delivery is cancelled without changing finalized results. After tracking returns, a player confirmation is required and the next attempt cannot have a velocity spike.
