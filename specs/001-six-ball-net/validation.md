@@ -1249,6 +1249,26 @@ Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: spin seam visual (T080) not done, so the disguise (looks like off-spin) isn't visible yet
 ```
 
+```text
+Check ID / acceptance scenario: E-066 / Off-spinner's doosra and straighter one on device (follow-up to E-065)
+Requirement IDs: REQ-041, REQ-043, REQ-045
+Date and tester: 2026-10-27 20:50-20:58 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-offspin-variations.apk sha256 e25d249400cae1c75b83e51301e7dc3dde760bf798eef8cdf67cea67437e82fd, installed 20:49:17; app started 20:50:01
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice, Off-spin, over the wicket; 8 sessions, 96 balls; one empty session file at 20:51:39 (Docs/evidence/2026-10-27-offspin-variations/)
+Steps or exact command: owner played; adb pull
+Expected result: about 8 doosras and 8 straighter ones in 96; each behaves as designed
+Actual result and measured values:
+  - Off-break flighted 27 (22 hit, 5 missed): 70-80 km/h, launch +4.2..+9.6 deg, turn -2.9..-6.2 deg, crease height 0.50-1.25 m, worst finish miss 1.3 cm.
+  - Off-break flat 50 (39 hit, 7 missed, 4 bowled): 75-92 km/h, launch -2.9..+8.8 deg, turn -3.0..-6.5 deg, crease height 0.33-0.76 m, worst finish miss 1.8 cm.
+  - Doosra 9 (4 hit, 4 missed, 1 bowled): 75-91 km/h, turn +2.2..+4.3 deg (the other way), crease height 0.48-0.66 m.
+  - Straighter one 10 (4 hit, 6 bowled): 83-95 km/h, launch -3.8..+1.5 deg, turn -0.5..0.0 deg, crease height 0.22-0.47 m.
+Outcome: Pass (device data matches the design); owner's feel pending
+Log or artifact path: Docs/evidence/2026-10-27-offspin-variations/
+Remaining limitation / follow-up task: flighted share came out 27 of 77 off-breaks (35%, 25% expected); the spin seam visual (T080) is not done
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
