@@ -35,7 +35,7 @@ namespace CricketVR
         [Header("Swing (before the bounce)")]
         [Tooltip("-1 = inswing (toward −X, into a right-hander), +1 = outswing (toward +X), 0 = none.")]
         public int swingDirection;
-        [Tooltip("Curve (m) at movement 0 and 1: the largest sideways distance from the straight release-to-bounce line.")]
+        [Tooltip("Swing (m) at movement 0 and 1: how far the ball is, at the striker's popping crease, from the straight line it was released along. At most 0.5 m (MaxSwing).")]
         public float swingMin, swingMax;
         [Tooltip("How late the swing comes: 0 = uniform, 2 = late.")]
         public float swingLateness;
@@ -77,6 +77,11 @@ namespace CricketVR
         // ---------- Allowed ranges (REQ-041) ----------
 
         public const float MaxVisualRevPerSecond = 5f;
+        /// <summary>
+        /// Largest swing (m) any ball gets, after natural variation (owner decision 2026-10-27, plan.md open decision 4).
+        /// Going beyond it needs an owner-approved "exaggerated" setting, which does not exist yet.
+        /// </summary>
+        public const float MaxSwing = 0.5f;
 
         struct Limit
         {
@@ -90,8 +95,8 @@ namespace CricketVR
             L("minSpeedKmh", d => d.minSpeedKmh, 0f, 150f),
             L("maxSpeedKmh", d => d.maxSpeedKmh, 0f, 150f),
             L("swingDirection", d => d.swingDirection, -1f, 1f),
-            L("swingMin", d => d.swingMin, 0f, 1f),
-            L("swingMax", d => d.swingMax, 0f, 1f),
+            L("swingMin", d => d.swingMin, 0f, MaxSwing),
+            L("swingMax", d => d.swingMax, 0f, MaxSwing),
             L("swingLateness", d => d.swingLateness, 0f, 3f),
             L("turnDirection", d => d.turnDirection, -1f, 1f),
             L("driftMin", d => d.driftMin, 0f, 0.3f),
@@ -164,7 +169,7 @@ namespace CricketVR
         {
             kind = kind, displayName = name, description = description, style = BowlingStyle.Pace, looksLike = kind,
             minSpeedKmh = 115f, maxSpeedKmh = 140f,
-            swingDirection = direction, swingMin = 0.2f, swingMax = 0.6f, swingLateness = 1.5f,
+            swingDirection = direction, swingMin = 0.1f, swingMax = 0.5f, swingLateness = 1.5f,
             visualRevPerSecond = 3f, variation = 0.15f,
         };
 

@@ -6,7 +6,8 @@ namespace CricketVR
     /// Delivery-type flight on the ball (M7.5, plan.md §19). Before the ball pitches (and unless it is hit first) it
     /// applies the solver's <see cref="FlightPlan"/> through <see cref="DeliveryFlightModel.Acceleration"/>, one step
     /// at a time exactly as the solver integrated it. Stock has a still plan: no force at all, so its physics is
-    /// unchanged. Also measures the ball's curve and arrival line for the per-ball record, and drives the seam visual.
+    /// unchanged. Also measures the ball's swing, curve and arrival line for the per-ball record, and drives the seam
+    /// visual.
     /// Runs before the contact resolver (-40); the force is added with AddForce, so the resolver's view of the
     /// step's velocity is unchanged by it.
     /// </summary>
@@ -24,6 +25,7 @@ namespace CricketVR
         bool _forcing, _measuring, _pitched;
         int _step;
         Vector3 _release, _previous;
+        float _releaseLineX;
         readonly Vector2[] _path = new Vector2[MaxPathSamples];
         int _pathCount;
 
@@ -37,6 +39,11 @@ namespace CricketVR
         public float MeasuredCurve { get; private set; } = float.NaN;
         /// <summary>Ball x where it reached the striker's popping crease (m); NaN if it was hit or stopped first.</summary>
         public float ArrivalLine { get; private set; } = float.NaN;
+        /// <summary>
+        /// Swing (m): distance at the popping crease between the ball and its release line (the launch velocity's
+        /// horizontal direction from the release point); NaN until it reaches the crease unhit.
+        /// </summary>
+        public float MeasuredSwing => float.IsNaN(ArrivalLine) ? float.NaN : Mathf.Abs(ArrivalLine - _releaseLineX);
 
         void Awake()
         {
@@ -60,6 +67,9 @@ namespace CricketVR
             _step = 0;
             _release = release;
             _previous = release;
+            _releaseLineX = Mathf.Abs(launchVelocity.z) > 1e-6f
+                ? release.x + launchVelocity.x * (FieldDimensions.PoppingCreaseOffset - release.z) / launchVelocity.z
+                : release.x;
             _pathCount = 0;
             MeasuredCurve = float.NaN;
             ArrivalLine = float.NaN;
@@ -84,9 +94,12 @@ namespace CricketVR
 
             if (_forcing)
             {
-                if (_ball.HasBeenHit || _ball.TouchedGround)
+                // Movement acts only before the bounce, and never on a hit ball. The solver's flight takes its last
+                // acceleration in the step that reaches the pitch point (step·dt ≤ T); PhysX often reports the ground a
+                // step later, and one more step of swing would add ~1 cm at the crease, so stop on the solver's count.
+                if (_ball.HasBeenHit || _ball.TouchedGround || _step * Time.fixedDeltaTime > _plan.PlannedTime)
                 {
-                    _forcing = false; // movement acts only before the bounce, and never on a hit ball
+                    _forcing = false;
                 }
                 else
                 {

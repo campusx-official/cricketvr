@@ -149,12 +149,27 @@ namespace CricketVR
                 : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
             var hand = handedness != null ? handedness.Current : Handedness.Right;
-            var delivery = DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
-                DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out int redraws);
+            int redraws = 0;
+            var delivery = SwingCheck
+                ? DeliveryPlanner.SwingCheckRequest(ballIndex, hand, _types)
+                : DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
+                    DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out redraws);
             if (redraws > 0)
                 Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
             int id = machine.Bowl(delivery);
             _session.BallLaunched(id);
+        }
+
+        /// <summary>T076 (AC-26) build: Net Practice bowls the fixed swing-check sequence.</summary>
+        bool SwingCheck => _mode == SessionMode.NetPractice && config.delivery.swingCheck;
+
+        /// <summary>The delivery type and its measured swing, shown after a moving ball (nothing for Stock).</summary>
+        static string MovementLine(BallRecord r)
+        {
+            if (float.IsNaN(r.PredictedSwing))
+                return "";
+            string measured = float.IsNaN(r.MeasuredSwing) ? "not measured (hit before the crease)" : $"{r.MeasuredSwing:F2} m";
+            return $"\n{r.DeliveryType}: swing {measured}, planned {r.PredictedSwing:F2} m";
         }
 
         void OnBatContact(BatContactReport report) => _contacts[report.DeliveryId] = report;
@@ -168,7 +183,7 @@ namespace CricketVR
                 return;
             log?.Append(record);
             _lastResultLine = $"Ball {record.Over - 1}.{record.BallInOver}: {result.Summary}" +
-                              (result.BatContact ? $"\n{result.CarryLabel}" : "");
+                              (result.BatContact ? $"\n{result.CarryLabel}" : "") + MovementLine(record);
             _contacts.Remove(result.DeliveryId);
         }
 
@@ -190,6 +205,8 @@ namespace CricketVR
                 VarSwing = machine.LastMovement.VarSwing,
                 VarDrift = machine.LastMovement.VarDrift,
                 VarTurn = machine.LastMovement.VarTurn,
+                PredictedSwing = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedSwing,
+                MeasuredSwing = machine.LastMeasuredSwing,
                 PredictedCurve = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedCurve,
                 MeasuredCurve = machine.LastMeasuredCurve,
                 ArrivalLine = machine.LastArrivalLine,
@@ -316,7 +333,8 @@ namespace CricketVR
             ui.Select("RightHanded", right);
             ui.Select("LeftHanded", !right);
             ui.Board(_mode == SessionMode.NetPractice
-                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls)\nNo runs: every ball gets a result."
+                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls)\nNo runs: every ball gets a result." +
+                  (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "")
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");
             pointer?.SetVisible(true);
         }

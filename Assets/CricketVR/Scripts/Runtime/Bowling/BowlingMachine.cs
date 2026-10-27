@@ -97,6 +97,8 @@ namespace CricketVR
             }
         }
 
+        /// <summary>The latest delivery's measured swing off its release line at the crease (m); NaN until it gets there unhit.</summary>
+        public float LastMeasuredSwing => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.MeasuredSwing : float.NaN;
         /// <summary>The latest delivery's measured curve (m); NaN before it pitches or without a BallFlight.</summary>
         public float LastMeasuredCurve => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.MeasuredCurve : float.NaN;
         /// <summary>The latest delivery's x at the striker's popping crease (m); NaN if not reached unhit.</summary>
@@ -157,7 +159,7 @@ namespace CricketVR
                 Debug.Log($"[CricketVR] Delivery #{id} {request}: v0 {solution.Velocity.magnitude:F2} m/s " +
                           $"({Units.MsToKmh(solution.Velocity.magnitude):F1} km/h), elevation {solution.ElevationDegrees:F2} deg, " +
                           $"predicted bounce ({solution.PredictedBounce.x:F3}, {solution.PredictedBounce.z:F3})" +
-                          (solution.Plan.IsStill ? "" : $", {world.type.displayName} curve {solution.PredictedCurve:F2} m"));
+                          (solution.Plan.IsStill ? "" : $", {world.type.displayName} swing {solution.PredictedSwing:F2} m (curve {solution.PredictedCurve:F2} m)"));
             Bowled?.Invoke(id, request, solution);
             return id;
         }

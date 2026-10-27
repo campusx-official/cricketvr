@@ -37,7 +37,9 @@ namespace CricketVR
         public int BallSeed;
         /// <summary>Natural-variation factors applied to swing, drift and turn (REQ-048).</summary>
         public float VarSwing = float.NaN, VarDrift = float.NaN, VarTurn = float.NaN;
-        /// <summary>Swing deviation (m): largest sideways distance from the straight release-to-bounce line (DT-13).</summary>
+        /// <summary>Swing (m): distance at the popping crease from the line the ball was released along (plan.md §19).</summary>
+        public float PredictedSwing = float.NaN, MeasuredSwing = float.NaN;
+        /// <summary>Curve (m): largest sideways distance from the straight release-to-pitch line (diagnostic).</summary>
         public float PredictedCurve = float.NaN, MeasuredCurve = float.NaN;
         /// <summary>Measured change of horizontal direction at the bounce (degrees, + = toward +X).</summary>
         public float TurnDegrees = float.NaN;
@@ -163,6 +165,8 @@ namespace CricketVR
             AddF("var_swing", r => r.VarSwing, (r, v) => r.VarSwing = v);
             AddF("var_drift", r => r.VarDrift, (r, v) => r.VarDrift = v);
             AddF("var_turn", r => r.VarTurn, (r, v) => r.VarTurn = v);
+            AddF("pred_swing_m", r => r.PredictedSwing, (r, v) => r.PredictedSwing = v);
+            AddF("swing_m", r => r.MeasuredSwing, (r, v) => r.MeasuredSwing = v);
             AddF("pred_curve_m", r => r.PredictedCurve, (r, v) => r.PredictedCurve = v);
             AddF("curve_m", r => r.MeasuredCurve, (r, v) => r.MeasuredCurve = v);
             AddF("turn_deg", r => r.TurnDegrees, (r, v) => r.TurnDegrees = v);

@@ -54,7 +54,9 @@ namespace CricketVR
         public string Error;
         /// <summary>Movement the runtime flight applies before the bounce (still for Stock).</summary>
         public FlightPlan Plan;
-        /// <summary>Simulated swing deviation (m), DT-13; 0 without swing.</summary>
+        /// <summary>Simulated swing (m): distance off the release line at the popping crease; 0 without swing.</summary>
+        public float PredictedSwing;
+        /// <summary>Simulated curve (m): largest distance from the release-to-pitch line (diagnostic); 0 without swing.</summary>
         public float PredictedCurve;
     }
 
@@ -170,7 +172,7 @@ namespace CricketVR
         /// <summary>
         /// Solves a world-frame request (after <see cref="DeliveryRequest.ForBatter"/>). A ball without movement uses
         /// <see cref="Solve(DeliveryConfig,float,float,float)"/> unchanged; a moving ball uses the shooting solve
-        /// below, with its natural variation already in <paramref name="movement"/>.
+        /// below, with its natural variation (and the swing cap) already in <paramref name="movement"/>.
         /// </summary>
         public static DeliverySolution Solve(in DeliveryRequest worldRequest, in DeliveryMovement movement, float gravity, float fixedDeltaTime, float ballRadius)
         {
@@ -191,8 +193,9 @@ namespace CricketVR
         /// Shooting solve on (yaw, elevation) at the requested speed. Integrates gravity plus
         /// <see cref="DeliveryFlightModel.Acceleration"/> exactly as PhysX steps the ball (velocity, then position)
         /// down to the pitch point. An inner Newton loop corrects yaw and elevation until it lands within 0.1 mm; an
-        /// outer loop then updates the planned flight time T and rescales the swing so the simulated curve equals the
-        /// requested one (the closed form is a small-angle result). Converges in about three outer passes.
+        /// outer loop then updates the planned flight time T and rescales the swing acceleration so the simulated swing
+        /// (distance off the release line at the popping crease) equals the requested one (the closed form is a
+        /// small-angle result). Converges in a few outer passes.
         /// </summary>
         static DeliverySolution SolveMoving(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float radius)
         {
@@ -210,7 +213,10 @@ namespace CricketVR
 
             float yaw = 0f, elevation = still.ElevationDegrees * Mathf.Deg2Rad;
             var start = Simulate(release, Launch(forward, side, speed, yaw, elevation), default, gravity, dt, radius, target);
-            float curve = movement.SwingCurve, scale = 1f;
+            float swing = movement.Swing, scale = 1f;
+            // Time from the pitch point to the popping crease, for the closed-form first guess (negative for a yorker).
+            float pitchToCrease = (config.length - FieldDimensions.PoppingCreaseOffset) /
+                                  (speed * Mathf.Cos(elevation));
             var plan = new FlightPlan
             {
                 SwingDirection = movement.SwingDirection,
@@ -221,7 +227,7 @@ namespace CricketVR
             // Outer loop: swing strength and planned time from a flight that lands on target. Inner loop: aim.
             for (int outer = 0; outer < MaxMovingIterations; outer++)
             {
-                plan.SwingAcceleration = scale * DeliveryFlightModel.SwingAccelerationFor(curve, plan.PlannedTime, plan.SwingLateness);
+                plan.SwingAcceleration = scale * DeliveryFlightModel.SwingAccelerationFor(swing, plan.PlannedTime, plan.SwingLateness, pitchToCrease);
                 SimulatedFlight flight = default;
                 bool aimed = false;
                 for (int inner = 0; inner < MaxMovingIterations && !aimed; inner++)
@@ -258,19 +264,21 @@ namespace CricketVR
                     return Fail(result, $"no aim lands {config} with this movement within {MovingTolerance * 1000f:F0} mm");
 
                 bool timed = Mathf.Abs(flight.Time - plan.PlannedTime) < 1e-4f;
-                bool curved = curve <= 0f || Mathf.Abs(flight.Curve - curve) < MovingTolerance * 0.5f;
-                if (timed && curved)
+                float swung = Mathf.Abs(flight.Swing);
+                bool sized = swing <= 0f || Mathf.Abs(swung - swing) < MovingTolerance * 0.5f;
+                if (timed && sized)
                 {
                     result.Velocity = Launch(forward, side, speed, yaw, elevation);
                     result.ElevationDegrees = elevation * Mathf.Rad2Deg;
                     result.PredictedBounce = flight.Bounce;
+                    result.PredictedSwing = swung;
                     result.PredictedCurve = flight.Curve;
                     result.Plan = plan;
                     return result;
                 }
                 plan.PlannedTime = flight.Time;
-                if (curve > 0f && flight.Curve > 1e-4f)
-                    scale *= curve / flight.Curve;
+                if (swing > 0f && swung > 1e-4f)
+                    scale *= swing / swung;
             }
             return Fail(result, $"the swing for {config} did not settle within {MaxMovingIterations} passes");
         }
@@ -292,16 +300,22 @@ namespace CricketVR
             public float Curve;
             /// <summary>Velocity on arrival at the pitch point.</summary>
             public Vector3 ArrivalVelocity;
+            /// <summary>
+            /// Signed swing (m): ball x at the popping crease minus where the release line (the launch velocity's
+            /// horizontal direction from the release point) reaches it. After the pitch point the ball is taken to keep
+            /// its heading (PhysX's bounce of a ball with no sideways spin doesn't change it; measured in PlayMode).
+            /// </summary>
+            public float Swing;
         }
 
         /// <summary>
         /// Steps the ball as PhysX does (v += (g + a)·dt, then x += v·dt; a from the velocity at the step's start)
         /// until its centre crosses <paramref name="contactHeight"/>, interpolating within the crossing step. The curve
         /// is measured against the line from the release to <paramref name="chordEnd"/> (the requested pitch point,
-        /// which the converged flight reaches).
+        /// which the converged flight reaches); the swing at the line z = <paramref name="creaseZ"/>.
         /// </summary>
         public static SimulatedFlight Simulate(Vector3 release, Vector3 velocity, in FlightPlan plan, float gravity, float dt,
-            float contactHeight, Vector3 chordEnd)
+            float contactHeight, Vector3 chordEnd, float creaseZ = FieldDimensions.PoppingCreaseOffset)
         {
             var result = new SimulatedFlight();
             var chord = new Vector2(chordEnd.x - release.x, chordEnd.z - release.z);
@@ -309,6 +323,8 @@ namespace CricketVR
             var p = release;
             var v = velocity;
             var g = new Vector3(0f, -gravity, 0f);
+            float releaseLineX = Mathf.Abs(velocity.z) > 1e-6f ? release.x + velocity.x * (creaseZ - release.z) / velocity.z : release.x;
+            float creaseX = float.NaN;
             int maxSteps = Mathf.CeilToInt(10f / dt);
             for (int step = 0; step < maxSteps; step++)
             {
@@ -322,8 +338,15 @@ namespace CricketVR
                     result.Bounce = Vector3.LerpUnclamped(p, next, f);
                     result.Time = (step + f) * dt;
                     result.ArrivalVelocity = v;
+                    // Not at the crease yet: the ball carries on along its arrival heading (the same straight segment
+                    // when the crease falls inside this step).
+                    if (float.IsNaN(creaseX) && Mathf.Abs(v.z) > 1e-6f)
+                        creaseX = result.Bounce.x + v.x * (creaseZ - result.Bounce.z) / v.z;
+                    result.Swing = creaseX - releaseLineX;
                     return result;
                 }
+                if (float.IsNaN(creaseX) && p.z > creaseZ && next.z <= creaseZ)
+                    creaseX = Mathf.Lerp(p.x, next.x, (p.z - creaseZ) / (p.z - next.z));
                 p = next;
                 result.Curve = Mathf.Max(result.Curve, Mathf.Abs(Vector2.Dot(new Vector2(p.x - release.x, p.z - release.z), normal)));
             }

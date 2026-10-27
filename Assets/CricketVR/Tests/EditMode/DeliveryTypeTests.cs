@@ -219,6 +219,39 @@ namespace CricketVR.Tests
             CollectionAssert.IsEmpty(offenders, "type-specific code outside the module");
         }
 
+        /// <summary>Owner decision 2026-10-27: Easy and Medium swing about 0.15-0.3 m, Hard up to 0.5 m, nothing over 0.5 m.</summary>
+        [Test]
+        public void DifficultySwingRangesFollowTheOwnersSizes()
+        {
+            foreach (var (preset, lo, hi) in new[]
+                     {
+                         (DeliveryPlanSettings.Easy, 0.15f, 0.30f), (DeliveryPlanSettings.Medium, 0.15f, 0.30f),
+                         (DeliveryPlanSettings.Hard, 0.20f, 0.50f),
+                     })
+            {
+                var plan = preset;
+                plan.typeMix = new[]
+                {
+                    new TypeWeight { kind = DeliveryKind.Inswinger, weight = 1f }, new TypeWeight { kind = DeliveryKind.Outswinger, weight = 1f },
+                };
+                var rng = new System.Random(5);
+                float min = float.MaxValue, max = 0f;
+                for (int i = 0; i < 500; i++)
+                {
+                    var request = DeliveryPlanner.DrawRequest(plan, rng, i % 2 == 0 ? Handedness.Right : Handedness.Left, null, null, out _);
+                    var nominal = request;
+                    nominal.type.variation = 0f;
+                    float swing = DeliveryMovement.For(nominal.ForBatter()).Swing;
+                    Assert.That(swing, Is.InRange(lo - 1e-5f, hi + 1e-5f), $"{plan.label}: nominal swing");
+                    Assert.LessOrEqual(DeliveryMovement.For(request.ForBatter()).Swing, DeliveryTypeData.MaxSwing, $"{plan.label}: varied swing");
+                    min = Mathf.Min(min, swing);
+                    max = Mathf.Max(max, swing);
+                }
+                Assert.Less(min, lo + 0.01f, $"{plan.label} uses its whole range");
+                Assert.Greater(max, hi - 0.01f, $"{plan.label} uses its whole range");
+            }
+        }
+
         // ---------- T072a natural variation (AC-31) ----------
 
         static DeliveryRequest Moving(DeliveryTypeData type, int seed, float movement = 0.5f, Handedness hand = Handedness.Right) => new DeliveryRequest
@@ -237,7 +270,7 @@ namespace CricketVR.Tests
                 Assert.AreEqual(a.VarSwing, b.VarSwing);
                 Assert.AreEqual(a.VarDrift, b.VarDrift);
                 Assert.AreEqual(a.VarTurn, b.VarTurn);
-                Assert.AreEqual(a.SwingCurve, b.SwingCurve);
+                Assert.AreEqual(a.Swing, b.Swing);
                 Assert.AreEqual(a.Drift, b.Drift);
                 Assert.AreEqual(a.TurnDegrees, b.TurnDegrees);
             }
@@ -278,7 +311,7 @@ namespace CricketVR.Tests
                     Assert.AreEqual(1f, mv.VarSwing);
                     Assert.AreEqual(1f, mv.VarDrift);
                     Assert.AreEqual(1f, mv.VarTurn);
-                    Assert.AreEqual(t.swingDirection == 0 ? 0f : t.swingMin + m * (t.swingMax - t.swingMin), mv.SwingCurve, 1e-6f, t.displayName);
+                    Assert.AreEqual(t.swingDirection == 0 ? 0f : t.swingMin + m * (t.swingMax - t.swingMin), mv.Swing, 1e-6f, t.displayName);
                     Assert.AreEqual(t.turnDirection == 0 ? 0f : t.driftMin + m * (t.driftMax - t.driftMin), mv.Drift, 1e-6f, t.displayName);
                     Assert.AreEqual(t.turnDirection == 0 ? 0f : t.turnMin + m * (t.turnMax - t.turnMin), mv.TurnDegrees, 1e-6f, t.displayName);
                 }

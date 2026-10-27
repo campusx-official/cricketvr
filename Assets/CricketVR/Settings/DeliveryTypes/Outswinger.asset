@@ -20,8 +20,8 @@ MonoBehaviour:
     minSpeedKmh: 115
     maxSpeedKmh: 140
     swingDirection: 1
-    swingMin: 0.2
-    swingMax: 0.6
+    swingMin: 0.1
+    swingMax: 0.5
     swingLateness: 1.5
     turnDirection: 0
     driftMin: 0

@@ -12,8 +12,11 @@ namespace CricketVR
     {
         /// <summary>-1 = toward −X, +1 = toward +X, 0 = none (world).</summary>
         public int SwingDirection;
-        /// <summary>Curve (m): largest sideways distance from the straight release-to-bounce line.</summary>
-        public float SwingCurve;
+        /// <summary>
+        /// Swing (m): how far the ball is, at the striker's popping crease, from the straight line it was released
+        /// along (plan.md §19, owner decision 2026-10-27). Never more than <see cref="DeliveryTypeData.MaxSwing"/>.
+        /// </summary>
+        public float Swing;
         public float SwingLateness;
         /// <summary>Turn direction at the bounce (world); drift goes the other way.</summary>
         public int TurnDirection;
@@ -28,7 +31,7 @@ namespace CricketVR
         /// <summary>Applied natural-variation factors (1 = nominal).</summary>
         public float VarSwing, VarDrift, VarTurn;
 
-        public bool IsStill => SwingCurve == 0f && Drift == 0f && Dip == 0f && TurnDegrees == 0f &&
+        public bool IsStill => Swing == 0f && Drift == 0f && Dip == 0f && TurnDegrees == 0f &&
                                BounceFactor == 0f && Grip == 0f && SeamDegrees == 0f;
 
         /// <param name="request">A request after <see cref="DeliveryRequest.ForBatter"/>.</param>
@@ -40,7 +43,8 @@ namespace CricketVR
             return new DeliveryMovement
             {
                 SwingDirection = t.swingDirection,
-                SwingCurve = t.swingDirection == 0 ? 0f : Mathf.Lerp(t.swingMin, t.swingMax, m) * factors.x,
+                // The cap applies after variation, so a varied ball never swings more than 0.5 m.
+                Swing = t.swingDirection == 0 ? 0f : Mathf.Min(Mathf.Lerp(t.swingMin, t.swingMax, m) * factors.x, DeliveryTypeData.MaxSwing),
                 SwingLateness = t.swingLateness,
                 TurnDirection = t.turnDirection,
                 Drift = t.turnDirection == 0 ? 0f : Mathf.Lerp(t.driftMin, t.driftMax, m) * factors.y,
@@ -115,19 +119,20 @@ namespace CricketVR
         }
 
         /// <summary>
-        /// Swing acceleration A that curves a ball of flight time T by <paramref name="curve"/> (m), the largest
-        /// sideways distance from the straight release-to-bounce line (DT-13). With a = A (t/T)^p and both ends on the
-        /// line, the deviation peaks at u* = (p + 2)^(−1/(p+1)) and equals A T² (u* − u*^(p+2)) / ((p+1)(p+2)).
-        /// Small-angle result; the solver corrects the remainder so the simulated curve matches.
+        /// Swing acceleration A that puts the ball <paramref name="swing"/> (m) off its release line at the popping
+        /// crease. With a = A (t/T)^p sideways, the ball is A T² / ((p+1)(p+2)) off the release line at the pitch point
+        /// (t = T) and moving sideways at A T / (p+1), which it keeps after pitching for <paramref name="pitchToCrease"/>
+        /// seconds (negative when it reaches the crease before pitching). Small-angle result; the solver rescales A
+        /// until the simulated swing matches.
         /// </summary>
-        public static float SwingAccelerationFor(float curve, float flightTime, float lateness)
+        public static float SwingAccelerationFor(float swing, float flightTime, float lateness, float pitchToCrease)
         {
-            if (!(curve > 0f) || !(flightTime > 0f))
+            if (!(swing > 0f) || !(flightTime > 0f))
                 return 0f;
             float p = Mathf.Max(0f, lateness);
-            float u = Mathf.Pow(p + 2f, -1f / (p + 1f));
-            float k = (u - Mathf.Pow(u, p + 2f)) / ((p + 1f) * (p + 2f));
-            return curve / (flightTime * flightTime * k);
+            float reach = flightTime / (p + 2f) + pitchToCrease;
+            reach = Mathf.Max(reach, 0.1f * flightTime / (p + 2f)); // a yorker reaches the crease just before it pitches
+            return swing * (p + 1f) / (flightTime * reach);
         }
     }
 

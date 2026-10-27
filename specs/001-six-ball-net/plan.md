@@ -438,8 +438,9 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | Pickup, throw speed, run time | ScorerSettings.pickup / throwSpeed / runTime / runStart | 0.5 s / 28 m/s / 3.0 s / 1.0 s | Run histogram (share of 1s, 2s, 3s) | AC-20, AC-21 |
 | Difficulty speeds and yorker/short shares | DeliveryPlan assets | spec.md "Two modes" | Bounce errors (AC-04 re-run to 120 km/h); contact rate per preset | AC-16, AC-04 re-run, AC-23 |
 | Scenario bounds | ScenarioSettings | RR 6–15, 6–36 balls, 1–5 wickets | Win rate across 10+ played scenarios | AC-22, AC-23 |
-| Swing curve range | DeliveryType.swingMin / swingMax | 0.2 / 0.6 m | Measured curve (CSV) vs what the owner sees; visible but hittable | AC-26 |
-| Swing lateness | DeliveryType.swingLateness p | 1.5 | Owner's sense of "late swing"; position along the flight where half the curve has happened | AC-26 |
+| Swing range | DeliveryType.swingMin / swingMax (cap `DeliveryTypeData.MaxSwing`) | 0.2 / 0.6 m curve → **0.1 / 0.5 m swing at the crease** (owner, 2026-10-27; cap 0.5 m) | Measured swing (CSV `swing_m`) vs what the owner sees; visible but hittable | AC-26 |
+| Swing per difficulty | DeliveryPlanSettings.minSwing / maxSwing | Easy, Medium 0.15–0.30 m; Hard 0.20–0.50 m; Net Practice the type's range | Owner feel per difficulty (M10) | AC-26, AC-23 |
+| Swing lateness | DeliveryType.swingLateness p | 1.5 | Owner's sense of "late swing"; position along the flight where half the swing has happened | AC-26 |
 | Drift | DeliveryType.driftMin / driftMax | per §19 table | Measured drift by the bounce; visible but subtle | AC-27 |
 | Dip | DeliveryType.dip | 0.6–1.2 m/s² | Arrival angle and bounce height vs Stock at the same speed and length | AC-27 |
 | Turn range | DeliveryType.turnMin / turnMax | per §19 table | Measured turn (CSV); off-spin vs leg-spin distinguishable in the headset | AC-27 |
@@ -516,13 +517,13 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 
 | Effect | Formula | Notes |
 | --- | --- | --- |
-| Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the curve equals D(m) = D_min + m·(D_max − D_min): A = D / (T²·K(p)), K = (u* − u*^(p+2)) / ((p+1)(p+2)), u* = (p+2)^(−1/(p+1)) (K = 1/8 for p = 0); the solver rescales A so the simulated curve matches exactly. *(Corrected in T073: the proposal's A = D·(p+1)(p+2)/T² makes the distance from the launch line equal D, not the curve.)* p = 0 uniform, p = 2 late. |
+| Swing | a = s·σ·A·(t/T)^p · ŝ, with ŝ = the horizontal unit vector ⟂ to the velocity, on the side of σX̂ | σ = −1 inswing, +1 outswing. A is set so the swing at the crease equals S(m) = min(f_swing·(S_min + m·(S_max − S_min)), 0.5 m): A = S·(p+1) / (T·(T/(p+2) + τ)), τ = time from the pitch point to the crease (negative for a yorker); the solver rescales A so the simulated swing matches exactly. p = 0 uniform, p = 2 late. Force applies in steps with step·dt ≤ T only (the solver's own count), never after the pitch. *(Swing was defined as the curve until 2026-10-27, with A = D / (T²·K(p)); see open decision 4.)* |
 | Drift (spin) | a = −s·τ·d · ŝ, constant before the bounce | τ = turn direction (−1 off-spin/googly, +1 leg-spin/doosra). Drift is opposite to the turn. d gives 0.05–0.15 m of drift by the bounce. |
 | Dip (spin) | a = −k_dip · Ŷ, constant before the bounce | Top-spin dip. The solver compensates with a higher launch, so the ball arrives steeper and bounces higher. |
 | Turn at the bounce | v_h′ = R_Y(s·τ·θ(m)) · v_h · (1 − g_grip); v_y′ = v_y · (1 + b) | θ(m) = θ_min + m·(θ_max − θ_min); b = bounce-height factor; g_grip = speed lost to grip. Applied once, in the step after the physical bounce. |
 | Seam (pace, D-2) | v_h′ = R_Y(φ) · v_h | φ = 0 in v1. |
 
-**Swing deviation (DT-13)** = the largest lateral distance between the actual path and the straight line from release to the bounce point, before the bounce (how much it curved). The arrival line at the batter is logged too. The 0.2–0.6 m target applies to the curve. Because the solver aims the bounce at the requested line, a swinging ball starts wider and curves in.
+**Swing (DT-13, owner decision 2026-10-27)** = the ball's sideways distance at the striker's popping crease (z = 1.22 m) from its **release line**, the straight line along the launch velocity's horizontal direction from the release point. For a ball pitched before the crease this is measured after the bounce: PhysX's bounce of a ball with no sideways spin keeps its heading, so the solver continues the arrival heading to the crease (PlayMode: measured = solved within 0.1 mm, E-048). Range 0.1–0.5 m, capped at 0.5 m after variation. At late swing p = 1.5 that is a heading change of about 0.7–3.4° and a curve (largest distance from the release-to-pitch line, still logged as a diagnostic) of about 0.02–0.09 m. Because the solver aims the bounce at the requested line, a swinging ball starts wider and curves in.
 
 **Natural variation (owner change 3).**
 - Each ball draws factors f_swing, f_drift, f_turn ∈ [1 − v, 1 + v] from `System.Random(request.seed)`, with v = `DeliveryTypeData.variation` (default 0.15).
@@ -532,11 +533,11 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 
 **Starting values per type** (all calibrated; §17 table):
 
-| Type | Speed (km/h) | Swing D (m) / p | Drift d (m) | Dip k (m/s²) | Turn θ (°) / dir | Bounce b | Grip |
+| Type | Speed (km/h) | Swing S (m) / p | Drift d (m) | Dip k (m/s²) | Turn θ (°) / dir | Bounce b | Grip |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Stock | plan's range | 0 | 0 | 0 | 0 | 0 | 0 |
-| Inswinger | 115–140 (120 cap, DT-5) | 0.2–0.6 / 1.5 | 0 | 0 | 0 | 0 | 0 |
-| Outswinger | 115–140 (120 cap) | 0.2–0.6 / 1.5 | 0 | 0 | 0 | 0 | 0 |
+| Inswinger | 115–140 (cap 140 since T075) | 0.1–0.5 swing / 1.5 | 0 | 0 | 0 | 0 | 0 |
+| Outswinger | 115–140 (cap 140) | 0.1–0.5 swing / 1.5 | 0 | 0 | 0 | 0 | 0 |
 | Off-spin | 80–92 | 0 | 0.05–0.10 (→ +X) | 0.6 | 3–6 / −X | +0.05 | 0.05 |
 | Leg-spin | 75–90 | 0 | 0.06–0.12 (→ −X) | 0.8 | 4–9 / +X | +0.08 | 0.06 |
 | Doosra | 80–92 (same as off-spin) | 0 | 0.05–0.10 (→ −X) | 0.6 | 2.5–5 / +X | +0.03 | 0.05 |
@@ -548,7 +549,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
   - Start from the no-movement solution.
   - Integrate gravity plus `Acceleration` with the same semi-implicit Euler step as PhysX (v += (g + a)·dt, then x += v·dt; a from the velocity at the step's start), down to the pitch point (crossing of contact height).
   - Inner loop: Newton steps on (yaw, elevation) from finite differences of the landing point, to < 0.1 mm.
-  - Outer loop: T = that flight's time to the pitch point, and the swing rescaled so the simulated curve equals D (within 0.5 mm). About three outer passes. (Updating swing and aim in one loop oscillated: the curve is measured against the line to the target, so it is only meaningful once the ball lands there.)
+  - Outer loop: T = that flight's time to the pitch point, and the swing acceleration rescaled so the simulated swing at the crease equals S (within 0.5 mm). A few outer passes. (Updating swing and aim in one loop oscillated: the swing depends on the aim, so it is only meaningful once the ball lands on target.)
   - Output: launch velocity and a `FlightPlan` (direction, A, p, T) that the runtime applies unchanged.
   - Rejected with a reason: Stock-unreachable speed, aim more than 0.5 rad off the line ("too much movement"), or no convergence.
 - *Arrival line (D-1):* the same, then continue through `TurnAtBounce` with the measured pitch restitution to z = 1.22 m and correct yaw on the arrival miss (tolerance about 3 cm).
@@ -637,7 +638,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 2. ~~Unity 6 LTS patch version~~: resolved 2026-10-23, 6000.3.27f1 (see decisions log).
 3. **Default delivery length.** The proposal is a bounce 6 m from the stumps at 80 km/h. It gets confirmed after M4 measurement, with slower deliveries used for early M5 batting.
 
-4. **Swing size definition (M7.5, before T076):** DT-13/REQ-042 define the 0.2–0.6 m as the *curve* (largest deviation from the release-to-bounce line). Measured in T073 (E-045) at late swing p = 1.5, 115–140 km/h: curve 0.2 / 0.4 / 0.6 m turns the ball's heading by about 7 / 14 / 22° and puts it 0.46 / 0.92 / 1.38 m off the line it was launched on, with sideways accelerations of 25–108 m/s². Real big swing is about 0.5 m off the launch line. Options: (a) keep the curve definition and lower the range to about 0.05–0.25 m; (b) define swing as the distance from the launch line (how swing is usually quoted, and what the proposal's formula did), keeping 0.2–0.6 m, i.e. a curve of about 0.09–0.26 m; (c) keep as is (deliberately exaggerated arcade swing). Recommendation: (b). Either way it is a setting and test-range change, not a model change.
+4. ~~**Swing size definition (M7.5, before T076):**~~ **Decided by the owner 2026-10-27: option (b), measured at the batter (distance off the release line at the popping crease), range 0.1–0.5 m; Easy/Medium about 0.15–0.3 m, Hard up to 0.5 m; nothing over 0.5 m without a future "exaggerated" setting.** Implemented and tested in E-048. Original text: DT-13/REQ-042 define the 0.2–0.6 m as the *curve* (largest deviation from the release-to-bounce line). Measured in T073 (E-045) at late swing p = 1.5, 115–140 km/h: curve 0.2 / 0.4 / 0.6 m turns the ball's heading by about 7 / 14 / 22° and puts it 0.46 / 0.92 / 1.38 m off the line it was launched on, with sideways accelerations of 25–108 m/s². Real big swing is about 0.5 m off the launch line. Options: (a) keep the curve definition and lower the range to about 0.05–0.25 m; (b) define swing as the distance from the launch line (how swing is usually quoted, and what the proposal's formula did), keeping 0.2–0.6 m, i.e. a curve of about 0.09–0.26 m; (c) keep as is (deliberately exaggerated arcade swing). Recommendation: (b). Either way it is a setting and test-range change, not a model change.
 5. **Pitch bounce owner (M7.5, before Phase B):** keep PhysX's bounce (rebound starts up to one step either side of the pitch point; T078/T079 model it) or resolve the bounce in code at the pitch point (exact; changes every ball's post-bounce path by up to ~12 cm; AC-04 headset re-check). See §19 and E-042.
 6. **Delivery types, open (M7.5, `proposals/delivery-types.md` §7):**
    1. Incoming spin effect on the shot (D-5), v2 after M8 calibration.
@@ -684,3 +685,4 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | 2026-10-27 | The bounce is measured at the pitch point, where the incoming flight reaches the pitch (interpolated or extrapolated within the step, after the v_y sign change), not at the PhysX contact report; the PhysX rebound start is recorded separately; Stock tolerance on the pitch point 10 cm → 1 cm | T070/T072 probes (E-040, E-042): PhysX turns the ball up to one step either side of the pitch point (−9.8 to +11.9 cm over 60 planned balls); pitch point within 0.51 cm; measurement only, physics unchanged | REQ-005, REQ-044, REQ-045 |
 | 2026-10-27 | M7.5 branches from `m7-session` and is rebased onto `main` after M7 merges; no merge into `main` before the owner's M7 re-check | Owner instruction: start M7.5 without waiting for the M7 re-check | All M7.5 tasks |
 | 2026-10-27 | Pace-type speed cap 120 → 140 km/h | AC-29 pace checks passed (E-047): AC-04 re-run at 100/120/140 km/h (spread 0.00 cm, pitch ≤ 0.21 cm), contact matrix at 120/140 km/h straight and swinging at 150 m/s² (exactly one contact in every run), 140 km/h swing matrix pitch ≤ 0.19 cm. Hard difficulty's range unchanged (T065) | REQ-042, REQ-044 |
+| 2026-10-27 | Swing = distance off the release line at the popping crease, 0.1–0.5 m, capped at 0.5 m after variation; Easy/Medium 0.15–0.3 m, Hard 0.2–0.5 m | Owner decision on open decision 4: the curve definition (0.2–0.6 m) gave up to 1.4 m off the release line; real big swing is about 0.5 m | REQ-042, AC-26, DeliveryTypeData, DeliveryPlanSettings, T076 |

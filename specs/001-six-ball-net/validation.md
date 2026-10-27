@@ -35,7 +35,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h (E-045–E-047); headset pending | E-045–E-047 | M7.5 T076 (owner) |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h with swing redefined (E-045–E-048); headset pending | E-045–E-048 | M7.5 T076 (owner) |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
@@ -862,6 +862,31 @@ Actual result and measured values:
 Outcome: Pass (automated) for the pace part of AC-29. Spinning balls in the contact matrix come in T081. Whether 140 km/h is playable is the owner's call in the headset (T076).
 Log or artifact path: scratchpad play.log
 Remaining limitation / follow-up task: T076 headset; T081 spinning balls
+```
+
+```text
+Check ID / acceptance scenario: E-048 / owner decision on swing size (plan.md open decision 4): swing redefined and re-tested (AC-26 automated)
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5: swing measured off the release line at the crease, 0.1-0.5 m ..."); no APK (the T076 build is E-049)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz
+Configuration: Inswinger / Outswinger 0.1-0.5 m swing (assets and code defaults), lateness 1.5; cap DeliveryTypeData.MaxSwing = 0.5 m after variation; plans Easy/Medium 0.15-0.30 m, Hard 0.20-0.50 m (mixes still Stock-only)
+Steps or exact command: -runTests EditMode (139 tests) and PlayMode (55 tests)
+Expected result: swing (distance at the popping crease from the release line) as requested and as solved; never over about 0.5 m; Stock unchanged
+Actual result and measured values:
+  - Definition change: the solver now rescales the swing acceleration until the simulated swing at the crease equals the request (it was the curve). Closed form A = S(p+1) / (T (T/(p+2) + tau)). Swing and curve are both in the record (new CSV columns pred_swing_m, swing_m).
+  - Solver, 576 solves (as E-045, now 0.1/0.3/0.5 m): worst landing miss 0.094 mm, worst swing error 0.46 mm. Largest swing acceleration 19.9 m/s^2 (2.0 g; was 150 m/s^2), heading change at most 5.2 deg, curve at most 0.19 m (pitch 2 m from the stumps).
+  - Size at lateness 1.5, 115-140 km/h, good length: swing 0.1 / 0.3 / 0.5 m = heading change 0.7 / 2.0 / 3.4 deg, curve 0.019 / 0.056 / 0.094 m, sideways acceleration 2.3-3.4 / 6.9-10.1 / 11.6-16.9 m/s^2.
+  - Owner's test: an inswinger pitched on off stump (+0.097 m), movement 1, both hands, 115-140 km/h, lengths 2-8 m, variation 0 / 0.15 / 0.5 over 10 seeds: largest swing 0.5002 m in simulation (the solver's 0.5 mm tolerance); in PhysX (variation 0.15, 115/140 km/h, lengths 3/6/8 m, both hands) largest measured 0.496 m.
+  - PhysX matrix, 60 swinging balls (in/out x 115/125/140 km/h x 10, both hands): worst pitch error 0.08 / 0.10 cm (was 0.14 / 0.19 cm); measured swing equals the solver's within 0.1 mm; swings 0.103-0.494 m.
+  - Bug found and fixed (from T074): BallFlight kept applying swing until PhysX reported ground contact, often one step after the pitch point the solver integrated to, adding up to 1.4 cm of swing at the crease (first run: 0.364 m measured vs 0.350 m solved; the off-stump test failed at 0.513 m). The force now stops on the solver's own step count (step x dt <= T). Stock is unaffected (no force).
+  - Arrival line: the E-046 inswinger (120 km/h, middle movement, pitched +0.20 m) now reaches the crease at +0.155 m (0.30 m swing); it was -0.61 m under the curve definition.
+  - Plans: 500 draws each with an in/out mix: Easy and Medium nominal swing 0.15-0.30 m, Hard 0.20-0.50 m, every varied ball <= 0.5 m. Stock-only plans draw exactly as before (no movement drawn).
+  - Unchanged: T070 Stock pitch errors (worst 0.21 cm presets, 0.51 cm planned), AC-04 re-run, the contact matrix (E-047 used 150 m/s^2 of held swing, now a far harsher case than any real ball).
+Outcome: Pass (automated). E-045/E-046 size figures (curve 0.2-0.6 m) are historical.
+Log or artifact path: scratchpad edit.log, play.log
+Remaining limitation / follow-up task: T076 headset (E-049 build)
 ```
 
 ```text

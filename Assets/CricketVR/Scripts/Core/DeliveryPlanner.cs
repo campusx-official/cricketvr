@@ -41,6 +41,8 @@ namespace CricketVR
         public TypeWeight[] typeMix;
         [Tooltip("Pace types' speed range is clamped to this (km/h); 0 = the default cap (140 since AC-29, T075).")]
         public float paceCapKmh;
+        [Tooltip("Swing for swing types in this plan (m off the release line at the crease, before natural variation); 0..0 = the type's own range.")]
+        public float minSwing, maxSwing;
 
         public float PaceCap => paceCapKmh > 0f ? paceCapKmh : DefaultPaceCapKmh;
         public bool StockOnly => typeMix == null || typeMix.Length == 0;
@@ -51,17 +53,19 @@ namespace CricketVR
             minLength = 3.5f, maxLength = 9f,
         };
 
-        public static DeliveryPlanSettings Easy => Match("Easy", 70f, 85f, 0.05f, 0.10f);
-        public static DeliveryPlanSettings Medium => Match("Medium", 80f, 100f, 0.10f, 0.15f);
+        // Swing per difficulty (owner, 2026-10-27): Easy and Medium about 0.15-0.3 m, Hard up to the 0.5 m cap.
+        public static DeliveryPlanSettings Easy => Match("Easy", 70f, 85f, 0.05f, 0.10f, 0.15f, 0.30f);
+        public static DeliveryPlanSettings Medium => Match("Medium", 80f, 100f, 0.10f, 0.15f, 0.15f, 0.30f);
         /// <summary>Capped at 120 km/h until AC-04 is re-run for 100-120 km/h (C-14).</summary>
-        public static DeliveryPlanSettings Hard => Match("Hard", 95f, 120f, 0.20f, 0.20f);
+        public static DeliveryPlanSettings Hard => Match("Hard", 95f, 120f, 0.20f, 0.20f, 0.20f, DeliveryTypeData.MaxSwing);
 
-        static DeliveryPlanSettings Match(string label, float min, float max, float yorkers, float shorts) => new DeliveryPlanSettings
+        static DeliveryPlanSettings Match(string label, float min, float max, float yorkers, float shorts, float minSwing, float maxSwing) => new DeliveryPlanSettings
         {
             label = label, minSpeedKmh = min, maxSpeedKmh = max, minLine = -0.1f, maxLine = 0.3f,
             minLength = 4f, maxLength = 7.5f,
             yorkerShare = yorkers, yorkerMinLength = 0.8f, yorkerMaxLength = 1.5f,
             shortShare = shorts, shortMinLength = 8.5f, shortMaxLength = 10f,
+            minSwing = minSwing, maxSwing = maxSwing,
         };
     }
 
@@ -144,10 +148,23 @@ namespace CricketVR
             {
                 request.type = type;
                 request.label = $"{plan.label}: {type.displayName}, {kind}";
-                request.movement = (float)rng.NextDouble();
+                request.movement = Movement(plan, type, (float)rng.NextDouble());
                 request.seed = rng.Next();
             }
             return request;
+        }
+
+        /// <summary>
+        /// The type's movement 0-1 for a uniform draw <paramref name="u"/>: spread over the plan's swing range (clipped
+        /// to the type's) for a swing type, or the whole range otherwise.
+        /// </summary>
+        static float Movement(in DeliveryPlanSettings plan, in DeliveryTypeData type, float u)
+        {
+            if (type.swingDirection == 0 || !(plan.maxSwing > 0f) || !(type.swingMax > type.swingMin))
+                return u;
+            float lo = Mathf.InverseLerp(type.swingMin, type.swingMax, plan.minSwing);
+            float hi = Mathf.InverseLerp(type.swingMin, type.swingMax, plan.maxSwing);
+            return Mathf.Lerp(lo, hi, u);
         }
 
         static DeliveryTypeData PickType(TypeWeight[] mix, float u, IReadOnlyList<DeliveryTypeData> types)
@@ -179,6 +196,37 @@ namespace CricketVR
         }
 
         static float Range(System.Random rng, float min, float max) => min + (float)rng.NextDouble() * (max - min);
+
+        // ---------- T076 headset swing check (AC-26) ----------
+
+        /// <summary>Swing sizes (m) shown by the check, in order, each as an inswinger then an outswinger.</summary>
+        public static readonly float[] SwingCheckSizes = { 0.15f, 0.30f, DeliveryTypeData.MaxSwing };
+        public const float SwingCheckLength = 6f;
+        public const float SwingCheckSlowKmh = 120f;
+        /// <summary>Centre of the off stump (m, batter frame).</summary>
+        public const float OffStumpLine = (FieldDimensions.StumpSetWidth - FieldDimensions.StumpDiameter) * 0.5f;
+
+        /// <summary>
+        /// A fixed sequence instead of a random plan, so the owner knows what each ball should do (T076 build only).
+        /// Each over: inswinger, outswinger at 0.15 m, then 0.30 m, then 0.50 m; odd overs at 120 km/h, even overs at
+        /// the pace cap. Good length on off stump, no natural variation.
+        /// </summary>
+        public static DeliveryRequest SwingCheckRequest(int ballIndex, Handedness handedness, IReadOnlyList<DeliveryTypeData> types)
+        {
+            int inOver = ballIndex % 6;
+            bool fast = ballIndex / 6 % 2 == 1;
+            var type = Find(inOver % 2 == 0 ? DeliveryKind.Inswinger : DeliveryKind.Outswinger, types);
+            type.variation = 0f;
+            float swing = SwingCheckSizes[inOver / 2];
+            float speed = fast ? DeliveryPlanSettings.DefaultPaceCapKmh : SwingCheckSlowKmh;
+            var request = DeliveryRequest.FromConfig(DeliveryConfig.Create(
+                $"Swing check: {type.displayName} {swing:F2} m", speed, OffStumpLine, SwingCheckLength));
+            request.type = type;
+            request.handedness = handedness;
+            request.seed = ballIndex + 1;
+            request.movement = type.swingMax > type.swingMin ? Mathf.InverseLerp(type.swingMin, type.swingMax, swing) : 1f;
+            return request;
+        }
 
         /// <summary>Reachability of a request (any type) as the machine will solve it.</summary>
         public static Func<DeliveryRequest, bool> RequestSolverCheck(float gravity, float fixedDeltaTime, float ballRadius) =>
