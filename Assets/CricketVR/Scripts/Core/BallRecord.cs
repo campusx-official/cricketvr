@@ -47,6 +47,9 @@ namespace CricketVR
         public float ArrivalLine = float.NaN;
         /// <summary>Ball centre height above the pitch where it reached the striker's popping crease (m).</summary>
         public float CreaseHeight = float.NaN;
+        /// <summary>A flighted (tossed-up) ball, and the launch angle above horizontal it was released at (degrees).</summary>
+        public bool Flighted;
+        public float LaunchDegrees = float.NaN;
         /// <summary>Where the delivery pitched (T070), and its distance from the requested bounce point.</summary>
         public Vector3 Bounce = NaN3;
         public float BounceError = float.NaN;
@@ -175,6 +178,8 @@ namespace CricketVR
             AddF("turn_deg", r => r.TurnDegrees, (r, v) => r.TurnDegrees = v);
             AddF("arrival_line_m", r => r.ArrivalLine, (r, v) => r.ArrivalLine = v);
             AddF("crease_height_m", r => r.CreaseHeight, (r, v) => r.CreaseHeight = v);
+            Add("flighted", r => r.Flighted ? "1" : "0", (r, s) => r.Flighted = s == "1");
+            AddF("launch_deg", r => r.LaunchDegrees, (r, v) => r.LaunchDegrees = v);
             AddV("bounce", r => r.Bounce, (r, v) => r.Bounce = v);
             AddF("bounce_error_m", r => r.BounceError, (r, v) => r.BounceError = v);
             AddF("rebound_offset_m", r => r.ReboundOffset, (r, v) => r.ReboundOffset = v);

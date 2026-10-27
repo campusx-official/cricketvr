@@ -179,7 +179,7 @@ namespace CricketVR
                 line += $"\n{r.DeliveryType}: swing {measured}, planned {r.PredictedSwing:F2} m";
             }
             if (!float.IsNaN(r.TurnDegrees))
-                line += $"\n{r.DeliveryType}: turned {Mathf.Abs(r.TurnDegrees):F1}°";
+                line += $"\n{r.DeliveryType}{(r.Flighted ? " (flighted)" : "")}: launched {r.LaunchDegrees:+0;-0}°, turned {Mathf.Abs(r.TurnDegrees):F1}°";
             if (!float.IsNaN(r.CreaseHeight))
                 line += $"\nHeight at the crease: {r.CreaseHeight:F2} m";
             return line;
@@ -224,6 +224,8 @@ namespace CricketVR
                 MeasuredCurve = machine.LastMeasuredCurve,
                 ArrivalLine = machine.LastArrivalLine,
                 CreaseHeight = machine.LastCreaseHeight,
+                Flighted = machine.LastRequest.flighted,
+                LaunchDegrees = machine.LastSolution.Reachable ? machine.LastSolution.ElevationDegrees : float.NaN,
                 TurnDegrees = machine.LastTurn,
                 Bounce = machine.LastBounce ?? BallRecord.NaN3,
                 BounceError = machine.LastBounceError,

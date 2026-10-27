@@ -448,6 +448,43 @@ namespace CricketVR.Tests
             Debug.Log(table.ToString());
         }
 
+        /// <summary>
+        /// Flighted off-spin in PhysX (owner request 2026-10-27): launched 4-10 degrees up at 70-80 km/h, from over the
+        /// wicket, finishing on its line. It pitches on its length, reaches the crease on its line, and loops: it rises
+        /// above the release and arrives steeper than a flat ball.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator FlightedOffSpinLoopsAndStillLandsOnLengthAndLine()
+        {
+            var table = new System.Text.StringBuilder("[CricketVR] Flighted off-spin (over the wicket, finish +0.05 m, right-handed, movement 0.5):");
+            foreach (var (kmh, launch, flighted) in new[] { (92f, 0f, false), (84f, 0f, false), (80f, 4f, true), (75f, 7f, true), (70f, 10f, true) })
+            foreach (var length in new[] { 3.5f, 4.75f, 6f })
+            {
+                var request = Request(Shipped(DeliveryKind.OffSpin), kmh, 0.05f, length, 0.5f, Handedness.Right);
+                request.releasePosition = FieldDimensions.OverTheWicketRelease;
+                request.lineReference = LineReference.AtBatter;
+                request.flighted = flighted;
+                request.launchDegrees = launch;
+                var run = new SpinRun();
+                float apex = float.MinValue;
+                yield return BowlSpin(request, run, p => apex = Mathf.Max(apex, p.y));
+                var s = _machine.LastSolution;
+                Assert.IsTrue(s.Reachable, s.Error);
+                if (flighted)
+                {
+                    Assert.AreEqual(launch, s.ElevationDegrees, 0.05f, $"{request}: launch angle");
+                    Assert.Greater(apex, request.releasePosition.y + 0.03f, $"{request}: rises above the release");
+                }
+                Assert.AreEqual(length, run.Pitch.z, BowlingPlayModeTests.StockTolerance, $"{request}: length");
+                Assert.AreEqual(0.05f, _flight.ArrivalLine, 0.03f, $"{request}: finish line");
+                float arrive = Mathf.Atan2(-run.Arrival.y, Flat(run.Arrival).magnitude) * Mathf.Rad2Deg;
+                table.Append($"\n  {(flighted ? "flighted" : "flat    ")} {kmh:F0} km/h {length:F2} m: launch {s.ElevationDegrees:+0.0;-0.0} deg (dip {s.Plan.Dip:F1}), " +
+                             $"top {apex - request.releasePosition.y:+0.00;-0.00} m vs release, arrives {arrive:F1} deg, crease height {run.CreaseHeight:F2} m, " +
+                             $"finish {_flight.ArrivalLine:+0.000} m");
+            }
+            Debug.Log(table.ToString());
+        }
+
         [UnityTest]
         public IEnumerator StockWithBallFlightIsUnchanged()
         {

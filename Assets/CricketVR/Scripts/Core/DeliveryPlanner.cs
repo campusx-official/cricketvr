@@ -172,6 +172,16 @@ namespace CricketVR
                 maxSpeed = type.style == BowlingStyle.Pace ? Mathf.Min(type.maxSpeedKmh, plan.PaceCap) : type.maxSpeedKmh;
                 minSpeed = Mathf.Min(minSpeed, maxSpeed); // a range wholly above the cap bowls at the cap
             }
+            // A type with a flighted variation (off-spin) tosses some balls up: slower, launched upward. Only such types
+            // draw these numbers, so every other plan's random sequence is unchanged.
+            bool flighted = type.HasFlighted && rng.NextDouble() < type.flightedShare;
+            float launch = 0f;
+            if (flighted)
+            {
+                minSpeed = type.flightedMinKmh;
+                maxSpeed = type.flightedMaxKmh;
+                launch = Mathf.Round(Range(rng, type.flightedMinLaunch, type.flightedMaxLaunch) * 10f) / 10f;
+            }
             float speed = Mathf.Round(Range(rng, minSpeed, maxSpeed));
             float line = Range(rng, plan.minLine, plan.maxLine);
 
@@ -184,7 +194,9 @@ namespace CricketVR
             if (!type.IsStill)
             {
                 request.type = type;
-                request.label = $"{plan.label}: {type.displayName}, {kind}";
+                request.label = $"{plan.label}: {type.displayName}{(flighted ? " (flighted)" : "")}, {kind}";
+                request.flighted = flighted;
+                request.launchDegrees = launch;
                 request.movement = Movement(plan, type, (float)rng.NextDouble());
                 request.seed = rng.Next();
             }

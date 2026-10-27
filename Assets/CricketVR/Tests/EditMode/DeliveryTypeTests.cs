@@ -171,7 +171,7 @@ namespace CricketVR.Tests
                 else if (r.type.style == BowlingStyle.Pace)
                     Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, DeliveryPlanSettings.DefaultPaceCapKmh), $"{r.type.displayName} capped (DT-5)");
                 else
-                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), r.type.displayName);
+                    Assert.That(r.speedKmh, r.flighted ? Is.InRange(r.type.flightedMinKmh, r.type.flightedMaxKmh) : Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), r.type.displayName);
                 if (!r.type.IsStill)
                     Assert.That(r.movement, Is.InRange(0f, 1f));
             }

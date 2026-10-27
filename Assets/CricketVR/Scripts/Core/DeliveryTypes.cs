@@ -68,6 +68,16 @@ namespace CricketVR
         [Tooltip("Each ball's swing, drift and turn are scaled by a seeded factor in [1 − v, 1 + v] (REQ-048).")]
         public float variation;
 
+        [Header("Flighted variation (spin)")]
+        [Tooltip("Share of this type's balls bowled as a flighted delivery: slower and tossed up (owner request 2026-10-27). 0 = none.")]
+        public float flightedShare;
+        [Tooltip("Speed range of a flighted ball (km/h).")]
+        public float flightedMinKmh, flightedMaxKmh;
+        [Tooltip("Launch angle above horizontal of a flighted ball (degrees); the solver finds the dip that lands it on its length.")]
+        public float flightedMinLaunch, flightedMaxLaunch;
+
+        public bool HasFlighted => flightedShare > 0f && flightedMaxLaunch > 0f;
+
         /// <summary>No swing, spin, dip or bounce change: the type bowls exactly like the pre-M7.5 machine.</summary>
         public bool IsStill => swingDirection == 0 && turnDirection == 0 && dip == 0f && flightDip == 0f && bounceFactor == 0f &&
                                grip == 0f && seamDegrees == 0f;
@@ -112,6 +122,11 @@ namespace CricketVR
             L("seamDegrees", d => d.seamDegrees, -5f, 5f),
             L("visualRevPerSecond", d => d.visualRevPerSecond, 0f, MaxVisualRevPerSecond),
             L("variation", d => d.variation, 0f, 0.5f),
+            L("flightedShare", d => d.flightedShare, 0f, 1f),
+            L("flightedMinKmh", d => d.flightedMinKmh, 0f, 150f),
+            L("flightedMaxKmh", d => d.flightedMaxKmh, 0f, 150f),
+            L("flightedMinLaunch", d => d.flightedMinLaunch, 0f, 15f),
+            L("flightedMaxLaunch", d => d.flightedMaxLaunch, 0f, 15f),
         };
 
         static Limit L(string name, Func<DeliveryTypeData, float> get, float min, float max) =>
@@ -132,6 +147,8 @@ namespace CricketVR
             if (swingMin > swingMax) errors.Add($"{displayName}: swingMin > swingMax");
             if (driftMin > driftMax) errors.Add($"{displayName}: driftMin > driftMax");
             if (turnMin > turnMax) errors.Add($"{displayName}: turnMin > turnMax");
+            if (HasFlighted && (flightedMinKmh > flightedMaxKmh || flightedMinKmh < 40f)) errors.Add($"{displayName}: flighted speed range invalid");
+            if (HasFlighted && flightedMinLaunch > flightedMaxLaunch) errors.Add($"{displayName}: flightedMinLaunch > flightedMaxLaunch");
             if ((swingDirection == 0) != (swingMax == 0f)) errors.Add($"{displayName}: swing amount without a direction (or the reverse)");
             if ((turnDirection == 0) != (turnMax == 0f && driftMax == 0f)) errors.Add($"{displayName}: turn or drift without a direction (or the reverse)");
             if (string.IsNullOrEmpty(displayName)) errors.Add($"{kind}: no display name");
@@ -153,8 +170,9 @@ namespace CricketVR
         public static DeliveryTypeData Outswinger => Swing(DeliveryKind.Outswinger, "Outswinger", +1,
             "Curves away from a right-hander toward the slips before pitching.");
 
-        public static DeliveryTypeData OffSpin => Spin(DeliveryKind.OffSpin, "Off-spin", -1, 75f, 92f, 0.05f, 0.10f, 1.0f, 5.0f, 3f, 6f, -0.21f, 0.10f,
-            DeliveryKind.OffSpin, "Drifts away, then turns in from off to leg (toward a right-hander) after pitching.");
+        public static DeliveryTypeData OffSpin => Flighted(Spin(DeliveryKind.OffSpin, "Off-spin", -1, 75f, 92f, 0.05f, 0.10f, 1.0f, 5.0f, 3f, 6f, -0.21f, 0.10f,
+            DeliveryKind.OffSpin, "Drifts away, then turns in from off to leg (toward a right-hander) after pitching."),
+            0.25f, 70f, 80f, 4f, 10f);
 
         public static DeliveryTypeData LegSpin => Spin(DeliveryKind.LegSpin, "Leg-spin", +1, 72f, 90f, 0.06f, 0.12f, 1.2f, 5.5f, 4f, 9f, -0.19f, 0.12f,
             DeliveryKind.LegSpin, "Drifts in, then turns away from leg to off after pitching.");
@@ -175,6 +193,17 @@ namespace CricketVR
             swingDirection = direction, swingMin = 0.1f, swingMax = 0.5f, swingLateness = 1.5f,
             visualRevPerSecond = 3f, variation = 0.15f,
         };
+
+        /// <summary>Adds the flighted variation (owner request 2026-10-27, off-spin first).</summary>
+        static DeliveryTypeData Flighted(DeliveryTypeData t, float share, float minKmh, float maxKmh, float minLaunch, float maxLaunch)
+        {
+            t.flightedShare = share;
+            t.flightedMinKmh = minKmh;
+            t.flightedMaxKmh = maxKmh;
+            t.flightedMinLaunch = minLaunch;
+            t.flightedMaxLaunch = maxLaunch;
+            return t;
+        }
 
         static DeliveryTypeData Spin(DeliveryKind kind, string name, int turn, float minKmh, float maxKmh, float driftMin, float driftMax,
             float dip, float flightDip, float turnMin, float turnMax, float bounce, float grip, DeliveryKind looksLike, string description) => new DeliveryTypeData
@@ -212,6 +241,9 @@ namespace CricketVR
         public int seed;
         [Tooltip("Set by ForBatter: line and movement directions are in world coordinates.")]
         public bool worldFrame;
+        [Tooltip("A flighted ball (spin): launched launchDegrees above horizontal; the solver finds the dip.")]
+        public bool flighted;
+        public float launchDegrees;
 
         public static DeliveryRequest FromConfig(DeliveryConfig config) => new DeliveryRequest
         {
@@ -255,7 +287,7 @@ namespace CricketVR
 
         public override string ToString() =>
             type.IsStill && movement == 0f ? ToConfig().ToString()
-                : $"{label} [{type.displayName}, movement {movement:F2}, {handedness}-handed]: {speedKmh:F0} km/h, line {line:+0.00;-0.00;0.00} m, length {length:F2} m";
+                : $"{label} [{type.displayName}{(flighted ? $", flighted {launchDegrees:F1} deg" : "")}, movement {movement:F2}, {handedness}-handed]: {speedKmh:F0} km/h, line {line:+0.00;-0.00;0.00} m, length {length:F2} m";
     }
 
     /// <summary>

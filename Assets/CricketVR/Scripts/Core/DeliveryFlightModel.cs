@@ -30,6 +30,9 @@ namespace CricketVR
         public float SeamDegrees;
         /// <summary>Applied natural-variation factors (1 = nominal).</summary>
         public float VarSwing, VarDrift, VarTurn;
+        /// <summary>A flighted ball's launch angle (degrees above horizontal): the solver finds the dip that lands it on
+        /// its length at this angle. NaN = free (the dip is given).</summary>
+        public float LaunchDegrees;
 
         public bool IsStill => Swing == 0f && Drift == 0f && Dip == 0f && TurnDegrees == 0f &&
                                BounceFactor == 0f && Grip == 0f && SeamDegrees == 0f;
@@ -53,6 +56,7 @@ namespace CricketVR
                 BounceFactor = t.bounceFactor,
                 Grip = t.grip,
                 SeamDegrees = t.seamDegrees,
+                LaunchDegrees = request.flighted ? request.launchDegrees : float.NaN,
                 VarSwing = factors.x,
                 VarDrift = factors.y,
                 VarTurn = factors.z,

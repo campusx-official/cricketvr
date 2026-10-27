@@ -266,7 +266,7 @@ namespace CricketVR.Tests
                 DeliveryType = "Googly", Movement = 0.625f, Hand = Handedness.Left, LineRef = LineReference.AtBatter, BallSeed = -77,
                 VarSwing = 1f, VarDrift = 0.875f, VarTurn = 1.125f, PredictedSwing = 0.4375f, MeasuredSwing = 0.4f,
                 PredictedCurve = 0.3125f, MeasuredCurve = 0.3f,
-                TurnDegrees = -5.5f, ArrivalLine = 0.0625f, CreaseHeight = 0.71875f, Bounce = new Vector3(0.05f, 0.036f, 5.998f), BounceError = 0.0021f, ReboundOffset = -0.03125f,
+                TurnDegrees = -5.5f, ArrivalLine = 0.0625f, CreaseHeight = 0.71875f, Flighted = true, LaunchDegrees = 7.5f, Bounce = new Vector3(0.05f, 0.036f, 5.998f), BounceError = 0.0021f, ReboundOffset = -0.03125f,
             };
             var back = BallRecord.FromCsv(BallRecord.CsvHeader, r.ToCsvRow());
             Assert.AreEqual(r.SessionId, back.SessionId);
@@ -309,6 +309,8 @@ namespace CricketVR.Tests
             Assert.AreEqual(-5.5f, back.TurnDegrees);
             Assert.AreEqual(0.0625f, back.ArrivalLine);
             Assert.AreEqual(0.71875f, back.CreaseHeight);
+            Assert.IsTrue(back.Flighted);
+            Assert.AreEqual(7.5f, back.LaunchDegrees);
             Assert.AreEqual(r.Bounce, back.Bounce);
             Assert.AreEqual(0.0021f, back.BounceError);
             Assert.AreEqual(-0.03125f, back.ReboundOffset);

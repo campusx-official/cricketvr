@@ -285,7 +285,8 @@ namespace CricketVR.Tests
                     var r = DeliveryPlanner.DrawRequest(plan, rng, hand, types, reachable, out int k);
                     redraws += k;
                     Assert.AreEqual(kind, r.type.kind, $"draw {n}: {r}");
-                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh), $"draw {n}: the type's own speed");
+                    Assert.That(r.speedKmh, r.flighted ? Is.InRange(r.type.flightedMinKmh, r.type.flightedMaxKmh) : Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh),
+                        $"draw {n}: the type's own speed");
                     Assert.That(r.length, Is.InRange(2.5f, 7.5f), $"draw {n}: spin lengths");
                     if (r.length < NetBowler.SpinGoodLengthMin) { full++; StringAssert.Contains("Full", r.label); }
                     else if (r.length < NetBowler.SpinGoodLengthMax) { good++; StringAssert.Contains("Good length", r.label); }
@@ -340,6 +341,94 @@ namespace CricketVR.Tests
                               $"{pitchSum / draws:+0.00;-0.00} m, average finish {finishSum / draws:+0.00;-0.00} m");
                 Assert.Less(turnSide * (pitchSum - finishSum) / draws, 0f, $"{bowler.Label} {side.Label} {hand}: pitched on the far side of its finish, turning onto it");
             }
+        }
+
+        // ---------- Flighted off-spin (owner request 2026-10-27) ----------
+
+        static DeliveryRequest FlightedOffSpin(float kmh, float launch, float line, float length, Handedness hand, LineReference reference)
+        {
+            var r = Request(DeliveryTypeData.OffSpin, kmh, line, length, 0.5f, hand);
+            r.flighted = true;
+            r.launchDegrees = launch;
+            r.lineReference = reference;
+            return r;
+        }
+
+        [Test]
+        public void FlightedOffSpinLeavesAtItsLaunchAngleAndStillLandsOnLengthAndLine()
+        {
+            int solved = 0, clamped = 0;
+            float worstMiss = 0f, maxDip = 0f, minDip = float.MaxValue, lowest = float.MaxValue, highest = 0f;
+            foreach (var reference in new[] { LineReference.AtBounce, LineReference.AtBatter })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            foreach (var kmh in new[] { 70f, 75f, 80f })
+            foreach (var launch in new[] { 4f, 7f, 10f })
+            foreach (var length in new[] { 3f, 4.75f, 6.5f })
+            foreach (var release in new[] { FieldDimensions.OverTheWicketRelease, FieldDimensions.AroundTheWicketRelease })
+            {
+                var r = FlightedOffSpin(kmh, launch, 0.05f, length, hand, reference);
+                r.releasePosition = release;
+                var world = r.ForBatter();
+                var mv = DeliveryMovement.For(world);
+                var s = DeliverySolver.Solve(world, mv, G, Dt, R);
+                Assert.IsTrue(s.Reachable, $"{world}: {s.Error}");
+                if (s.Plan.Dip <= 0f)
+                    Assert.GreaterOrEqual(s.ElevationDegrees, launch - 0.05f, $"{world}: gravity alone launches it higher");
+                else if (s.Plan.Dip >= 10f - 1e-4f)
+                    Assert.LessOrEqual(s.ElevationDegrees, launch + 0.05f, $"{world}: as high as the dip limit allows");
+                else
+                    Assert.AreEqual(launch, s.ElevationDegrees, 0.05f, $"{world}: launch angle");
+                if (Mathf.Abs(s.ElevationDegrees - launch) > 0.05f) clamped++;
+                Assert.AreEqual(Units.KmhToMs(kmh), s.Velocity.magnitude, 1e-3f, "speed unchanged");
+                var flight = Fly(world, s);
+                float miss = reference == LineReference.AtBounce
+                    ? Vector2.Distance(new Vector2(flight.Bounce.x, flight.Bounce.z), new Vector2(world.line, world.length))
+                    : Mathf.Abs(flight.CreaseX - world.line);
+                Assert.LessOrEqual(miss, 0.001f, $"{world}: {(reference == LineReference.AtBounce ? "pitch" : "crease line")} miss {miss * 1000f:F2} mm");
+                Assert.AreEqual(world.length, flight.Bounce.z, 0.001f, $"{world}: length");
+                lowest = Mathf.Min(lowest, s.ElevationDegrees);
+                highest = Mathf.Max(highest, s.ElevationDegrees);
+                worstMiss = Mathf.Max(worstMiss, miss);
+                maxDip = Mathf.Max(maxDip, s.Plan.Dip);
+                minDip = Mathf.Min(minDip, s.Plan.Dip);
+                solved++;
+            }
+            Debug.Log($"[CricketVR] Flighted off-spin: {solved} solves (70-80 km/h, launch 4-10 deg, 3-6.5 m, over/around, both line references), " +
+                      $"launched {lowest:F1}-{highest:F1} deg ({clamped} clamped to what 0-10 m/s^2 of dip can land), worst miss {worstMiss * 1000f:F2} mm, dip {minDip:F1}-{maxDip:F1} m/s^2");
+        }
+
+        [Test]
+        public void OffSpinnerFlightsAboutOneBallInFour()
+        {
+            var types = DeliveryTypeData.All;
+            var reachable = DeliveryPlanner.RequestSolverCheck(G, Dt, R);
+            var plan = NetBowler.All[1].Plan(FieldDimensions.OverTheWicketRelease);
+            var rng = new System.Random(21);
+            int flighted = 0, redraws = 0;
+            const int draws = 400;
+            for (int n = 0; n < draws; n++)
+            {
+                var r = DeliveryPlanner.DrawRequest(plan, rng, Handedness.Right, types, reachable, out int k);
+                redraws += k;
+                if (r.flighted)
+                {
+                    flighted++;
+                    Assert.That(r.speedKmh, Is.InRange(70f, 80f), "a flighted ball is slower");
+                    Assert.That(r.launchDegrees, Is.InRange(4f, 10f));
+                    StringAssert.Contains("(flighted)", r.label);
+                }
+                else
+                {
+                    Assert.That(r.speedKmh, Is.InRange(75f, 92f));
+                }
+            }
+            Debug.Log($"[CricketVR] Off-spinner: {flighted} of {draws} balls flighted, {redraws} redraws");
+            Assert.That(flighted, Is.InRange(draws * 15 / 100, draws * 35 / 100), "about a quarter flighted");
+            Assert.AreEqual(0, redraws, "every flighted and flat ball reachable");
+            var leg = NetBowler.All[2].Plan();
+            var legRng = new System.Random(21);
+            for (int n = 0; n < 100; n++)
+                Assert.IsFalse(DeliveryPlanner.DrawRequest(leg, legRng, Handedness.Right, types, null, out _).flighted, "leg-spin has no flighted variation yet");
         }
     }
 }

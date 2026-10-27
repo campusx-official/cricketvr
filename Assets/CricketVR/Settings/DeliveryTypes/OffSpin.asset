@@ -37,3 +37,8 @@ MonoBehaviour:
     visualRevPerSecond: 4
     looksLike: 3
     variation: 0.15
+    flightedShare: 0.25
+    flightedMinKmh: 70
+    flightedMaxKmh: 80
+    flightedMinLaunch: 4
+    flightedMaxLaunch: 10

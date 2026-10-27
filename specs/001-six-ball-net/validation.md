@@ -1189,6 +1189,27 @@ Log or artifact path: Docs/evidence/2026-10-27-net-spin-wicket/
 Remaining limitation / follow-up task: owner's view on the feel; open owner decision on tossed-up bounce height (E-060)
 ```
 
+```text
+Check ID / acceptance scenario: E-063 / Flighted off-spin variation (owner request 2026-10-27)
+Requirement IDs: REQ-043, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: off-spin flightedShare 0.25, 70-80 km/h, launch 4-10 deg; dip solved within 0-10 m/s^2; flat balls unchanged (75-92 km/h, dip 5.0 -> 1.0 with speed)
+Steps or exact command: both suites
+Expected result: a flighted ball leaves at its launch angle (or the nearest angle 0-10 m/s^2 of dip can land), at its speed, and still lands on its length and line; about a quarter of off-spin balls flighted; everything else unchanged
+Actual result and measured values:
+  - EditMode: 216 solves (70/75/80 km/h x 4/7/10 deg x 3/4.75/6.5 m x over/around x both line references x both hands), all reachable; launched 4.0-10.0 deg, 40 clamped (slow full balls need more than 4 deg with no dip; 10 deg at 75-80 km/h on 6.5 m needs more than 10 m/s^2); worst pitch or crease-line miss 0.31 mm. Planner: 104 of 400 off-spin balls flighted, all flighted 70-80 km/h, 0 redraws; leg-spin has no flighted balls.
+  - PlayMode (over the wicket, finish +0.05 m): flat 92 km/h launch -2.5..+0.1 deg, top 0.00 m; flat 84 km/h -0.0..+3.1 deg, top up to +0.06 m; flighted 80 km/h +4 deg, top +0.07..+0.09 m, arrives 18-20 deg; 75 km/h +7 deg, top +0.17..+0.23 m, arrives 20-23 deg; 70 km/h +10 deg, top +0.30..+0.39 m, arrives 23-25 deg. Every ball pitched within 1 cm of its length and finished +0.056..+0.064 m (asked +0.05).
+  - Crease height of flighted balls: 3.5 m 0.57-0.87 m; 4.75 m 0.87-1.19 m; 6 m 1.13-1.35 m (flat balls 0.44-0.84 m).
+  - Unchanged: AC-04 0.16 cm; AC-29 0.21/0.19/0.12; T074 0.08/0.10 cm; Main 0.02 cm; T077 0.08 cm; T078 0.018 deg; T079 spin 2.25 cm.
+  - Suites: EditMode 155/155, PlayMode 63/63.
+Outcome: Pass (automated); headset check by the owner pending
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: flighted balls bounce to 1.1-1.35 m at the crease off 4.75-6 m (open owner decision on bounce height, E-060); leg-spin, doosra and googly have no flighted variation yet
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:

@@ -198,7 +198,57 @@ namespace CricketVR
 
         /// <summary>The line is where the ball pitches: Stock's unchanged solve, or the movement-aware one.</summary>
         static DeliverySolution SolveAtBounce(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float ballRadius) =>
-            movement.IsStill ? Solve(config, gravity, dt, ballRadius) : SolveMoving(config, movement, gravity, dt, ballRadius);
+            movement.IsStill ? Solve(config, gravity, dt, ballRadius)
+            : float.IsNaN(movement.LaunchDegrees) ? SolveMoving(config, movement, gravity, dt, ballRadius)
+            : SolveFlighted(config, movement, gravity, dt, ballRadius);
+
+        const float MaxFlightDip = 10f;          // m/s²: the most top-spin dip a flighted ball may be given (about 1 g)
+        const float LaunchTolerance = 0.05f;     // degrees
+
+        /// <summary>
+        /// A flighted ball (owner request 2026-10-27): launched <see cref="DeliveryMovement.LaunchDegrees"/> above the
+        /// horizontal at its speed. More dip needs a higher launch to reach the same length, so the solver finds the dip
+        /// by secant steps on the moving solve's launch elevation. A slow, full ball may need more than the asked angle
+        /// with no dip at all (gravity alone): it is launched at that angle with no dip. A ball pitched longer may need
+        /// more than <see cref="MaxFlightDip"/> to come down from the asked angle: it is launched as high as that dip
+        /// allows. So the launch is the asked angle clamped to what 0..MaxFlightDip can land on the length.
+        /// </summary>
+        static DeliverySolution SolveFlighted(DeliveryConfig config, DeliveryMovement movement, float gravity, float dt, float ballRadius)
+        {
+            float want = movement.LaunchDegrees;
+            DeliverySolution Try(float dip)
+            {
+                var m = movement;
+                m.Dip = dip;
+                m.LaunchDegrees = float.NaN;
+                return SolveMoving(config, m, gravity, dt, ballRadius);
+            }
+            var noDip = Try(0f);
+            if (noDip.Reachable && noDip.ElevationDegrees >= want - LaunchTolerance)
+                return noDip; // already launched at least this high with gravity alone
+            var mostDip = Try(MaxFlightDip);
+            if (mostDip.Reachable && mostDip.ElevationDegrees <= want + LaunchTolerance)
+                return mostDip; // as high as the dip limit allows for this length
+            float d0 = Mathf.Clamp(movement.Dip, 0f, MaxFlightDip), d1 = Mathf.Min(d0 + 2f, MaxFlightDip);
+            var s0 = Try(d0);
+            var s1 = Try(d1);
+            for (int i = 0; i < MaxMovingIterations; i++)
+            {
+                if (!s1.Reachable)
+                    return s1;
+                if (Mathf.Abs(s1.ElevationDegrees - want) < LaunchTolerance)
+                    return s1;
+                if (!s0.Reachable || Mathf.Abs(s1.ElevationDegrees - s0.ElevationDegrees) < 1e-4f)
+                    break;
+                float next = d1 + (want - s1.ElevationDegrees) * (d1 - d0) / (s1.ElevationDegrees - s0.ElevationDegrees);
+                next = Mathf.Clamp(next, 0f, MaxFlightDip);
+                if (Mathf.Abs(next - d1) < 1e-5f)
+                    break; // pinned at a limit
+                d0 = d1; s0 = s1;
+                d1 = next; s1 = Try(d1);
+            }
+            return Fail(s1, $"no dip up to {MaxFlightDip:F0} m/s² launches {config} at {want:F1} degrees (got {s1.ElevationDegrees:F1})");
+        }
 
         const float ArrivalTolerance = 0.001f; // metres at the crease, in simulation
 
