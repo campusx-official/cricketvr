@@ -75,9 +75,9 @@ namespace CricketVR
     }
 
     /// <summary>
-    /// What the flight applies before the bounce, as solved for one ball: swing acceleration A along the side
-    /// direction, growing as (t/T)^p; a constant sideways drift; a constant downward dip. Solved by
-    /// <see cref="DeliverySolver"/>; the runtime flight applies exactly this.
+    /// What the flight applies, as solved for one ball. Before the bounce: swing acceleration A along the side
+    /// direction, growing as (t/T)^p; a constant sideways drift; a constant downward dip. At the bounce: the turn.
+    /// Solved by <see cref="DeliverySolver"/>; the runtime flight applies exactly this.
     /// </summary>
     public struct FlightPlan
     {
@@ -94,9 +94,19 @@ namespace CricketVR
         public float DriftAcceleration;
         /// <summary>Extra downward acceleration before the bounce (m/s², top-spin dip).</summary>
         public float Dip;
+        /// <summary>-1 = turns toward −X, +1 = toward +X, 0 = no turn (world).</summary>
+        public int TurnDirection;
+        /// <summary>Heading change at the bounce (degrees, ≥ 0).</summary>
+        public float TurnDegrees;
+        /// <summary>Vertical speed added at the bounce, as a fraction of PhysX's rebound (b).</summary>
+        public float BounceFactor;
+        /// <summary>Fraction of the horizontal speed lost to grip at the bounce.</summary>
+        public float Grip;
 
-        public bool IsStill => (SwingDirection == 0 || SwingAcceleration == 0f) &&
-                               (DriftDirection == 0 || DriftAcceleration == 0f) && Dip == 0f;
+        public bool AcceleratesBeforeBounce => (SwingDirection != 0 && SwingAcceleration != 0f) ||
+                                               (DriftDirection != 0 && DriftAcceleration != 0f) || Dip != 0f;
+        public bool ActsAtBounce => (TurnDirection != 0 && TurnDegrees != 0f) || BounceFactor != 0f || Grip != 0f;
+        public bool IsStill => !AcceleratesBeforeBounce && !ActsAtBounce;
     }
 
     /// <summary>
@@ -112,7 +122,7 @@ namespace CricketVR
         /// </summary>
         public static Vector3 Acceleration(float t, Vector3 velocity, in FlightPlan plan)
         {
-            if (plan.IsStill || !(plan.PlannedTime > 0f))
+            if (!plan.AcceleratesBeforeBounce || !(plan.PlannedTime > 0f))
                 return Vector3.zero;
             var a = new Vector3(0f, -plan.Dip, 0f);
             var side = new Vector3(-velocity.z, 0f, velocity.x);
@@ -131,6 +141,32 @@ namespace CricketVR
             if (plan.DriftDirection != 0)
                 a += side * (plan.DriftDirection * plan.DriftAcceleration);
             return a;
+        }
+
+        /// <summary>
+        /// Signed rotation about world up (degrees) that turns the horizontal <paramref name="velocity"/> by the plan's
+        /// turn toward its turn direction; 0 without a turn.
+        /// </summary>
+        public static float TurnAngle(Vector3 velocity, in FlightPlan plan)
+        {
+            if (plan.TurnDirection == 0 || !(plan.TurnDegrees > 0f))
+                return 0f;
+            // Rotating (x, z) by +a about +Y gives x' = x cos a + z sin a: the sign that moves x toward the turn
+            // depends on which way the ball travels.
+            float sign = velocity.z * plan.TurnDirection > 0f ? 1f : -1f;
+            return sign * plan.TurnDegrees;
+        }
+
+        /// <summary>
+        /// The velocity just after the bounce (plan.md §19, Option A): PhysX's rebound <paramref name="velocity"/>
+        /// with its heading turned by the plan's turn, its horizontal speed reduced by grip, and its vertical speed
+        /// raised by the bounce factor. Applied once, in the step after the ball turns upward.
+        /// </summary>
+        public static Vector3 TurnAtBounce(Vector3 velocity, in FlightPlan plan)
+        {
+            var horizontal = Quaternion.AngleAxis(TurnAngle(velocity, plan), Vector3.up) * new Vector3(velocity.x, 0f, velocity.z);
+            horizontal *= 1f - Mathf.Clamp01(plan.Grip);
+            return new Vector3(horizontal.x, velocity.y * (1f + plan.BounceFactor), horizontal.z);
         }
 
         /// <summary>

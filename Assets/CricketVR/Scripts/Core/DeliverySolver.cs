@@ -189,9 +189,9 @@ namespace CricketVR
             if (worldRequest.lineReference != LineReference.AtBounce)
                 return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
                     "arrival-line requests are not available yet (T079)");
-            if (movement.TurnDegrees != 0f || movement.BounceFactor != 0f || movement.Grip != 0f || movement.SeamDegrees != 0f)
+            if (movement.SeamDegrees != 0f)
                 return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
-                    "the turn at the bounce is not available yet (T078)");
+                    "seam movement is not available (D-2: 0 in v1)");
             return SolveMoving(config, movement, gravity, fixedDeltaTime, ballRadius);
         }
 
@@ -233,6 +233,11 @@ namespace CricketVR
                 PlannedTime = start.Time,
                 DriftDirection = drift > 0f ? -movement.TurnDirection : 0,
                 Dip = movement.Dip,
+                // Applied after PhysX's bounce (Option A): no effect on the flight to the pitch point.
+                TurnDirection = movement.TurnDegrees > 0f ? movement.TurnDirection : 0,
+                TurnDegrees = movement.TurnDegrees,
+                BounceFactor = movement.BounceFactor,
+                Grip = movement.Grip,
             };
 
             // Outer loop: swing strength and planned time from a flight that lands on target. Inner loop: aim.

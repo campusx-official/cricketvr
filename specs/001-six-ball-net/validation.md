@@ -36,7 +36,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
 | AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
-| AC-27 | REQ-043, REQ-044, REQ-047 | Drift and dip automated pass (E-053); turn, arrival line and headset not run | E-053 | M7.5 T078, T079, T082 |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053) and turn at the bounce (E-054) automated pass; arrival line and headset not run | E-053, E-054 | M7.5 T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
@@ -989,6 +989,28 @@ Actual result and measured values:
 Outcome: Pass (automated, simulation and PhysX; before the bounce only)
 Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: T078 turn at the bounce (lifts the solver's turn rejection); spin types are not bowled in play until then; headset AC-27 in T082
+```
+
+```text
+Check ID / acceptance scenario: E-054 / T078 turn at the physical bounce (AC-27 automated; Option A)
+Requirement IDs: REQ-043, REQ-044, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: shipped spin types with natural variation 0.15 (turn test) or 0 (bounce-height test); speeds from each type's range; lengths 4-8 m; lines -0.1..+0.3 m; movement 0-1; seed 78; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: 10 runs x 4 spin types x both hands: turn in range, direction correct, bounce point unchanged by the turn; googly bounces higher than leg-spin
+Actual result and measured values:
+  - PlayMode SpinningBallsTurnAtTheBounce: 80 balls; heading change 2.44-9.23 deg, each within 0.018 deg of its planned (varied) turn and inside the type's range widened by the variation; toward the type's turn direction for both hands; the turned heading is kept in the air (10 steps later < 0.2 deg).
+  - Pitch point with vs without the turn (same ball, turn/bounce/grip zeroed): identical, 0.000 mm.
+  - Bounce height at 82 km/h, 6 m, movement 0.5: leg-spin rebound peak 1.349 m (v_y 5.08 m/s), googly 1.496 m (v_y 5.36 m/s).
+  - EditMode: TurnAtBounce turns the heading by exactly theta toward its direction for either travel direction, grip and bounce factor as specified; the solver accepts full spin movements, carries turn/bounce/grip in the plan, and its launch equals the no-turn solve.
+  - Swing, Stock and real-scene results unchanged (T074 0.08/0.10 cm; AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; Main 0.02 cm; T077 0.04 cm).
+  - Suites: EditMode 147/147, PlayMode 58/58.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: (1) crease position after the turn carries PhysX's rebound offset (up to about 2 cm, owner-accepted); T079 arrival-line solve. (2) Spin types are not in any default plan's mix yet (T065), so they are not bowled in normal play. (3) The rebound peaks (1.3-1.5 m off a good length at 82 km/h) come from the existing pitch material; review in T083 calibration. (4) Headset AC-27 in T082.
 ```
 
 ```text

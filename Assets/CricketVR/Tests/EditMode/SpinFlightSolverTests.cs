@@ -4,9 +4,9 @@ using UnityEngine;
 namespace CricketVR.Tests
 {
     /// <summary>
-    /// M7.5 T077 (AC-27 automated, simulation): drift and dip before the bounce, and the solver that lands a spinning
-    /// ball on the requested point. The turn at the bounce is T078, so these solves zero it (and the bounce and grip
-    /// factors), which the solver otherwise still rejects.
+    /// M7.5 T077/T078 (AC-27 automated, simulation): drift and dip before the bounce, the solver that lands a spinning
+    /// ball on the requested point, and the turn at the bounce (applied after PhysX's rebound, Option A). The flight
+    /// tests zero the turn, bounce and grip factors, which act only after the pitch point.
     /// </summary>
     public class SpinFlightSolverTests
     {
@@ -135,12 +135,41 @@ namespace CricketVR.Tests
         }
 
         [Test]
-        public void TurnAtTheBounceIsStillRejectedUntilT078()
+        public void TheTurnRidesInThePlanAndLeavesTheFlightToThePitchUnchanged()
         {
-            var world = Request(DeliveryTypeData.OffSpin, 85f, 0f, 6f, 0.5f).ForBatter();
-            var s = DeliverySolver.Solve(world, DeliveryMovement.For(world), G, Dt, R);
-            Assert.IsFalse(s.Reachable);
-            StringAssert.Contains("T078", s.Error);
+            foreach (var type in SpinTypes)
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            {
+                var world = Request(type, 85f, 0.1f, 6f, 0.5f, hand).ForBatter();
+                var full = DeliveryMovement.For(world);
+                var s = DeliverySolver.Solve(world, full, G, Dt, R);
+                Assert.IsTrue(s.Reachable, $"{world}: {s.Error}");
+                Assert.AreEqual(world.type.turnDirection, s.Plan.TurnDirection, $"{world}: turn direction");
+                Assert.AreEqual(full.TurnDegrees, s.Plan.TurnDegrees, 1e-6f);
+                Assert.AreEqual(full.BounceFactor, s.Plan.BounceFactor);
+                Assert.AreEqual(full.Grip, s.Plan.Grip);
+                var before = Solve(Request(type, 85f, 0.1f, 6f, 0.5f, hand), out _, out _);
+                Assert.AreEqual(before.Velocity, s.Velocity, $"{world}: the turn doesn't change the launch");
+            }
+        }
+
+        [Test]
+        public void TurnAtBounceTurnsTheHeadingTowardItsDirectionAndAppliesGripAndBounce()
+        {
+            var plan = new FlightPlan { TurnDirection = +1, TurnDegrees = 6f, BounceFactor = 0.1f, Grip = 0.05f };
+            foreach (var v in new[] { new Vector3(0.2f, 4f, -20f), new Vector3(-0.1f, 3f, 15f) })
+            foreach (int dir in new[] { -1, +1 })
+            {
+                plan.TurnDirection = dir;
+                var after = DeliveryFlightModel.TurnAtBounce(v, plan);
+                var h0 = new Vector3(v.x, 0f, v.z);
+                var h1 = new Vector3(after.x, 0f, after.z);
+                Assert.AreEqual(6f, Vector3.Angle(h0, h1), 1e-3f, $"{v} dir {dir}: heading change");
+                Assert.AreEqual(dir, (int)Mathf.Sign(h1.normalized.x - h0.normalized.x), $"{v} dir {dir}: turns toward {dir}");
+                Assert.AreEqual(h0.magnitude * 0.95f, h1.magnitude, 1e-4f, "grip");
+                Assert.AreEqual(v.y * 1.1f, after.y, 1e-5f, "bounce factor");
+            }
+            Assert.AreEqual(new Vector3(1f, 2f, -3f), DeliveryFlightModel.TurnAtBounce(new Vector3(1f, 2f, -3f), default), "no turn: unchanged");
         }
 
         [Test]

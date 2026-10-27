@@ -5,8 +5,9 @@ namespace CricketVR
     /// <summary>
     /// Delivery-type flight on the ball (M7.5, plan.md §19). Before the ball pitches (and unless it is hit first) it
     /// applies the solver's <see cref="FlightPlan"/> through <see cref="DeliveryFlightModel.Acceleration"/>, one step
-    /// at a time exactly as the solver integrated it. Stock has a still plan: no force at all, so its physics is
-    /// unchanged. Also measures the ball's swing, curve and arrival line for the per-ball record, and drives the seam
+    /// at a time exactly as the solver integrated it. In the first step after PhysX's pitch bounce turns the ball
+    /// upward it applies <see cref="DeliveryFlightModel.TurnAtBounce"/> once (Option A, T078). Stock has a still
+    /// plan: no force or turn at all, so its physics is unchanged. Also measures the ball's swing, curve and arrival line for the per-ball record, and drives the seam
     /// visual.
     /// Runs before the contact resolver (-40); the force is added with AddForce, so the resolver's view of the
     /// step's velocity is unchanged by it.
@@ -22,7 +23,7 @@ namespace CricketVR
 
         BallController _ball;
         FlightPlan _plan;
-        bool _forcing, _measuring, _pitched;
+        bool _forcing, _turnPending, _measuring, _pitched;
         int _step;
         Vector3 _release, _previous;
         float _releaseLineX;
@@ -44,6 +45,11 @@ namespace CricketVR
         /// horizontal direction from the release point); NaN until it reaches the crease unhit.
         /// </summary>
         public float MeasuredSwing => float.IsNaN(ArrivalLine) ? float.NaN : Mathf.Abs(ArrivalLine - _releaseLineX);
+        /// <summary>Signed heading change applied at the bounce (degrees about world up); NaN until applied.</summary>
+        public float AppliedTurn { get; private set; } = float.NaN;
+        /// <summary>The ball's velocity just before and just after the turn was applied (PhysX's rebound, then turned).</summary>
+        public Vector3 VelocityBeforeTurn { get; private set; }
+        public Vector3 VelocityAfterTurn { get; private set; }
 
         void Awake()
         {
@@ -61,7 +67,9 @@ namespace CricketVR
         {
             DeliveryId = deliveryId;
             _plan = plan;
-            _forcing = !plan.IsStill;
+            _forcing = plan.AcceleratesBeforeBounce;
+            _turnPending = plan.ActsAtBounce;
+            AppliedTurn = float.NaN;
             _measuring = true;
             _pitched = false;
             _step = 0;
@@ -75,7 +83,7 @@ namespace CricketVR
             ArrivalLine = float.NaN;
 
             _revPerSecond = Mathf.Min(type.visualRevPerSecond, DeliveryTypeData.MaxVisualRevPerSecond);
-            _spinAxis = BallSpinVisual.PaceSpinAxis(launchVelocity, plan.IsStill ? 0 : plan.SwingDirection);
+            _spinAxis = BallSpinVisual.PaceSpinAxis(launchVelocity, plan.SwingDirection);
             _seamFrame = Quaternion.FromToRotation(Vector3.up, _spinAxis);
             _angle = 0f;
             UpdateVisual();
@@ -85,7 +93,7 @@ namespace CricketVR
         {
             if (!_ball.InFlight || _ball.ActiveDeliveryId != DeliveryId)
             {
-                _forcing = _measuring = false;
+                _forcing = _turnPending = _measuring = false;
                 return;
             }
 
@@ -108,6 +116,36 @@ namespace CricketVR
                     _step++;
                 }
             }
+
+            if (_turnPending)
+                TurnIfBounced();
+        }
+
+        /// <summary>
+        /// The body holds the state after the previous step. Once the ball has met the ground and PhysX has turned it
+        /// upward, its velocity is PhysX's rebound: turn it here, once, before the next step. The pitch measurement
+        /// (which runs after this) only uses positions and the sign of v_y, so the turn doesn't move the pitch point.
+        /// </summary>
+        void TurnIfBounced()
+        {
+            if (_ball.HasBeenHit)
+            {
+                _turnPending = false; // a full toss hit before pitching never turns
+                return;
+            }
+            var body = _ball.Body;
+            var v = body.linearVelocity;
+            if (!_ball.TouchedGround || !(v.y > 0f))
+                return;
+            _turnPending = false;
+            float angle = DeliveryFlightModel.TurnAngle(v, _plan);
+            var turned = DeliveryFlightModel.TurnAtBounce(v, _plan);
+            body.linearVelocity = turned;
+            // Keep the ball's spin about the same axis relative to its new heading (no sideways skid from the turn).
+            body.angularVelocity = Quaternion.AngleAxis(angle, Vector3.up) * body.angularVelocity;
+            VelocityBeforeTurn = v;
+            VelocityAfterTurn = turned;
+            AppliedTurn = angle;
         }
 
         void Measure(Vector3 position)

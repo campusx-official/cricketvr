@@ -224,6 +224,113 @@ namespace CricketVR.Tests
                       $"worst measured-vs-solved drift {worstDrift * 1000f:F1} mm");
         }
 
+        /// <summary>
+        /// T078 (AC-27 PlayMode): the turn at PhysX's bounce. 10 runs × 4 spin types × both hands, shipped types with
+        /// their natural variation: the heading change is the planned turn and in the type's range, toward the type's
+        /// direction; the pitch point is the same as the same ball without a turn; the googly bounces higher than the
+        /// leg-break.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SpinningBallsTurnAtTheBounce()
+        {
+            var rng = new System.Random(78);
+            float worstTurn = 0f, worstPitchShift = 0f, minTurn = float.MaxValue, maxTurn = 0f;
+            int balls = 0;
+            foreach (var kind in new[] { DeliveryKind.OffSpin, DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly })
+            foreach (var hand in new[] { Handedness.Right, Handedness.Left })
+            for (int run = 0; run < 10; run++)
+            {
+                var type = Shipped(kind, 0.15f);
+                float kmh = Mathf.Round(Mathf.Lerp(type.minSpeedKmh, type.maxSpeedKmh, (float)rng.NextDouble()));
+                float length = Mathf.Lerp(4f, 8f, (float)rng.NextDouble());
+                float line = Mathf.Lerp(-0.1f, 0.3f, (float)rng.NextDouble());
+                var request = Request(type, kmh, line, length, (float)rng.NextDouble(), hand, seed: rng.Next());
+                var spun = new SpinRun();
+                yield return BowlSpin(request, spun);
+                var world = request.ForBatter();
+                var planned = _machine.LastMovement;
+
+                // Same ball without the turn: the turn must not move the pitch point.
+                var still = request;
+                still.type.turnMin = still.type.turnMax = still.type.bounceFactor = still.type.grip = 0f;
+                var plain = new SpinRun();
+                yield return BowlSpin(still, plain);
+                float shift = Vector3.Distance(spun.Pitch, plain.Pitch);
+                Assert.LessOrEqual(shift, 1e-4f, $"{request}: pitch moved {shift * 1000f:F2} mm by the turn");
+
+                float turn = Vector3.Angle(Flat(spun.Arrival), Flat(spun.AfterTurn));
+                int side = (int)Mathf.Sign(Flat(spun.AfterTurn).normalized.x - Flat(spun.Arrival).normalized.x);
+                Assert.AreEqual(planned.TurnDegrees, turn, 0.2f, $"{request}: turned {turn:F2} deg (planned {planned.TurnDegrees:F2})");
+                Assert.AreEqual(planned.TurnDegrees, Mathf.Abs(spun.Applied), 1e-4f);
+                Assert.That(turn, Is.InRange(world.type.turnMin * 0.85f - 0.2f, world.type.turnMax * 1.15f + 0.2f), $"{request}: turn in the type's range");
+                Assert.AreEqual(world.type.turnDirection, side, $"{request}: turns toward {world.type.turnDirection}");
+                Assert.Less(Vector3.Angle(Flat(spun.Later), Flat(spun.AfterTurn)), 0.2f, $"{request}: keeps the turned heading in the air");
+                worstTurn = Mathf.Max(worstTurn, Mathf.Abs(turn - planned.TurnDegrees));
+                worstPitchShift = Mathf.Max(worstPitchShift, shift);
+                minTurn = Mathf.Min(minTurn, turn);
+                maxTurn = Mathf.Max(maxTurn, turn);
+                balls++;
+            }
+            Debug.Log($"[CricketVR] T078 turn PlayMode: {balls} balls, turns {minTurn:F2}-{maxTurn:F2} deg, worst measured-vs-planned " +
+                      $"{worstTurn:F3} deg, pitch shift by the turn {worstPitchShift * 1000f:F3} mm");
+
+            // Googly vs leg-break at the same speed, line, length and movement, no variation.
+            var leg = new SpinRun();
+            yield return BowlSpin(Request(Shipped(DeliveryKind.LegSpin), 82f, 0.1f, 6f, 0.5f, Handedness.Right), leg);
+            var googly = new SpinRun();
+            yield return BowlSpin(Request(Shipped(DeliveryKind.Googly), 82f, 0.1f, 6f, 0.5f, Handedness.Right), googly);
+            Debug.Log($"[CricketVR] T078 bounce at 82 km/h, 6 m: leg-spin peak {leg.PeakAfterBounce:F3} m (v_y {leg.AfterTurn.y:F2}), " +
+                      $"googly {googly.PeakAfterBounce:F3} m (v_y {googly.AfterTurn.y:F2})");
+            Assert.Greater(googly.PeakAfterBounce, leg.PeakAfterBounce, "the googly bounces higher than the leg-break");
+        }
+
+        static Vector3 Flat(Vector3 v) => new Vector3(v.x, 0f, v.z);
+
+        class SpinRun
+        {
+            public Vector3 Pitch, Arrival, AfterTurn, Later;
+            public float Applied, PeakAfterBounce;
+        }
+
+        /// <summary>Bowls one ball and follows it to just past the bounce: arrival velocity (last step before it met
+        /// the ground), the turn, the velocity 10 steps later, and the peak height of the rebound.</summary>
+        IEnumerator BowlSpin(DeliveryRequest request, SpinRun run)
+        {
+            yield return new WaitForFixedUpdate();
+            int id = _machine.Bowl(request);
+            Assert.AreNotEqual(0, id, _machine.LastError);
+            float until = Time.time + 5f;
+            int after = -1;
+            bool turns = _machine.LastSolution.Plan.ActsAtBounce;
+            while (Time.time < until)
+            {
+                yield return new WaitForFixedUpdate();
+                var v = _ball.Body.linearVelocity;
+                if (!_ball.TouchedGround)
+                {
+                    run.Arrival = v;
+                    continue;
+                }
+                if (turns && float.IsNaN(_flight.AppliedTurn))
+                    continue;
+                if (after < 0)
+                {
+                    after = 0;
+                    run.AfterTurn = turns ? _flight.VelocityAfterTurn : v;
+                    run.Applied = turns ? _flight.AppliedTurn : 0f;
+                }
+                run.PeakAfterBounce = Mathf.Max(run.PeakAfterBounce, _ball.Body.position.y);
+                if (++after == 10)
+                    run.Later = v;
+                if (after >= 10 && _pitches.ContainsKey(id) && v.y <= 0f)
+                    break; // past the rebound's peak
+            }
+            Assert.IsTrue(_pitches.ContainsKey(id), $"{request}: never pitched");
+            Assert.GreaterOrEqual(after, 10, $"{request}: no rebound followed");
+            run.Pitch = _pitches[id].Point;
+            _ball.Cancel();
+        }
+
         [UnityTest]
         public IEnumerator StockWithBallFlightIsUnchanged()
         {
