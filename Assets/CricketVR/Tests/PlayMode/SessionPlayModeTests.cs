@@ -119,8 +119,16 @@ namespace CricketVR.Tests
                 Assert.AreEqual(6, _session.Session.Records.Count);
                 foreach (var r in _session.Session.Records)
                 {
-                    Assert.AreEqual(type, r.DeliveryType);
-                    Assert.AreEqual(turn, (int)Mathf.Sign(r.TurnDegrees), $"{type} turns toward {turn} for a right-hander ({r.TurnDegrees:F1} deg)");
+                    // The off-spinner mixes in a doosra (turns the other way) and the straighter one (barely turns).
+                    if (r.DeliveryType == "Doosra")
+                        Assert.AreEqual(-turn, (int)Mathf.Sign(r.TurnDegrees), $"doosra turns the other way ({r.TurnDegrees:F1} deg)");
+                    else if (r.DeliveryType == "Straighter one")
+                        Assert.Less(Mathf.Abs(r.TurnDegrees), 0.7f, $"the straighter one barely turns ({r.TurnDegrees:F1} deg)");
+                    else
+                    {
+                        Assert.AreEqual(type, r.DeliveryType);
+                        Assert.AreEqual(turn, (int)Mathf.Sign(r.TurnDegrees), $"{type} turns toward {turn} for a right-hander ({r.TurnDegrees:F1} deg)");
+                    }
                     Assert.That(r.CreaseHeight, Is.InRange(0.1f, 1.5f), $"{type}: crease height");
                     Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, $"{type}: pitched on its length");
                     Assert.AreEqual(WicketSide.All[side].Release.x, r.Delivery.releasePosition.x, 1e-5f, $"{type}: released {WicketSide.All[side].Label} the wicket");

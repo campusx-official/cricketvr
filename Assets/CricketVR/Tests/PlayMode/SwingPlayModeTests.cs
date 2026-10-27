@@ -425,7 +425,7 @@ namespace CricketVR.Tests
         public IEnumerator SpinCharacterTable()
         {
             var table = new System.Text.StringBuilder("[CricketVR] Spin character, right-handed, line +0.1 m, length 5 m, movement 0.5:");
-            foreach (var kind in new[] { DeliveryKind.Stock, DeliveryKind.OffSpin, DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly })
+            foreach (var kind in new[] { DeliveryKind.Stock, DeliveryKind.OffSpin, DeliveryKind.LegSpin, DeliveryKind.Doosra, DeliveryKind.Googly, DeliveryKind.ArmBall })
             {
                 var type = Shipped(kind);
                 var speeds = type.UsesPlanSpeed ? new[] { 75f, 90f }
@@ -483,6 +483,39 @@ namespace CricketVR.Tests
                              $"finish {_flight.ArrivalLine:+0.000} m");
             }
             Debug.Log(table.ToString());
+        }
+
+        /// <summary>
+        /// The off-spinner's straighter one in PhysX (owner request 2026-10-27): at the off-break's speed and length it
+        /// barely turns, keeps more of its pace off the pitch and reaches the crease lower; both finish on their line.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheStraighterOneHurriesOnStraightAndLow()
+        {
+            foreach (var length in new[] { 4f, 5.5f })
+            {
+                var runs = new Dictionary<DeliveryKind, (SpinRun run, float finish)>();
+                foreach (var kind in new[] { DeliveryKind.OffSpin, DeliveryKind.ArmBall })
+                {
+                    var request = Request(Shipped(kind), 86f, 0.05f, length, 0.5f, Handedness.Right);
+                    request.releasePosition = FieldDimensions.OverTheWicketRelease;
+                    request.lineReference = LineReference.AtBatter;
+                    var run = new SpinRun();
+                    yield return BowlSpin(request, run, _ => { });
+                    Assert.AreEqual(0.05f, _flight.ArrivalLine, 0.03f, $"{request}: finish line");
+                    runs[kind] = (run, _flight.ArrivalLine);
+                }
+                var off = runs[DeliveryKind.OffSpin].run;
+                var arm = runs[DeliveryKind.ArmBall].run;
+                float offTurn = Vector3.Angle(Flat(off.Arrival), Flat(off.AfterTurn)), armTurn = Vector3.Angle(Flat(arm.Arrival), Flat(arm.AfterTurn));
+                float offKept = Flat(off.Later).magnitude / Flat(off.Arrival).magnitude, armKept = Flat(arm.Later).magnitude / Flat(arm.Arrival).magnitude;
+                Debug.Log($"[CricketVR] {length:F1} m, 86 km/h: off-spin turns {offTurn:F1} deg, keeps {offKept * 100f:F0}%, crease height {off.CreaseHeight:F2} m; " +
+                          $"straighter one turns {armTurn:F1} deg, keeps {armKept * 100f:F0}%, crease height {arm.CreaseHeight:F2} m");
+                Assert.Less(armTurn, 0.7f, "barely turns");
+                Assert.Greater(offTurn, 2.5f);
+                Assert.Greater(armKept, offKept, "keeps more pace");
+                Assert.Less(arm.CreaseHeight, off.CreaseHeight, "lower");
+            }
         }
 
         [UnityTest]

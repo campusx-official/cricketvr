@@ -62,7 +62,7 @@ namespace CricketVR
             DeliveryConfig.Create("Unreachable test", 30f, 0f, 6f),
         };
 
-        [Tooltip("The seven delivery types (M7.5), one asset each; filled by the scene builder.")]
+        [Tooltip("The delivery types (M7.5; the straighter one added 2026-10-27), one asset each; filled by the scene builder.")]
         public DeliveryType[] deliveryTypes = new DeliveryType[0];
         [Tooltip("T076 headset build only (set by CricketVR > Build > swing check, then restored): Net Practice bowls the fixed swing-check sequence.")]
         public bool swingCheck;

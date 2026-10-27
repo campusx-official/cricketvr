@@ -21,7 +21,7 @@ namespace CricketVR.Tests
         }
 
         [Test]
-        public void SevenStartingTypesAreValidAndInKindOrder()
+        public void StartingTypesAreValidAndInKindOrder()
         {
             var all = DeliveryTypeData.All;
             CollectionAssert.AreEqual(System.Enum.GetValues(typeof(DeliveryKind)), all.Select(t => t.kind).ToArray());
@@ -37,12 +37,12 @@ namespace CricketVR.Tests
 #if UNITY_EDITOR
             var guids = UnityEditor.AssetDatabase.FindAssets("t:DeliveryType", new[] { "Assets/CricketVR/Settings/DeliveryTypes" });
             var assets = guids.Select(g => UnityEditor.AssetDatabase.LoadAssetAtPath<DeliveryType>(UnityEditor.AssetDatabase.GUIDToAssetPath(g))).ToList();
-            Assert.AreEqual(7, assets.Count, "one asset per type; run the scene builder");
+            Assert.AreEqual(DeliveryTypeData.All.Length, assets.Count, "one asset per type; run the scene builder");
             CollectionAssert.AreEquivalent(System.Enum.GetValues(typeof(DeliveryKind)), assets.Select(a => a.data.kind).ToArray());
             foreach (var a in assets)
                 CollectionAssert.IsEmpty(a.data.Validate(), a.name);
             var config = UnityEditor.AssetDatabase.LoadAssetAtPath<GameConfig>("Assets/CricketVR/Settings/GameConfig.asset");
-            Assert.AreEqual(7, config.delivery.deliveryTypes.Count(t => t != null), "GameConfig references every type");
+            Assert.AreEqual(DeliveryTypeData.All.Length, config.delivery.deliveryTypes.Count(t => t != null), "GameConfig references every type");
 #endif
         }
 
@@ -160,7 +160,8 @@ namespace CricketVR.Tests
             plan.typeMix = DeliveryTypeData.All.Select(t => new TypeWeight { kind = t.kind, weight = 1f }).ToArray();
             var rng = new System.Random(21);
             var counts = new Dictionary<DeliveryKind, int>();
-            for (int i = 0; i < 7000; i++)
+            int draws = 1000 * DeliveryTypeData.All.Length;
+            for (int i = 0; i < draws; i++)
             {
                 var r = DeliveryPlanner.DrawRequest(plan, rng, Handedness.Left, null, null, out _);
                 counts[r.type.kind] = counts.TryGetValue(r.type.kind, out int n) ? n + 1 : 1;

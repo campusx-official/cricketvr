@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CricketVR
 {
-    public enum DeliveryKind { Stock, Inswinger, Outswinger, OffSpin, LegSpin, Doosra, Googly }
+    public enum DeliveryKind { Stock, Inswinger, Outswinger, OffSpin, LegSpin, Doosra, Googly, ArmBall }
     public enum BowlingStyle { Pace, Spin }
 
     /// <summary>What a request's line means (D-1).</summary>
@@ -183,8 +183,15 @@ namespace CricketVR
         public static DeliveryTypeData Googly => Spin(DeliveryKind.Googly, "Googly", -1, 72f, 90f, 0.06f, 0.12f, 1.8f, 6.0f, 3.5f, 7.5f, -0.14f, 0.12f,
             DeliveryKind.LegSpin, "The leg-spinner's variation: looks like leg-spin but turns in, dips more and bounces higher.");
 
-        /// <summary>The seven starting types, in <see cref="DeliveryKind"/> order.</summary>
-        public static DeliveryTypeData[] All => new[] { Stock, Inswinger, Outswinger, OffSpin, LegSpin, Doosra, Googly };
+        /// <summary>
+        /// The off-spinner's straighter one (arm ball; owner request 2026-10-27): looks like off-spin, comes out a little
+        /// quicker and flatter, holds its line or drifts slightly away, barely turns, and skids on low with little grip.
+        /// </summary>
+        public static DeliveryTypeData ArmBall => Spin(DeliveryKind.ArmBall, "Straighter one", -1, 82f, 95f, 0.02f, 0.05f, 0.5f, 0f, 0f, 0.5f, -0.28f, 0.02f,
+            DeliveryKind.OffSpin, "The off-spinner's arm ball: looks like off-spin but goes straight on with the arm, quicker and lower, hurrying onto the batter.");
+
+        /// <summary>The starting types, in <see cref="DeliveryKind"/> order.</summary>
+        public static DeliveryTypeData[] All => new[] { Stock, Inswinger, Outswinger, OffSpin, LegSpin, Doosra, Googly, ArmBall };
 
         static DeliveryTypeData Swing(DeliveryKind kind, string name, int direction, string description) => new DeliveryTypeData
         {
@@ -320,13 +327,17 @@ namespace CricketVR
             new NetBowler { Button = "BowlerPace", Label = "Pace", Mix = new TypeWeight[0] },
             // Finish lines (owner feedback 2026-10-27: pitched on middle, the off-spinner turned down the leg side).
             // Off-spin turns in: finish from leg stump to just outside off. Leg-spin turns away: middle to outside off.
-            Spinner("BowlerOffSpin", "Off-spin", DeliveryKind.OffSpin, -0.10f, 0.25f),
-            Spinner("BowlerLegSpin", "Leg-spin", DeliveryKind.LegSpin, -0.05f, 0.35f),
+            // The off-spinner's variations (owner request 2026-10-27): 1 ball in 12 a doosra, 1 in 12 the straighter one.
+            Spinner("BowlerOffSpin", "Off-spin", -0.10f, 0.25f,
+                new TypeWeight { kind = DeliveryKind.OffSpin, weight = 10f },
+                new TypeWeight { kind = DeliveryKind.Doosra, weight = 1f },
+                new TypeWeight { kind = DeliveryKind.ArmBall, weight = 1f }),
+            Spinner("BowlerLegSpin", "Leg-spin", -0.05f, 0.35f, new TypeWeight { kind = DeliveryKind.LegSpin, weight = 1f }),
         };
 
-        static NetBowler Spinner(string button, string label, DeliveryKind kind, float minFinish, float maxFinish) => new NetBowler
+        static NetBowler Spinner(string button, string label, float minFinish, float maxFinish, params TypeWeight[] mix) => new NetBowler
         {
-            Button = button, Label = label, Mix = new[] { new TypeWeight { kind = kind, weight = 1f } },
+            Button = button, Label = label, Mix = mix,
             MinLength = SpinMinLength, PeakLength = SpinPeakLength, MaxLength = SpinMaxLength,
             MinFinishLine = minFinish, MaxFinishLine = maxFinish,
         };

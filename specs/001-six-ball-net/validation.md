@@ -1228,6 +1228,27 @@ Log or artifact path: Docs/evidence/2026-10-27-flighted-offspin/
 Remaining limitation / follow-up task: open owner decision on bounce height (E-060); flighted variation for the other spin types
 ```
 
+```text
+Check ID / acceptance scenario: E-065 / Off-spinner's doosra and straighter one, 1 in 12 each (owner request 2026-10-27)
+Requirement IDs: REQ-041, REQ-043, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch). One EditMode run crashed in Unity's Burst compiler before any test (exit 139); re-run with -burst-disable-compilation (no Burst code in the project)
+Configuration: new type ArmBall "Straighter one" (asset created by the scene builder); Net Practice off-spinner mix off-spin 10 : doosra 1 : straighter one 1
+Steps or exact command: scene builder; both suites
+Expected result: about 1 doosra and 1 straighter one in 12; doosra turns the other way; the straighter one barely turns, keeps more pace and stays lower; everything reachable
+Actual result and measured values:
+  - EditMode 1200 balls: off-spin 1020, doosra 96, straighter one 84 (100 each expected); 0 redraws; only off-breaks flighted (86 of 400 balls in the flighted check).
+  - PlayMode at 86 km/h, finish +0.05 m, over the wicket: 4 m: off-spin turns 4.5 deg, keeps 63% of its pace, crease height 0.61 m; straighter one turns 0.2 deg, keeps 71%, 0.45 m. 5.5 m: 4.5 / 63% / 0.77 m vs 0.3 deg / 71% / 0.57 m. Both reached the crease within 3 cm of their line.
+  - Straighter one across 82-95 km/h at 5 m: launch -0.1..-2.1 deg, crease height 0.52-0.56 m, keeps 70-73%.
+  - Session test: the off-spinner's records turn the right way per type (doosra opposite, straighter one < 0.7 deg).
+  - Suites: EditMode 157/157, PlayMode 64/64.
+Outcome: Pass (automated); headset pending
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: spin seam visual (T080) not done, so the disguise (looks like off-spin) isn't visible yet
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:

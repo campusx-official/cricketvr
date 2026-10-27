@@ -284,7 +284,7 @@ namespace CricketVR.Tests
                 {
                     var r = DeliveryPlanner.DrawRequest(plan, rng, hand, types, reachable, out int k);
                     redraws += k;
-                    Assert.AreEqual(kind, r.type.kind, $"draw {n}: {r}");
+                    Assert.IsTrue(System.Array.Exists(bowler.Mix, w => w.kind == r.type.kind), $"draw {n}: {r} is in the {bowler.Label} bowler's mix");
                     Assert.That(r.speedKmh, r.flighted ? Is.InRange(r.type.flightedMinKmh, r.type.flightedMaxKmh) : Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh),
                         $"draw {n}: the type's own speed");
                     Assert.That(r.length, Is.InRange(2.5f, 7.5f), $"draw {n}: spin lengths");
@@ -318,6 +318,7 @@ namespace CricketVR.Tests
                 var plan = bowler.Plan(side.Release);
                 var rng = new System.Random(11);
                 float pitchSum = 0f, finishSum = 0f, worst = 0f;
+                int stock = 0;
                 const int draws = 150;
                 for (int n = 0; n < draws; n++)
                 {
@@ -331,15 +332,19 @@ namespace CricketVR.Tests
                     Assert.IsTrue(s.Reachable, s.Error);
                     worst = Mathf.Max(worst, Mathf.Abs(s.PredictedArrivalLine - world.line));
                     float mirror = hand == Handedness.Left ? -1f : 1f; // back to the batter's frame
-                    pitchSum += mirror * s.Target.x;
-                    finishSum += r.line;
+                    if (r.type.kind == bowler.Mix[0].kind) // the stock ball; the off-spinner's variations turn otherwise
+                    {
+                        pitchSum += mirror * s.Target.x;
+                        finishSum += r.line;
+                        stock++;
+                    }
                 }
                 Assert.LessOrEqual(worst, 0.001f, "finishes on its line in simulation");
                 float turnSide = bowler.Mix[0].kind == DeliveryKind.OffSpin ? -1f : +1f; // batter frame: off-spin turns to leg
                 if (hand == Handedness.Right)
                     Debug.Log($"[CricketVR] Net Practice {bowler.Label} {side.Label.ToLowerInvariant()} the wicket: average pitch line " +
-                              $"{pitchSum / draws:+0.00;-0.00} m, average finish {finishSum / draws:+0.00;-0.00} m");
-                Assert.Less(turnSide * (pitchSum - finishSum) / draws, 0f, $"{bowler.Label} {side.Label} {hand}: pitched on the far side of its finish, turning onto it");
+                              $"{pitchSum / stock:+0.00;-0.00} m, average finish {finishSum / stock:+0.00;-0.00} m");
+                Assert.Less(turnSide * (pitchSum - finishSum) / stock, 0f, $"{bowler.Label} {side.Label} {hand}: pitched on the far side of its finish, turning onto it");
             }
         }
 
@@ -419,7 +424,7 @@ namespace CricketVR.Tests
                 }
                 else
                 {
-                    Assert.That(r.speedKmh, Is.InRange(75f, 92f));
+                    Assert.That(r.speedKmh, Is.InRange(r.type.minSpeedKmh, r.type.maxSpeedKmh));
                 }
             }
             Debug.Log($"[CricketVR] Off-spinner: {flighted} of {draws} balls flighted, {redraws} redraws");
@@ -429,6 +434,50 @@ namespace CricketVR.Tests
             var legRng = new System.Random(21);
             for (int n = 0; n < 100; n++)
                 Assert.IsFalse(DeliveryPlanner.DrawRequest(leg, legRng, Handedness.Right, types, null, out _).flighted, "leg-spin has no flighted variation yet");
+        }
+
+        /// <summary>Owner request 2026-10-27: the off-spinner bowls a doosra 1 ball in 12 and the straighter one 1 in 12.</summary>
+        [Test]
+        public void OffSpinnerBowlsADoosraAndTheStraighterOneOneBallInTwelveEach()
+        {
+            var types = DeliveryTypeData.All;
+            var reachable = DeliveryPlanner.RequestSolverCheck(G, Dt, R);
+            var plan = NetBowler.All[1].Plan(FieldDimensions.OverTheWicketRelease);
+            var rng = new System.Random(12);
+            var counts = new System.Collections.Generic.Dictionary<DeliveryKind, int>();
+            int redraws = 0;
+            const int draws = 1200;
+            for (int n = 0; n < draws; n++)
+            {
+                var r = DeliveryPlanner.DrawRequest(plan, rng, Handedness.Right, types, reachable, out int k);
+                redraws += k;
+                counts[r.type.kind] = (counts.TryGetValue(r.type.kind, out int c) ? c : 0) + 1;
+                if (r.type.kind != DeliveryKind.OffSpin)
+                    Assert.IsFalse(r.flighted, "only the stock off-break is flighted");
+                if (r.type.kind == DeliveryKind.ArmBall)
+                    Assert.That(r.speedKmh, Is.InRange(82f, 95f), "the straighter one is a little quicker");
+            }
+            Debug.Log($"[CricketVR] Off-spinner mix over {draws} balls: off-spin {counts[DeliveryKind.OffSpin]}, doosra {counts[DeliveryKind.Doosra]}, " +
+                      $"straighter one {counts[DeliveryKind.ArmBall]}; {redraws} redraws");
+            Assert.AreEqual(0, redraws);
+            Assert.AreEqual(3, counts.Count, "off-spin, doosra and the straighter one only");
+            foreach (var kind in new[] { DeliveryKind.Doosra, DeliveryKind.ArmBall })
+                Assert.That(counts[kind], Is.InRange(draws / 12 - 35, draws / 12 + 35), $"{kind}: about 1 in 12");
+        }
+
+        [Test]
+        public void TheStraighterOneLooksLikeOffSpinButBarelyTurnsAndDriftsAway()
+        {
+            var t = DeliveryTypeData.ArmBall;
+            CollectionAssert.IsEmpty(t.Validate());
+            Assert.AreEqual(DeliveryKind.OffSpin, t.looksLike, "disguised as the off-break");
+            Assert.LessOrEqual(t.turnMax, 0.5f, "barely turns");
+            Assert.Greater(t.minSpeedKmh, DeliveryTypeData.OffSpin.minSpeedKmh, "quicker");
+            Assert.Less(t.bounceFactor, DeliveryTypeData.OffSpin.bounceFactor, "skids on lower");
+            Assert.Less(t.grip, DeliveryTypeData.OffSpin.grip, "keeps its pace off the pitch");
+            var s = Solve(Request(t, 88f, 0.05f, 5f, 0.5f), out var world, out var mv);
+            Assert.IsTrue(s.Reachable, s.Error);
+            Assert.AreEqual(+1, s.Plan.DriftDirection, "drifts away from a right-hander, like the off-break's drift");
         }
     }
 }
