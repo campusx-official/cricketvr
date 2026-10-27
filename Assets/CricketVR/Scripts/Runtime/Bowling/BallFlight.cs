@@ -40,6 +40,9 @@ namespace CricketVR
         public float MeasuredCurve { get; private set; } = float.NaN;
         /// <summary>Ball x where it reached the striker's popping crease (m); NaN if it was hit or stopped first.</summary>
         public float ArrivalLine { get; private set; } = float.NaN;
+        /// <summary>Height of the ball's centre above the pitch surface where it reached the striker's popping crease
+        /// (m); NaN if it was hit or stopped first.</summary>
+        public float CreaseHeight { get; private set; } = float.NaN;
         /// <summary>
         /// Swing (m): distance at the popping crease between the ball and its release line (the launch velocity's
         /// horizontal direction from the release point); NaN until it reaches the crease unhit.
@@ -81,6 +84,7 @@ namespace CricketVR
             _pathCount = 0;
             MeasuredCurve = float.NaN;
             ArrivalLine = float.NaN;
+            CreaseHeight = float.NaN;
 
             _revPerSecond = Mathf.Min(type.visualRevPerSecond, DeliveryTypeData.MaxVisualRevPerSecond);
             _spinAxis = BallSpinVisual.PaceSpinAxis(launchVelocity, plan.SwingDirection);
@@ -164,6 +168,7 @@ namespace CricketVR
             {
                 float f = (_previous.z - crease) / (_previous.z - position.z);
                 ArrivalLine = Mathf.Lerp(_previous.x, position.x, f);
+                CreaseHeight = Mathf.Lerp(_previous.y, position.y, f) - FieldDimensions.PitchSurfaceHeight;
                 if (_pitched) _measuring = false;
             }
             _previous = position;

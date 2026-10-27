@@ -104,7 +104,7 @@ namespace CricketVR
             L("dip", d => d.dip, 0f, 3f),
             L("turnMin", d => d.turnMin, 0f, 15f),
             L("turnMax", d => d.turnMax, 0f, 15f),
-            L("bounceFactor", d => d.bounceFactor, -0.2f, 0.3f),
+            L("bounceFactor", d => d.bounceFactor, -0.5f, 0.3f),
             L("grip", d => d.grip, 0f, 0.2f),
             L("seamDegrees", d => d.seamDegrees, -5f, 5f),
             L("visualRevPerSecond", d => d.visualRevPerSecond, 0f, MaxVisualRevPerSecond),
@@ -150,16 +150,16 @@ namespace CricketVR
         public static DeliveryTypeData Outswinger => Swing(DeliveryKind.Outswinger, "Outswinger", +1,
             "Curves away from a right-hander toward the slips before pitching.");
 
-        public static DeliveryTypeData OffSpin => Spin(DeliveryKind.OffSpin, "Off-spin", -1, 80f, 92f, 0.05f, 0.10f, 0.6f, 3f, 6f, 0.05f, 0.05f,
+        public static DeliveryTypeData OffSpin => Spin(DeliveryKind.OffSpin, "Off-spin", -1, 80f, 92f, 0.05f, 0.10f, 0.6f, 3f, 6f, -0.21f, 0.05f,
             DeliveryKind.OffSpin, "Drifts away, then turns in from off to leg (toward a right-hander) after pitching.");
 
-        public static DeliveryTypeData LegSpin => Spin(DeliveryKind.LegSpin, "Leg-spin", +1, 75f, 90f, 0.06f, 0.12f, 0.8f, 4f, 9f, 0.08f, 0.06f,
+        public static DeliveryTypeData LegSpin => Spin(DeliveryKind.LegSpin, "Leg-spin", +1, 75f, 90f, 0.06f, 0.12f, 0.8f, 4f, 9f, -0.19f, 0.06f,
             DeliveryKind.LegSpin, "Drifts in, then turns away from leg to off after pitching.");
 
-        public static DeliveryTypeData Doosra => Spin(DeliveryKind.Doosra, "Doosra", +1, 80f, 92f, 0.05f, 0.10f, 0.6f, 2.5f, 5f, 0.03f, 0.05f,
+        public static DeliveryTypeData Doosra => Spin(DeliveryKind.Doosra, "Doosra", +1, 80f, 92f, 0.05f, 0.10f, 0.6f, 2.5f, 5f, -0.23f, 0.05f,
             DeliveryKind.OffSpin, "The off-spinner's variation: looks like off-spin but turns the other way, away from a right-hander.");
 
-        public static DeliveryTypeData Googly => Spin(DeliveryKind.Googly, "Googly", -1, 75f, 90f, 0.06f, 0.12f, 1.2f, 3.5f, 7.5f, 0.12f, 0.06f,
+        public static DeliveryTypeData Googly => Spin(DeliveryKind.Googly, "Googly", -1, 75f, 90f, 0.06f, 0.12f, 1.2f, 3.5f, 7.5f, -0.16f, 0.06f,
             DeliveryKind.LegSpin, "The leg-spinner's variation: looks like leg-spin but turns in, dips more and bounces higher.");
 
         /// <summary>The seven starting types, in <see cref="DeliveryKind"/> order.</summary>

@@ -103,6 +103,12 @@ namespace CricketVR
         public float LastMeasuredCurve => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.MeasuredCurve : float.NaN;
         /// <summary>The latest delivery's x at the striker's popping crease (m); NaN if not reached unhit.</summary>
         public float LastArrivalLine => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.ArrivalLine : float.NaN;
+        /// <summary>The latest delivery's ball height at the popping crease (m above the pitch); NaN until it gets there unhit.</summary>
+        public float LastCreaseHeight => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId ? Flight.CreaseHeight : float.NaN;
+        /// <summary>The latest delivery's turn applied at the bounce (degrees, + = toward +X); NaN without one.</summary>
+        public float LastTurn => Flight != null && Flight.DeliveryId == ball.ActiveDeliveryId && !float.IsNaN(Flight.AppliedTurn)
+            ? LastSolution.Plan.TurnDirection * Mathf.Abs(Flight.AppliedTurn)
+            : float.NaN;
 
         int Reject(DeliveryConfig request, string error)
         {

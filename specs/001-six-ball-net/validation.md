@@ -36,7 +36,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
 | AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
-| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053), turn at the bounce (E-054) and arrival line (E-055) automated pass; headset not run | E-053–E-055 | Spin bounce height (owner request), then M7.5 T082 |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053), turn at the bounce (E-054), arrival line (E-055) and spin bounce height (E-056) automated pass; headset not run | E-053–E-056 | M7.5 T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
@@ -1030,6 +1030,39 @@ Actual result and measured values:
 Outcome: Pass (automated)
 Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: spin bounce height at the crease (owner request before T082)
+```
+
+```text
+Check ID / acceptance scenario: E-056 / Spin bounce height at the striker's popping crease (owner request before T082); crease height in the CSV and on the result panel
+Requirement IDs: REQ-043, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: PlayMode (Mac batch); EditMode for the CSV
+Configuration: shipped types, right-handed, line +0.1 m, movement 0.5, variation 0; height = ball centre above the pitch surface where it crosses z = 1.22 m (BallFlight.CreaseHeight)
+Steps or exact command: SwingPlayModeTests.SpinBallsReachTheCreaseBetweenKneeAndWaistAtAGoodLength, then both full suites
+Expected result: good length (6 m): 0.5-0.9 m for every spin type at 75/85/95 km/h; googly higher than leg-spin and doosra lower than off-spin at every length and speed; fix through the spin types' own bounce factors only, Stock and swing unchanged
+Actual result and measured values (m; full 4 m / good 6 m / short 8 m, each at 75 / 85 / 95 km/h):
+  Before (bounce factors off +0.05, leg +0.08, doosra +0.03, googly +0.12):
+    Stock    0.71 0.63 0.56 | 0.95 0.92 0.86 | 1.09 1.14 1.15
+    Off-spin 0.78 0.72 0.62 | 1.08 1.05 0.97 | 1.25 1.30 1.31
+    Doosra   0.77 0.71 0.61 | 1.06 1.02 0.95 | 1.21 1.26 1.27
+    Leg-spin 0.82 0.77 0.66 | 1.15 1.12 1.03 | 1.33 1.39 1.38
+    Googly   0.87 0.82 0.69 | 1.23 1.20 1.10 | 1.44 1.50 1.48
+  After (every (1 + b) x 0.75: off -0.21, leg -0.19, doosra -0.23, googly -0.16):
+    Stock    0.71 0.63 0.56 | 0.95 0.92 0.86 | 1.09 1.14 1.15   (unchanged)
+    Off-spin 0.57 0.53 0.47 | 0.72 0.70 0.67 | 0.76 0.78 0.83
+    Doosra   0.55 0.51 0.46 | 0.69 0.67 0.64 | 0.73 0.74 0.80
+    Leg-spin 0.60 0.55 0.49 | 0.76 0.74 0.70 | 0.81 0.83 0.88
+    Googly   0.63 0.59 0.52 | 0.83 0.80 0.76 | 0.90 0.91 0.96
+  - Good length: 0.64-0.83 m, all within 0.5-0.9 m. Googly above leg-spin by 0.03-0.08 m; doosra below off-spin by 0.01-0.03 m (kept at every length and speed).
+  - bounceFactor limits widened from -0.2..0.3 to -0.5..0.3. Pitch material unchanged; Stock and swing results identical (AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; T074 0.08/0.10 cm; Main 0.02 cm).
+  - CSV: new column crease_height_m (round-trip test); session PlayMode test checks it is filled for every unhit ball. turn_deg is now filled (it was empty): the turn applied at the bounce, + = toward +X.
+  - Result panel line: "Height at the crease: X.XX m" for every ball that reaches the crease unhit, plus "<type>: turned X.X°" for spin balls; the swing line now appears only for swing types.
+  - Suites: EditMode 150/150, PlayMode 60/60.
+Outcome: Pass (automated). Headset check of the heights in T082.
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: (1) Stock (and so swing) reaches the crease at 0.86-0.95 m at a good length, at the top of the spin target range; left as is, per the owner's instruction. (2) The off-spin and doosra rows include 75 and 95 km/h, outside their 80-92 km/h range, because the owner asked for those speeds. (3) T082 headset.
 ```
 
 ```text

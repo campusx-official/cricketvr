@@ -166,10 +166,17 @@ namespace CricketVR
         /// <summary>The delivery type and its measured swing, shown after a moving ball (nothing for Stock).</summary>
         static string MovementLine(BallRecord r)
         {
-            if (float.IsNaN(r.PredictedSwing))
-                return "";
-            string measured = float.IsNaN(r.MeasuredSwing) ? "not measured (hit before the crease)" : $"{r.MeasuredSwing:F2} m";
-            return $"\n{r.DeliveryType}: swing {measured}, planned {r.PredictedSwing:F2} m";
+            string line = "";
+            if (r.PredictedSwing > 0f)
+            {
+                string measured = float.IsNaN(r.MeasuredSwing) ? "not measured (hit before the crease)" : $"{r.MeasuredSwing:F2} m";
+                line += $"\n{r.DeliveryType}: swing {measured}, planned {r.PredictedSwing:F2} m";
+            }
+            if (!float.IsNaN(r.TurnDegrees))
+                line += $"\n{r.DeliveryType}: turned {Mathf.Abs(r.TurnDegrees):F1}°";
+            if (!float.IsNaN(r.CreaseHeight))
+                line += $"\nHeight at the crease: {r.CreaseHeight:F2} m";
+            return line;
         }
 
         void OnBatContact(BatContactReport report) => _contacts[report.DeliveryId] = report;
@@ -210,6 +217,8 @@ namespace CricketVR
                 PredictedCurve = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedCurve,
                 MeasuredCurve = machine.LastMeasuredCurve,
                 ArrivalLine = machine.LastArrivalLine,
+                CreaseHeight = machine.LastCreaseHeight,
+                TurnDegrees = machine.LastTurn,
                 Bounce = machine.LastBounce ?? BallRecord.NaN3,
                 BounceError = machine.LastBounceError,
                 ReboundOffset = machine.LastReboundOffset,

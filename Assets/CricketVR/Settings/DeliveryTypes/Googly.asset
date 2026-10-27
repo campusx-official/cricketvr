@@ -30,7 +30,7 @@ MonoBehaviour:
     dip: 1.2
     turnMin: 3.5
     turnMax: 7.5
-    bounceFactor: 0.12
+    bounceFactor: -0.16
     grip: 0.06
     seamDegrees: 0
     visualRevPerSecond: 4

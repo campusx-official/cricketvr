@@ -444,7 +444,7 @@ The ball budget is fixed per session. Early end in Match Simulation (win, or no 
 | Drift | DeliveryType.driftMin / driftMax | per §19 table | Measured drift by the bounce; visible but subtle | AC-27 |
 | Dip | DeliveryType.dip | 0.6–1.2 m/s² | Arrival angle and bounce height vs Stock at the same speed and length | AC-27 |
 | Turn range | DeliveryType.turnMin / turnMax | per §19 table | Measured turn (CSV); off-spin vs leg-spin distinguishable in the headset | AC-27 |
-| Bounce factor | DeliveryType.bounceFactor | per §19 table | Bounce height at the crease vs Stock | AC-27 |
+| Bounce factor | DeliveryType.bounceFactor (limits −0.5..0.3) | per §19 table; 2026-10-27 every spin type's (1 + b) × 0.75, owner request (E-056) | Ball height at the striker's popping crease (`crease_height_m`): good length 0.5–0.9 m, googly above leg-spin, doosra below off-spin | AC-27 |
 | Grip loss | DeliveryType.grip | 0.05–0.06 | Speed after the bounce vs Stock | AC-27 |
 | Visual spin rate | DeliveryType.visualRevPerSecond | 4 (spin) / 3 (pace) | Owner: reads as spinning the right way, no strobing | AC-28 |
 | Pace speed cap | DeliveryPlanSettings.DefaultPaceCapKmh | 120 → **140 km/h** (T075, E-047) | AC-04 re-run and AC-05 matrix extension; on failure stay at 120 and scale the swing targets down | AC-29 |
@@ -538,10 +538,10 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | Stock | plan's range | 0 | 0 | 0 | 0 | 0 | 0 |
 | Inswinger | 115–140 (cap 140 since T075) | 0.1–0.5 swing / 1.5 | 0 | 0 | 0 | 0 | 0 |
 | Outswinger | 115–140 (cap 140) | 0.1–0.5 swing / 1.5 | 0 | 0 | 0 | 0 | 0 |
-| Off-spin | 80–92 | 0 | 0.05–0.10 (→ +X) | 0.6 | 3–6 / −X | +0.05 | 0.05 |
-| Leg-spin | 75–90 | 0 | 0.06–0.12 (→ −X) | 0.8 | 4–9 / +X | +0.08 | 0.06 |
-| Doosra | 80–92 (same as off-spin) | 0 | 0.05–0.10 (→ −X) | 0.6 | 2.5–5 / +X | +0.03 | 0.05 |
-| Googly | 75–90 (same as leg-spin) | 0 | 0.06–0.12 (→ +X) | 1.2 | 3.5–7.5 / −X | +0.12 | 0.06 |
+| Off-spin | 80–92 | 0 | 0.05–0.10 (→ +X) | 0.6 | 3–6 / −X | −0.21 (was +0.05) | 0.05 |
+| Leg-spin | 75–90 | 0 | 0.06–0.12 (→ −X) | 0.8 | 4–9 / +X | −0.19 (was +0.08) | 0.06 |
+| Doosra | 80–92 (same as off-spin) | 0 | 0.05–0.10 (→ −X) | 0.6 | 2.5–5 / +X | −0.23 (was +0.03) | 0.05 |
+| Googly | 75–90 (same as leg-spin) | 0 | 0.06–0.12 (→ +X) | 1.2 | 3.5–7.5 / −X | −0.16 (was +0.12) | 0.06 |
 
 **Solver (DT-2).**
 - *Stock:* today's `Solve`, unchanged.
@@ -689,3 +689,4 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | 2026-10-27 | Scene builders rebuild generated parts in place (`GeneratedTree`: find by name, keep object IDs and order, remove what is no longer generated) instead of deleting and recreating Ground and NearPanel | Owner request: commits show only real scene changes; two consecutive runs now leave Main.unity byte-identical | Editor builders |
 | 2026-10-27 | Spin bounce: PhysX keeps the pitch bounce; the turn is applied in the step after the rebound (Option A) | Owner decision: Stock untouched; a few cm of scatter (≤ ~2 cm at the crease) is fine for arcade play | REQ-043, T078, T079 |
 | 2026-10-27 | Solver aims at the real pitch top (`FieldDimensions.PitchSurfaceHeight` = 0.002 m, shared by the builders, the solver and the test rigs) | Owner decision 1(a): the pitch box top was 2 mm above the height the solver aimed at, so in the real scene balls pitched 0.75–1.02 cm short (E-051). Every launch changes by ~0.01°, Stock included; approved as a correctness fix. Real-scene worst 0.02 cm (E-052) | REQ-004, REQ-044 |
+| 2026-10-27 | Spin bounce height set by each spin type's own bounce factor: every (1 + b) scaled by 0.75 (off-spin −0.21, leg-spin −0.19, doosra −0.23, googly −0.16); bounceFactor limits −0.2..0.3 → −0.5..0.3 | Owner request before T082: at a good length the ball reached the crease at 0.95–1.23 m, target about knee to waist (0.5–0.9 m). One common scale keeps the googly/leg-spin and doosra/off-spin differences. Pitch material untouched, so Stock and swing are unchanged (E-056) | REQ-043, REQ-045 |

@@ -54,6 +54,7 @@ namespace CricketVR.Tests
             ballGo.AddComponent<Rigidbody>().isKinematic = true;
             _ball = ballGo.AddComponent<BallController>();
             _ball.Configure(_config, null, ballGo.GetComponent<Renderer>());
+            ballGo.AddComponent<BallFlight>(); // as in the Main scene: measures the arrival line and crease height
 
             var gameplay = new GameObject("Gameplay");
             gameplay.SetActive(false);
@@ -123,6 +124,7 @@ namespace CricketVR.Tests
                 Assert.AreEqual("Stock", r.DeliveryType);
                 Assert.AreEqual(0f, r.Movement);
                 Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, "measured bounce recorded");
+                Assert.That(r.CreaseHeight, Is.InRange(0.1f, 2f), "crease height recorded for an unhit ball");
                 Assert.LessOrEqual(r.BounceError, BowlingPlayModeTests.StockTolerance, $"{r.Delivery} pitched within the Stock tolerance");
             }
         }

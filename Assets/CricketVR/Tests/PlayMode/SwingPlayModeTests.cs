@@ -365,6 +365,45 @@ namespace CricketVR.Tests
                       $"Stock and swing {worstOther * 100f:F2} cm");
         }
 
+        /// <summary>
+        /// Spin bounce height (owner request before T082): ball centre height at the striker's popping crease for each
+        /// spin type at full (4 m), good (6 m) and short (8 m) lengths and 75/85/95 km/h. Target at a good length:
+        /// about knee to waist height, 0.5-0.9 m; googly a little higher than leg-spin; doosra and googly keep their
+        /// bounce difference from their stock balls. Stock and swing are untouched by the spin types' factors.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator SpinBallsReachTheCreaseBetweenKneeAndWaistAtAGoodLength()
+        {
+            var heights = new Dictionary<(DeliveryKind, float, float), float>();
+            var table = new System.Text.StringBuilder("[CricketVR] Spin crease height (m, ball centre above the pitch), right-handed, movement 0.5:");
+            foreach (var kind in new[] { DeliveryKind.Stock, DeliveryKind.OffSpin, DeliveryKind.Doosra, DeliveryKind.LegSpin, DeliveryKind.Googly })
+            {
+                table.Append($"\n  {kind,-8}");
+                foreach (var length in new[] { 4f, 6f, 8f })
+                foreach (var kmh in new[] { 75f, 85f, 95f })
+                {
+                    var request = Request(Shipped(kind), kmh, 0.1f, length, 0.5f, Handedness.Right);
+                    if (kind == DeliveryKind.Stock)
+                        request.speedKmh = kmh; // Stock uses the request's speed as well
+                    int id = 0;
+                    yield return BowlAndWaitForPitch(request, x => id = x, untilCrease: true);
+                    heights[(kind, length, kmh)] = _flight.CreaseHeight;
+                    table.Append($"  {length:F0} m {kmh:F0}: {_flight.CreaseHeight:F2}");
+                }
+            }
+            Debug.Log(table.ToString());
+
+            foreach (var kind in new[] { DeliveryKind.OffSpin, DeliveryKind.Doosra, DeliveryKind.LegSpin, DeliveryKind.Googly })
+            foreach (var kmh in new[] { 75f, 85f, 95f })
+                Assert.That(heights[(kind, 6f, kmh)], Is.InRange(0.5f, 0.9f), $"{kind} at 6 m, {kmh} km/h: crease height");
+            foreach (var length in new[] { 4f, 6f, 8f })
+            foreach (var kmh in new[] { 75f, 85f, 95f })
+            {
+                Assert.Greater(heights[(DeliveryKind.Googly, length, kmh)], heights[(DeliveryKind.LegSpin, length, kmh)], $"{length} m {kmh} km/h: googly higher than leg-spin");
+                Assert.Less(heights[(DeliveryKind.Doosra, length, kmh)], heights[(DeliveryKind.OffSpin, length, kmh)], $"{length} m {kmh} km/h: doosra lower than off-spin");
+            }
+        }
+
         [UnityTest]
         public IEnumerator StockWithBallFlightIsUnchanged()
         {
