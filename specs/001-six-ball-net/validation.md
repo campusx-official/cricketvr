@@ -35,7 +35,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h with swing redefined (E-045–E-048); headset pending | E-045–E-048 | M7.5 T076 (owner) |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h with swing redefined (E-045–E-048); headset pending | E-045–E-049 | M7.5 T076 (owner; build E-049) |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
@@ -887,6 +887,22 @@ Actual result and measured values:
 Outcome: Pass (automated). E-045/E-046 size figures (curve 0.2-0.6 m) are historical.
 Log or artifact path: scratchpad edit.log, play.log
 Remaining limitation / follow-up task: T076 headset (E-049 build)
+```
+
+```text
+Check ID / acceptance scenario: E-049 / T076 swing-check build prepared (AC-26 headset pending)
+Requirement IDs: REQ-042, REQ-046
+Date and tester: 2026-10-27, agent (build only; no headset result)
+Git commit or build identifier: branch m7.5-delivery 26d25b6; Builds/CricketVR-T076-swingcheck.apk sha256 6f3d4befa0b5a7ca64f0a023fc8bbd9be63aee87cf4f74dea55ba6bacd430f3e (91.9 MB). The M7 re-check APK is kept unchanged as Builds/CricketVR-M7-recheck.apk (sha256 c71f726...30f0, E-038)
+Unity and package versions: as E-001
+Environment: Mac batch build (development, NetMode)
+Configuration: -cricketvrSwingCheck: Net Practice bowls DeliveryPlanner.SwingCheckRequest: per over inswinger/outswinger at 0.15, 0.30, 0.50 m swing, good length 6 m on off stump, no variation; over 1 at 120 km/h, over 2 at 140 km/h, repeating. Match Simulation unchanged (Stock). GameConfig restored to swingCheck 0 after the build.
+Steps or exact command: Unity -batchmode -projectPath . -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrSwingCheck
+Expected result: owner sees each ball's swing and direction (AC-26 headset)
+Actual result and measured values: build succeeded, 0 errors, 0 warnings, 199 s. Headset result pending.
+Outcome: Pending (owner)
+Log or artifact path: scratchpad apk.log
+Remaining limitation / follow-up task: owner headset check T076; left-handed swing not checkable on device (left controller)
 ```
 
 ```text
