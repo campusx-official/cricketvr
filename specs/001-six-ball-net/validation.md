@@ -35,7 +35,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
 | AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
-| AC-26 | REQ-042, REQ-044, REQ-047 | **Automated pass** at 115/125/140 km/h with swing redefined (E-045–E-048); headset pending | E-045–E-049 | M7.5 T076 (owner; build E-049) |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-051 | Pitch-surface offset found in E-051 (owner decision) |
 | AC-27 | REQ-043, REQ-044, REQ-047 | Not run | None | M7.5 T077–T079, T082 |
 | AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
@@ -924,6 +924,29 @@ Actual result and measured values:
 Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part Pass (owner amended AC-16 on 2026-10-27: the Δt / swing-peak / reset-age columns may be empty until T053, M8); AC-08 and AC-09 pending the owner's confirmation that they were exercised
 Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
 Remaining limitation / follow-up task: owner to confirm AC-08/AC-09 (AC-16 Δt decided: amended); then merge m7-session into main only on the owner's go-ahead
+```
+
+```text
+Check ID / acceptance scenario: E-051 / T076 headset: AC-26 swing seen, both directions; device CSV; pitch measurement fix in the real scene
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-046
+Date and tester: 2026-10-27 09:56-10:03, owner (headset); agent (install over adb, CSV pull and analysis, fix)
+Git commit or build identifier: branch m7.5-delivery; Builds/CricketVR-T076-swingcheck.apk sha256 6f3d4befa0b5a7ca64f0a023fc8bbd9be63aee87cf4f74dea55ba6bacd430f3e (E-049), installed 09:56:03
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, NetMode; then Mac batch PlayMode with the Main scene loaded
+Configuration: swing-check sequence (in/out at 0.15/0.30/0.50 m; 120 then 140 km/h; good length on off stump; no variation)
+Steps or exact command: adb install -r; owner played Net Practice; adb pull; new PlayMode test MainScenePitchTests (loads Main.unity and bowls the same 12 balls)
+Expected result: AC-26 headset: each swing type's movement and direction seen; measured swing = planned; pitch point within the Stock tolerance (1 cm)
+Actual result and measured values:
+  - Owner: "i played normally and watched the balls. all fine". No per-item notes (size, lateness, seam, 140 km/h) beyond that.
+  - Device CSVs (Docs/evidence/2026-10-27-t076-swing/): 11 complete 12-ball sessions, 132 balls, sequence as designed; 42 Hit, 88 Miss, 2 Bowled (contacts 24/66 at 120 km/h, 18/66 at 140 km/h).
+  - Swing on device: 113 balls reached the crease unhit; measured = planned within 0.6 um; largest 0.4999 m. Arrival at the crease (right-hander, pitched on off stump +0.097 m): inswing 0.15/0.30/0.50 m -> +0.07/+0.01/-0.07 m; outswing -> +0.19/+0.25/+0.33 m (same at 120 and 140 km/h).
+  - Pitch point on device: 120 km/h 0.22-0.23 cm; 140 km/h 1.39-1.54 cm, every 140 km/h ball with "rebound +0.0 cm". Reproduced exactly in the Editor with Main.unity loaded (not device-specific).
+  - Cause 1 (measurement bug from T070): the ground height came from the PhysX contact point. When PhysX turns the ball before it touches (speculative contact, here 2.7 mm above), that point is on the ball's underside, so contact height equalled the lowest sample and the 1.4 cm extrapolation was skipped. The PlayMode rig's ground reported the point on its surface, so the tests missed it. Fix: BallController takes the ground top from a downward ray onto the ground layers. Rig results unchanged (T070 worst 0.21 cm presets / 0.51 cm planned; swing 0.08 / 0.10 cm).
+  - Cause 2 (calibration offset, owner decision): in Main the NetMode pitch box's top is at y = 0.002 (PracticeNetBuilder) while the solver aims at contact height above y = 0, so with the measurement fixed, balls meet the pitch 0.75 cm (120 km/h) to 1.02 cm (140 km/h) before the requested point. This applies to every ball, Stock included, and predates M7.5 (AC-04 was passed on Quest with the old 10 cm tolerance). MainScenePitchTests asserts 1 cm and is [Ignore]d with this reason until the owner decides.
+  - Suites: PlayMode 55/55 run + 1 ignored; EditMode 139/139.
+Outcome: AC-26 headset Pass (owner observation, right-handed). Pitch-point tolerance in the real scene: open (owner decision on the 2 mm offset).
+Log or artifact path: Docs/evidence/2026-10-27-t076-swing/; adb logcat lines "Delivery #129-#132 ... rebound starts +0.0 cm"
+Remaining limitation / follow-up task: owner decision on the pitch-surface offset; left-handed swing pending hardware
 ```
 
 ```text

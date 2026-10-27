@@ -124,7 +124,7 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 - [x] T073 *(done, E-045; swing size definition open, plan.md open decision 4)* `DeliveryFlightModel.Acceleration` (swing) and the movement-aware solver (yaw + elevation). EditMode tests: determinism, direction per type and hand, simulated bounce within 1 mm, unreachable rejection.
 - [x] T074 *(done at 115/125 km/h, E-046; 140 km/h runs come with the cap test in T075)* `BallFlight` runtime (forces before the bounce) and seam-up visual for pace. PlayMode: 10 runs × in/out × 115/125/140 km/h (140 only behind the cap test): curve in range, bounce within the Stock tolerance.
 - [x] T075 *(done, E-047: all passed; pace cap raised to 140 km/h; spinning balls in T081)* AC-04 re-run at 100/120/140 km/h; extend the AC-05 contact matrix to 39 m/s with swinging balls (AC-29). Raise the pace cap only if both pass. If either fails at 140 km/h: keep 120 km/h, scale the swing targets down for 115–120 km/h, keep the tests as written, and report the result to the owner.
-- [ ] T076 Headset: AC-26 (see the swing, both directions). *(Swing redefined per the owner first, E-048: 0.1–0.5 m off the release line at the crease. Build: `-cricketvrSwingCheck` / CricketVR > Build > Quest APK (Development, T076 swing check), where Net Practice bowls the fixed check sequence.)*
+- [x] T076 *(owner headset pass, E-051; device CSV; found and fixed a pitch-measurement bug; pitch-surface 2 mm offset open)* Headset: AC-26 (see the swing, both directions).
 
 ### Phase B — Spin
 - [ ] T077 Drift and dip in the flight model and solver. Tests: drift opposite to turn; googly dips most; spin speeds 75–95 km/h reach lengths 3–9 m.

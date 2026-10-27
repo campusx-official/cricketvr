@@ -255,7 +255,7 @@ namespace CricketVR
             {
                 // Pitch and outfield can both report in the contact step (the outfield top is 2 mm lower);
                 // the ball touches the higher surface.
-                float surface = collision.GetContact(0).point.y;
+                float surface = GroundTopUnder(_body.position, collision.GetContact(0).point.y);
                 _groundY = _bounced ? Mathf.Max(_groundY, surface) : surface;
             }
             if (!_bounced && ground)
@@ -265,6 +265,21 @@ namespace CricketVR
                 FirstBounce?.Invoke(id, collision.GetContact(0).point, Time.time - _launchTime);
             }
             Collided?.Invoke(id, collision);
+        }
+
+        /// <summary>
+        /// Top of the ground directly under the ball. Not the contact point: when PhysX turns the ball before it
+        /// touches (speculative contact), the reported point can be on the ball's underside, a few mm above the pitch,
+        /// which made the pitch point read 1.4 cm long at 140 km/h in the Main scene (E-051). The ray starts above the
+        /// ball so it also finds the surface when the ball has sunk in.
+        /// </summary>
+        float GroundTopUnder(Vector3 position, float fallback)
+        {
+            const float above = 0.5f;
+            return Physics.Raycast(position + Vector3.up * above, Vector3.down, out var hit, above + 1f, _groundMask,
+                QueryTriggerInteraction.Ignore)
+                ? hit.point.y
+                : fallback;
         }
 
         void End(BallEndReason reason)
