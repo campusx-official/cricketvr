@@ -41,8 +41,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
-| AC-32 | REQ-049, REQ-050, REQ-052 | Automated pass (E-067); headset pending | E-067, E-068 | T088 headset |
-| AC-33 | REQ-051 | Automated pass (E-067); headset pending | E-067, E-068 | T088 headset |
+| AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
+| AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
 
 ## Evidence entry template
 
@@ -1344,9 +1344,9 @@ Actual result and measured values:
   - Net Practice, over the wicket (release +0.35 m): off-spin 3 sessions (32 off-breaks, 3 doosras, 1 straighter one; 5 bowled), leg-spin 2 sessions (24 leg-breaks; 1 bowled), pace 2 sessions (24 Stock; 1 bowled). The Bowler choice works.
   - Match Simulation (centred release, Medium): 5 sessions, 60 Stock balls, 7 bowled. One more session started at 01:10:20 and was paused at 01:10:27 by focus loss (headset off or Meta button) before ball 1 (empty file).
   - 14 bowled balls in all. The device's log buffer had rolled over by the pull (only 01:09:37 onward kept, a session without a wicket), so there are no per-wicket log lines or LED lines for this run; the owner's observation is the evidence for how they looked.
-Outcome: Bowler choice Pass (device); wicket reaction and LED: owner's report pending
+Outcome: Pass. Bowler choice (device CSV); owner: "yes it flashed red, everything working" (the wicket reaction in both modes, the LED flash in Match Simulation, the reset). The owner did not fill in the checklist item by item.
 Log or artifact path: Docs/evidence/2026-10-30-wicket-gameplay/
-Remaining limitation / follow-up task: owner to confirm the red flash in Match Simulation and the T088 checklist; consider a larger logcat buffer (adb logcat -G 16M) for later sessions
+Remaining limitation / follow-up task: real stump sound (owner recording); consider a larger logcat buffer (adb logcat -G 16M) for later sessions
 ```
 
 ## Re-plan note (2026-10-26)
