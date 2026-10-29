@@ -41,6 +41,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
+| AC-32 | REQ-049, REQ-050, REQ-052 | Not run | None | Wicket reaction T084–T086, T088 |
+| AC-33 | REQ-051 | Not run | None | Wicket reaction T087, T088 |
 
 ## Evidence entry template
 

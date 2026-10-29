@@ -135,6 +135,16 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 - [ ] T082 Headset: AC-27 and AC-28 (off-spin vs leg-spin, deception, no strobing, 72 Hz).
 - [ ] T083 Calibration: tune the plan.md §17 type rows from the CSV and the owner's feedback; record before/after values.
 
+## Wicket reaction (branch `feature/wicket-reaction`, from `m7.5-delivery`)
+
+Owner request 2026-10-30. Requirements: REQ-049..052. Acceptance: AC-32, AC-33. Merge order (owner): `m7-session` → main, then `m7.5-delivery`, then this branch. Nothing merges into main without the owner's go-ahead.
+
+- [ ] T084 `WicketImpact` (Core, pure): impact point → which stumps move and how much (squareness), knock-back angle and direction, bail launch and spin, loudness; seeded variation; left-hander naming. EditMode tests (AC-32).
+- [ ] T085 Scene: `WicketDebris` layer (collides with Pitch, Outfield and itself only), bail rigidbodies (kinematic until dislodged, continuous collision), `WicketReaction` on the striker's stumps, builder repair for existing scenes, the visible-stumps-equal-detection-box test.
+- [ ] T086 Runtime reaction: `ScoreManager` raises the wicket event from the decided stump hit (detection unchanged); scripted stump knock-back; bail launch; the ball carries on slowed and deflected; clatter (placeholder) and LED setting. PlayMode tests (AC-32).
+- [ ] T087 Reset (REQ-051): saved poses restored exactly on every launch, the next ball, Play again, Menu, pause, mode switch; the 1.5 s hold. PlayMode tests (AC-33).
+- [ ] T088 Headset build and owner checklist: AC-32, AC-33 (80/120/140 km/h, spinner, which stump, reset paths, both modes).
+
 ## M8 — Net Practice with Shot Confidence
 
 Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended), AC-17, AC-18.
@@ -150,7 +160,7 @@ Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended)
 Dependency: M8 (calibration CSV). Requirements: REQ-032..035. Acceptance: AC-19, AC-20, AC-21.
 
 - [ ] T058 `ShotLaunch` capture; `VirtualField` flight, bounce and roll in Core (200 Hz, deterministic), with μ_roll from GroundDefinition (the single value, changed from 0.08 to 0.25 g here). Tests: analytic range without drag within 1%, drag monotonicity, bounce and roll formulas, determinism.
-- [ ] T059 Boundary 4/6 and the played-on sweep against the same stumps box the physics uses. Tests at the rope and at the stumps edges; a played-on case matching the physics stumps collider dimensions.
+- [ ] T059 Boundary 4/6 and the played-on sweep against the same stumps box the physics uses. *(Wicket reaction, REQ-050: a played-on found by the sweep raises the same wicket event, with the simulated ball's position and velocity at the stumps.)* Tests at the rope and at the stumps edges; a played-on case matching the physics stumps collider dimensions.
 - [ ] T060 Catches (dropped chances), ground fielding, the runs formula, an unfielded stop, a separate close-catcher reaction. Table-driven EditMode suite (AC-20).
 - [ ] T061 Calibration replay tool (Editor menu and batch): replays a CSV through the scorer and writes a distribution report. Tune the scorer rows of the §17 table and record before/after values (AC-21).
 
