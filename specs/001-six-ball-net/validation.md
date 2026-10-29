@@ -1330,6 +1330,25 @@ Log or artifact path: device logcat (scratchpad t088_log.txt)
 Remaining limitation / follow-up task: owner re-check of the LED; the rest of the T088 checklist
 ```
 
+```text
+Check ID / acceptance scenario: E-070 / Gameplay build with the wicket reaction on device (AC-32/AC-33 headset, partial)
+Requirement IDs: REQ-049..052, REQ-028
+Date and tester: 2026-10-30 01:02-01:10 owner (headset); agent (CSV pull)
+Git commit or build identifier: Builds/CricketVR-wicket-gameplay.apk sha256 0fe428baf9711f6db9d1c3b0710508d27fcaa8ad921ef3c40afb61961424f09c (feature/wicket-reaction 81bcf1c), installed 00:51; app started 01:01:59
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: normal gameplay (no check build)
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-30-wicket-gameplay/)
+Expected result: the chosen bowler is bowled; the wicket reacts when bowled; LEDs flash in Match Simulation; reset on the next ball
+Actual result and measured values:
+  - Net Practice, over the wicket (release +0.35 m): off-spin 3 sessions (32 off-breaks, 3 doosras, 1 straighter one; 5 bowled), leg-spin 2 sessions (24 leg-breaks; 1 bowled), pace 2 sessions (24 Stock; 1 bowled). The Bowler choice works.
+  - Match Simulation (centred release, Medium): 5 sessions, 60 Stock balls, 7 bowled. One more session started at 01:10:20 and was paused at 01:10:27 by focus loss (headset off or Meta button) before ball 1 (empty file).
+  - 14 bowled balls in all. The device's log buffer had rolled over by the pull (only 01:09:37 onward kept, a session without a wicket), so there are no per-wicket log lines or LED lines for this run; the owner's observation is the evidence for how they looked.
+Outcome: Bowler choice Pass (device); wicket reaction and LED: owner's report pending
+Log or artifact path: Docs/evidence/2026-10-30-wicket-gameplay/
+Remaining limitation / follow-up task: owner to confirm the red flash in Match Simulation and the T088 checklist; consider a larger logcat buffer (adb logcat -G 16M) for later sessions
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
