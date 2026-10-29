@@ -1293,6 +1293,22 @@ Log or artifact path: batch test results (scratchpad)
 Remaining limitation / follow-up task: headset T088; a spin ball's arrival line is at the crease, so it reaches the stumps on its turned heading (about 9 cm further toward the turn for 4.5 deg); real stump sound pending the owner's recording; the next-ball reset happens at the launch if the batter calls the ball inside the 1.5 s hold (the launch never waits)
 ```
 
+```text
+Check ID / acceptance scenario: E-068 / T088 wicket-check headset build (AC-32, AC-33 headset pending)
+Requirement IDs: REQ-049..052
+Date and tester: 2026-10-30, agent
+Git commit or build identifier: feature/wicket-reaction 1b5550d; Builds/CricketVR-T088-wicketcheck.apk sha256 6db82ddec2fbb0a437905914f9a8913c5caa397268aab85d91e494959f1634ae
+Unity and package versions: as E-001
+Environment: APK build (batch, -cricketvrWicketCheck)
+Configuration: both modes bowl the 12-ball wicket-check sequence (E-067) from the centred release; LED off in Net Practice, on in Match Simulation; placeholder clatter; the flag restored to off after the build
+Steps or exact command: Unity -batchmode -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrWicketCheck -quit
+Expected result: build succeeds; committed GameConfig unchanged
+Actual result and measured values: Build Succeeded, 0 errors, 0 warnings; working tree clean afterwards
+Outcome: Build pass; headset pending (owner)
+Log or artifact path: Builds/CricketVR-T088-wicketcheck.apk (gitignored)
+Remaining limitation / follow-up task: owner checklist (T088)
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
