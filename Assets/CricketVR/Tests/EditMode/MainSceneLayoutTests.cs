@@ -87,6 +87,9 @@ namespace CricketVR.Tests
             Assert.AreEqual(3, reaction.Stumps.Length);
             Assert.IsTrue(reaction.Stumps.All(t => t != null && t.GetComponent<Collider>() == null), "stump visuals have no colliders (scripted knock-back)");
             Assert.AreEqual(2, reaction.Bails.Length);
+            var led = new UnityEditor.SerializedObject(reaction).FindProperty("ledMaterial").objectReferenceValue as Material;
+            Assert.IsNotNull(led, "LED material assigned");
+            Assert.AreEqual("Universal Render Pipeline/Unlit", led.shader.name, "unlit, so it shows full colour (E-069)");
             foreach (var b in reaction.Bails)
             {
                 Assert.IsNotNull(b);

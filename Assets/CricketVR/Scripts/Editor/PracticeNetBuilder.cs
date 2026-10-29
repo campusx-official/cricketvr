@@ -354,6 +354,20 @@ namespace CricketVR.Editor
             return mat;
         }
 
+        /// <summary>An opaque URP Unlit material (found or created): full colour whatever the lighting.</summary>
+        public static Material UnlitMat(string name, Color color)
+        {
+            var path = $"{MaterialsFolder}/{name}.mat";
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (existing != null)
+                return existing;
+            Directory.CreateDirectory(MaterialsFolder);
+            var mat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            mat.SetColor("_BaseColor", color);
+            AssetDatabase.CreateAsset(mat, path);
+            return mat;
+        }
+
         static Material TransparentMat(string name, Color color)
         {
             var path = $"{MaterialsFolder}/{name}.mat";

@@ -178,18 +178,13 @@ namespace CricketVR.Editor
             audio.spatialBlend = 1f;
             audio.minDistance = 2f;
             var leds = stumps.Concat(bailTransforms).Select(t => t.GetComponent<Renderer>()).ToArray();
-            // LED flash (REQ-052): emission on the stump material, black until a property block lights it.
-            var wood = leds[0].sharedMaterial;
-            if (wood != null && !wood.IsKeywordEnabled("_EMISSION"))
-            {
-                wood.EnableKeyword("_EMISSION");
-                wood.SetColor("_EmissionColor", Color.black);
-                wood.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
-                EditorUtility.SetDirty(wood);
-            }
+            // LED flash (REQ-052): the pieces swap to this bright unlit material while lit. (An emission keyword on the
+            // stump material doesn't survive: URP drops _EMISSION from a material whose emission colour is black, so
+            // the first headset build never flashed, E-069.)
+            var led = PracticeNetBuilder.UnlitMat("StumpLed", config.wicket.ledColor);
             var reaction = GetOrAdd<WicketReaction>(root.gameObject, created);
             reaction.Configure(config, score, machine, ball, stumps, bails, root.GetComponent<BoxCollider>(), audio,
-                OptionalClips("StumpHit"), leds);
+                OptionalClips("StumpHit"), leds, led);
             EditorUtility.SetDirty(reaction);
         }
 

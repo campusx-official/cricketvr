@@ -1309,6 +1309,27 @@ Log or artifact path: Builds/CricketVR-T088-wicketcheck.apk (gitignored)
 Remaining limitation / follow-up task: owner checklist (T088)
 ```
 
+```text
+Check ID / acceptance scenario: E-069 / T088 first headset run: LED flash not visible; Bowler choice ignored in the check build
+Requirement IDs: REQ-049..052
+Date and tester: 2026-10-30 00:33-00:38 owner (headset, E-068 build); agent (log analysis, fix)
+Git commit or build identifier: Builds/CricketVR-T088-wicketcheck.apk sha256 6db82dde…34ae; fix on feature/wicket-reaction, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3; then EditMode and PlayMode (Mac batch)
+Configuration: wicket-check build, both modes
+Steps or exact command: owner played both modes; adb logcat
+Expected result: the reaction in both modes; the LEDs flash in Match Simulation
+Actual result and measured values:
+  - Owner: "the functionality is working fine", but "even if i am selecting off spin or leg spin the bowling machine is only bowling pace balls" and "cant see bails flashing red during the match simulations".
+  - Bowler choice: by design of the check build (E-068), both modes bowl only the fixed 12-ball sequence (9 pace, 3 spin), whatever the menu says. Not a gameplay fault, but it was not stated clearly enough before the session. A normal build bowls the chosen bowler.
+  - Device log: every wicket reacted as in PlayMode (e.g. Match Simulation middle stump 34-35 deg at 113-133 km/h at the stumps, grazes 6-9 deg), each with "LED" (the reaction did flash). Cause: the flash set _EmissionColor through a property block, which needs the _EMISSION keyword; URP removes that keyword from a material whose emission colour is black, so StumpWood.mat had no keyword (m_ValidKeywords: []) and nothing showed.
+  - Fix: the LED pieces swap to a bright URP Unlit material (StumpLed.mat) while lit (0.12 s on, 0.08 s off for 1.5 s) and back; no keyword, no lights. StumpWood.mat restored to its m7.5-delivery state. New PlayMode test: lit in Match Simulation, not in Net Practice, flashes on and off, the wood material is back after the flash and at once on a reset; EditMode: the LED material is assigned and unlit.
+  - Suites: EditMode 164/164, PlayMode 71/71.
+Outcome: Reaction Pass on device (owner); LED Fail on device, fixed (automated pass); headset re-check pending
+Log or artifact path: device logcat (scratchpad t088_log.txt)
+Remaining limitation / follow-up task: owner re-check of the LED; the rest of the T088 checklist
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:

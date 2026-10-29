@@ -26,6 +26,7 @@ namespace CricketVR.Tests
         readonly List<(int id, float time)> _results = new List<(int, float)>();
         readonly List<(int id, float time)> _reactions = new List<(int, float)>();
         int _ballDebrisContacts;
+        Material _ledMaterial;
 
         [SetUp]
         public void SetUp()
@@ -149,7 +150,12 @@ namespace CricketVR.Tests
             }
             var audio = root.AddComponent<AudioSource>();
             var reaction = root.AddComponent<WicketReaction>();
-            reaction.Configure(_config, _score, _machine, _ball, stumps, bails, box, audio, new AudioClip[0], new Renderer[0]);
+            var leds = new List<Renderer>();
+            foreach (var s in stumps) leds.Add(s.GetComponent<Renderer>());
+            foreach (var b in bails) leds.Add(b.GetComponent<Renderer>());
+            _ledMaterial = new Material(Shader.Find("Universal Render Pipeline/Unlit")) { color = Color.red };
+            _owned.Add(_ledMaterial);
+            reaction.Configure(_config, _score, _machine, _ball, stumps, bails, box, audio, new AudioClip[0], leds.ToArray(), _ledMaterial);
             return reaction;
         }
 
@@ -335,6 +341,44 @@ namespace CricketVR.Tests
                 _wicket.ResetWicket();
             }
             Debug.Log(table.ToString());
+        }
+
+        /// <summary>
+        /// REQ-052: the LEDs flash in Match Simulation (by default) and not in Net Practice, and the stumps' own material
+        /// is back after the flash and after a reset. (The first headset build never showed the flash: E-069.)
+        /// </summary>
+        [UnityTest]
+        public IEnumerator LedsFlashInMatchSimulationOnlyAndRestoreTheStumpMaterial()
+        {
+            var stumpRenderer = _wicket.Stumps[1].GetComponent<Renderer>();
+            var wood = stumpRenderer.sharedMaterial;
+            foreach (var (mode, expectLit) in new[] { (EnvironmentMode.NetMode, false), (EnvironmentMode.GroundMode, true) })
+            {
+                _wicket.SetMode(mode);
+                Break(100 + (int)mode);
+                bool sawLit = false, sawUnlitDuring = false;
+                float until = Time.time + _config.wicket.ledSeconds;
+                while (Time.time < until)
+                {
+                    yield return null;
+                    if (stumpRenderer.sharedMaterial == _ledMaterial) sawLit = true;
+                    else if (sawLit) sawUnlitDuring = true;
+                }
+                Assert.AreEqual(expectLit, sawLit, $"{mode}: LEDs lit");
+                if (expectLit) Assert.IsTrue(sawUnlitDuring, "they flash (on and off), not just turn on");
+                yield return new WaitForSeconds(0.3f);
+                Assert.AreSame(wood, stumpRenderer.sharedMaterial, $"{mode}: the stump's own material after the flash");
+                _wicket.ResetWicket();
+            }
+            // Reset during a flash puts the wood back at once.
+            _wicket.SetMode(EnvironmentMode.GroundMode);
+            Break(200);
+            float t0 = Time.time;
+            while (stumpRenderer.sharedMaterial != _ledMaterial && Time.time < t0 + 0.5f) yield return null;
+            Assert.AreSame(_ledMaterial, stumpRenderer.sharedMaterial, "lit");
+            _wicket.ResetWicket();
+            Assert.AreSame(wood, stumpRenderer.sharedMaterial, "reset restores the wood immediately");
+            Assert.IsFalse(_wicket.LedLit);
         }
 
         // ---------- AC-33 ----------

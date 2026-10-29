@@ -27,14 +27,15 @@ namespace CricketVR
         [SerializeField] AudioClip[] clips = new AudioClip[0];
         [Tooltip("Renderers that flash when the LED setting is on.")]
         [SerializeField] Renderer[] ledRenderers = new Renderer[0];
-
-        static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+        [Tooltip("Bright unlit material the LED renderers show while lit.")]
+        [SerializeField] Material ledMaterial;
 
         Vector3[] _stumpPos, _bailPos;
         Quaternion[] _stumpRot, _bailRot;
         float[] _knockDegrees = new float[3];
         Vector3[] _knockAxis = new Vector3[3];
-        MaterialPropertyBlock _block;
+        Material[] _ledOriginals;
+        bool _ledLit;
         AudioClip _placeholder;
         EnvironmentMode _mode;
         float _brokenAt = float.NegativeInfinity;
@@ -72,7 +73,9 @@ namespace CricketVR
                 _bailRot[i] = bails[i].transform.localRotation;
                 bails[i].isKinematic = true;
             }
-            _block = new MaterialPropertyBlock();
+            _ledOriginals = new Material[ledRenderers != null ? ledRenderers.Length : 0];
+            for (int i = 0; i < _ledOriginals.Length; i++)
+                _ledOriginals[i] = ledRenderers[i] != null ? ledRenderers[i].sharedMaterial : null;
             _mode = config.environment;
         }
 
@@ -221,15 +224,25 @@ namespace CricketVR
                 ResetWicket();
         }
 
+        /// <summary>The LEDs flash 0.12 s on, 0.08 s off for <see cref="WicketSettings.ledSeconds"/> (a material swap: no lights).</summary>
         void UpdateLed(float t)
         {
-            if (!LedOn || ledRenderers == null)
-                return;
-            bool lit = t < config.wicket.ledSeconds && Mathf.Repeat(t, 0.2f) < 0.12f;
-            _block.SetColor(EmissionColor, lit ? config.wicket.ledColor * 2.5f : Color.black);
-            foreach (var r in ledRenderers)
-                if (r != null) r.SetPropertyBlock(_block);
+            bool lit = LedOn && ledMaterial != null && t < config.wicket.ledSeconds && Mathf.Repeat(t, 0.2f) < 0.12f;
+            SetLed(lit);
         }
+
+        void SetLed(bool lit)
+        {
+            if (lit == _ledLit || ledRenderers == null || _ledOriginals == null)
+                return;
+            _ledLit = lit;
+            for (int i = 0; i < ledRenderers.Length; i++)
+                if (ledRenderers[i] != null)
+                    ledRenderers[i].sharedMaterial = lit ? ledMaterial : _ledOriginals[i];
+        }
+
+        /// <summary>The LEDs are showing their lit colour right now (tests).</summary>
+        public bool LedLit => _ledLit;
 
         /// <summary>
         /// The next ball is being called: reset once the broken wicket has been shown for the hold time (at once if
@@ -271,18 +284,14 @@ namespace CricketVR
             }
             if (ball != null && detectionBox != null)
                 Physics.IgnoreCollision(ball.GetComponent<Collider>(), detectionBox, false);
-            if (ledRenderers != null && _block != null)
-            {
-                _block.Clear();
-                foreach (var r in ledRenderers)
-                    if (r != null) r.SetPropertyBlock(null);
-            }
+            SetLed(false);
             Broken = false;
             _brokenDelivery = -1;
         }
 
         public void Configure(GameConfig cfg, ScoreManager scoreManager, BowlingMachine bowlingMachine, BallController ballController,
-            Transform[] stumpVisuals, Rigidbody[] bailBodies, Collider box, AudioSource source, AudioClip[] clatterClips, Renderer[] leds)
+            Transform[] stumpVisuals, Rigidbody[] bailBodies, Collider box, AudioSource source, AudioClip[] clatterClips, Renderer[] leds,
+            Material led = null)
         {
             config = cfg;
             score = scoreManager;
@@ -294,6 +303,7 @@ namespace CricketVR
             audioSource = source;
             clips = clatterClips;
             ledRenderers = leds;
+            ledMaterial = led;
         }
     }
 }

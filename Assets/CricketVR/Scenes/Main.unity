@@ -979,6 +979,7 @@ MonoBehaviour:
   - {fileID: 724478380}
   - {fileID: 2129864249}
   - {fileID: 1171553832}
+  ledMaterial: {fileID: 2100000, guid: 1e720cdbfa4a548b480819a6fea7b1b7, type: 2}
 --- !u!82 &65640125
 AudioSource:
   m_ObjectHideFlags: 0
