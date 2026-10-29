@@ -68,6 +68,8 @@ namespace CricketVR
         public bool swingCheck;
         [Tooltip("T082 headset build only (set by CricketVR > Build > spin check, then restored): Net Practice bowls the fixed spin-check sequence.")]
         public bool spinCheck;
+        [Tooltip("T088 headset build only (set by CricketVR > Build > wicket check, then restored): both modes bowl the fixed wicket-check sequence at the stumps.")]
+        public bool wicketCheck;
 
         [Header("Ball")]
         public float ballRadius = 0.036f;
@@ -162,5 +164,26 @@ namespace CricketVR
         public ContactSettings contact = new ContactSettings();
         public ScoringSettings scoring = new ScoringSettings();
         public SessionSettings session = new SessionSettings();
+        public WicketSettings wicket = new WicketSettings();
+    }
+
+    /// <summary>The wicket reaction (REQ-049..052, plan.md §20): cosmetic only.</summary>
+    [Serializable]
+    public class WicketSettings
+    {
+        [Tooltip("Stumps and bails knocked about when the wicket falls.")]
+        public bool reaction = true;
+        [Tooltip("The broken wicket stays at least this long after the result (s) before the next ball resets it.")]
+        public float holdSeconds = 1.5f;
+        [Tooltip("Knock-back time of a struck stump (s).")]
+        public float knockSeconds = 0.12f;
+        [Tooltip("LED 'zing' stumps and bails flash when dislodged.")]
+        public bool ledInNetPractice = false;
+        public bool ledInMatchSimulation = true;
+        public Color ledColor = new Color(1f, 0.08f, 0.05f);
+        [Tooltip("LED flashing time (s).")]
+        public float ledSeconds = 1.5f;
+        [Tooltip("Clatter volume at a 140 km/h hit.")]
+        [Range(0f, 1f)] public float volume = 0.9f;
     }
 }

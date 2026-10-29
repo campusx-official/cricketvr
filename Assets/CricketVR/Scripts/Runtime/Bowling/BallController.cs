@@ -49,6 +49,10 @@ namespace CricketVR
         /// <summary>In flight and its result not yet decided: it can still be hit and still score.</summary>
         public bool IsLive => InFlight && !_dead;
         public Rigidbody Body => _body;
+        /// <summary>The ball's position and velocity at the start of the current physics step, after this step's bat
+        /// hit was applied (this runs after the contact resolver): what a collision in this step came in with.</summary>
+        public Vector3 StepStartPosition { get; private set; }
+        public Vector3 StepStartVelocity { get; private set; }
         public float Radius => config.delivery.ballRadius;
 
         /// <summary>First contact with the ground (pitch or outfield) for this delivery: (id, contact point, time since release).
@@ -178,6 +182,8 @@ namespace CricketVR
         {
             if (!InFlight)
                 return;
+            StepStartPosition = _body.position;
+            StepStartVelocity = _body.linearVelocity;
             TrackPitch();
             if (_dead)
             {

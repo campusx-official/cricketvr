@@ -139,11 +139,11 @@ Dependency: M7 code (branch `m7-session`); `m7.5-delivery` is rebased onto `main
 
 Owner request 2026-10-30. Requirements: REQ-049..052. Acceptance: AC-32, AC-33. Merge order (owner): `m7-session` → main, then `m7.5-delivery`, then this branch. Nothing merges into main without the owner's go-ahead.
 
-- [ ] T084 `WicketImpact` (Core, pure): impact point → which stumps move and how much (squareness), knock-back angle and direction, bail launch and spin, loudness; seeded variation; left-hander naming. EditMode tests (AC-32).
-- [ ] T085 Scene: `WicketDebris` layer (collides with Pitch, Outfield and itself only), bail rigidbodies (kinematic until dislodged, continuous collision), `WicketReaction` on the striker's stumps, builder repair for existing scenes, the visible-stumps-equal-detection-box test.
-- [ ] T086 Runtime reaction: `ScoreManager` raises the wicket event from the decided stump hit (detection unchanged); scripted stump knock-back; bail launch; the ball carries on slowed and deflected; clatter (placeholder) and LED setting. PlayMode tests (AC-32).
-- [ ] T087 Reset (REQ-051): saved poses restored exactly on every launch, the next ball, Play again, Menu, pause, mode switch; the 1.5 s hold. PlayMode tests (AC-33).
-- [ ] T088 Headset build and owner checklist: AC-32, AC-33 (80/120/140 km/h, spinner, which stump, reset paths, both modes).
+- [x] T084 *(done, E-067)* `WicketImpact` (Core, pure): impact point → which stumps move and how much (squareness), knock-back angle and direction, bail launch and spin, loudness; seeded variation; left-hander naming. EditMode tests (AC-32).
+- [x] T085 *(done, E-067)* Scene: `WicketDebris` layer (collides with Pitch, Outfield and itself only), bail rigidbodies (kinematic until dislodged, continuous collision), `WicketReaction` on the striker's stumps, builder repair for existing scenes, the visible-stumps-equal-detection-box test.
+- [x] T086 *(done, E-067)* Runtime reaction: `ScoreManager` raises the wicket event from the decided stump hit (detection unchanged); scripted stump knock-back; bail launch; the ball carries on slowed and deflected; clatter (placeholder) and LED setting. PlayMode tests (AC-32).
+- [x] T087 *(done, E-067)* Reset (REQ-051): saved poses restored exactly on every launch, the next ball, Play again, Menu, pause, mode switch; the 1.5 s hold. PlayMode tests (AC-33).
+- [ ] T088 *(build ready, E-068; headset pending)* Headset build and owner checklist: AC-32, AC-33 (80/120/140 km/h, spinner, which stump, reset paths, both modes).
 
 ## M8 — Net Practice with Shot Confidence
 

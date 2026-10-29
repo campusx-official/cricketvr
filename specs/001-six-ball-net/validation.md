@@ -41,8 +41,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
-| AC-32 | REQ-049, REQ-050, REQ-052 | Not run | None | Wicket reaction T084–T086, T088 |
-| AC-33 | REQ-051 | Not run | None | Wicket reaction T087, T088 |
+| AC-32 | REQ-049, REQ-050, REQ-052 | Automated pass (E-067); headset pending | E-067, E-068 | T088 headset |
+| AC-33 | REQ-051 | Automated pass (E-067); headset pending | E-067, E-068 | T088 headset |
 
 ## Evidence entry template
 
@@ -1269,6 +1269,28 @@ Actual result and measured values:
 Outcome: Pass (device data matches the design); owner's feel pending
 Log or artifact path: Docs/evidence/2026-10-27-offspin-variations/
 Remaining limitation / follow-up task: flighted share came out 27 of 77 off-breaks (35%, 25% expected); the spin seam visual (T080) is not done
+```
+
+```text
+Check ID / acceptance scenario: E-067 / Wicket reaction T084-T087 (AC-32, AC-33 automated)
+Requirement IDs: REQ-049, REQ-050, REQ-051, REQ-052
+Date and tester: 2026-10-30, agent
+Git commit or build identifier: branch feature/wicket-reaction (from m7.5-delivery), the commit that adds this entry
+Unity and package versions: as E-001; batch runs with -burst-disable-compilation (Unity's Burst compiler crashed once in batch, E-065; no Burst code in the project)
+Environment: EditMode and PlayMode (Mac batch); scene builder twice (byte-identical)
+Configuration: stumps by scripted knock-back (max 35 deg, 0.12 s ease-out); bails kinematic rigidbodies on the new WicketDebris layer (collides with Pitch, Outfield, itself only); knock-back scaled by the speed at the stumps (17-32 m/s); placeholder clatter; LED off in Net Practice, on in Match Simulation
+Steps or exact command: both suites
+Expected result: AC-32 and AC-33 automated items
+Actual result and measured values:
+  - EditMode WicketImpactTests (5): impact point -> stumps (middle only at x 0; +X only at x +0.097; between two: both, equally square; a graze moves its stump < 5 deg but pops its bail); batter names mirror for a left-hander and the mirrored impact gives the mirrored reaction; square 140 km/h yorker 35 deg, 80 km/h about 19-21 deg, never above 35; bails faster off a fast ball, upward and behind; same seed same reaction (another seed varies the bails only).
+  - EditMode scene: visible stumps equal the detection box within 1 mm; WicketDebris ignores every layer except Pitch, Outfield and itself (so never Ball, BatProxy, Stumps, Boundary); stump visuals collider-free; bails kinematic with capsules on WicketDebris.
+  - PlayMode WicketReactionPlayModeTests (6), both modes: a Stock ball at the stumps (80 km/h 3.0 m, 140 km/h 1.6 m) is Bowled and the reaction fires in the same physics step as the result; a bail is flying one step later; exactly one result over 2.5 s with the bails bouncing; bails rest on the pitch; the ball never touches a bail; the next launch finds the wicket whole. Played on (bat contact then stumps) fires it through physics in Net Practice and Match Simulation. The ball's path to the stumps is identical step for step with the reaction on and off. Resets: Play again, Menu, pause (focus loss) and resume, mode switch (SetMode, and starting the other mode) all leave stumps and bails within 0.1 mm / 0.1 deg, kinematic and still; the broken wicket holds 1 s after the next ball is called and is whole after 1.5 s; the session's next ball finds it whole.
+  - Wicket-check sequence (the T088 build), 12 balls, all Bowled: middle 21 deg (80 km/h), 30 deg (120), 35 deg (140 yorker); leg 27 deg (120); off 32 deg (140); grazes 5 deg with one bail; off-spin 12 / 9 deg (arrives about 60 km/h); between middle and off: both; straighter one 20 deg; 120 km/h at bail height 31 deg with both bails.
+  - Measured speed loss to the stumps: 80 -> 68 km/h, 120 -> 97, 140 -> 117 (so the knock-back scales with the speed at the stumps).
+  - All earlier results unchanged (AC-04, AC-29, T074, T077-T079, Main scene 0.02 cm). Suites: EditMode 164/164, PlayMode 70/70.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: headset T088; a spin ball's arrival line is at the crease, so it reaches the stumps on its turned heading (about 9 cm further toward the turn for 4.5 deg); real stump sound pending the owner's recording; the next-ball reset happens at the launch if the batter calls the ball inside the 1.5 s hold (the launch never waits)
 ```
 
 ## Re-plan note (2026-10-26)

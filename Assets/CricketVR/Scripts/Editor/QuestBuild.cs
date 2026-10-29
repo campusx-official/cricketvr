@@ -35,6 +35,9 @@ namespace CricketVR.Editor
         [MenuItem("CricketVR/Build/Quest APK (Development, T082 spin check)")]
         public static void BuildSpinCheckMenu() => Run(development: true, autoRun: false, spinCheck: true);
 
+        [MenuItem("CricketVR/Build/Quest APK (Development, T088 wicket check)")]
+        public static void BuildWicketCheckMenu() => Run(development: true, autoRun: false, wicketCheck: true);
+
         [MenuItem("CricketVR/Build/Quest APK (Ground mode, foveation A-B measurement)")]
         public static void BuildGroundAbMenu() => Run(development: true, autoRun: false, EnvironmentMode.GroundMode, foveationAbSeconds: 30f);
 
@@ -45,12 +48,12 @@ namespace CricketVR.Editor
             bool development = !args.Contains("-cricketvrRelease");
             var mode = args.Contains("-cricketvrGround") ? EnvironmentMode.GroundMode : EnvironmentMode.NetMode;
             var report = Run(development, autoRun: false, mode, args.Contains("-cricketvrFoveationAB") ? 30f : 0f,
-                args.Contains("-cricketvrSwingCheck"), args.Contains("-cricketvrSpinCheck"));
+                args.Contains("-cricketvrSwingCheck"), args.Contains("-cricketvrSpinCheck"), args.Contains("-cricketvrWicketCheck"));
             EditorApplication.Exit(report != null && report.summary.result == BuildResult.Succeeded ? 0 : 1);
         }
 
         static BuildReport Run(bool development, bool autoRun, EnvironmentMode mode = EnvironmentMode.NetMode, float foveationAbSeconds = 0f,
-            bool swingCheck = false, bool spinCheck = false)
+            bool swingCheck = false, bool spinCheck = false, bool wicketCheck = false)
         {
             var config = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
             if (config == null)
@@ -60,17 +63,19 @@ namespace CricketVR.Editor
             }
             var previous = config.environment;
             float previousAb = config.foveationAbSeconds;
-            bool previousSwingCheck = config.delivery.swingCheck, previousSpinCheck = config.delivery.spinCheck;
+            bool previousSwingCheck = config.delivery.swingCheck, previousSpinCheck = config.delivery.spinCheck,
+                previousWicketCheck = config.delivery.wicketCheck;
             config.environment = mode;
             config.foveationAbSeconds = foveationAbSeconds;
             config.delivery.swingCheck = swingCheck;
             config.delivery.spinCheck = spinCheck;
+            config.delivery.wicketCheck = wicketCheck;
             EditorUtility.SetDirty(config);
             AssetDatabase.SaveAssets();
             try
             {
                 Debug.Log($"[CricketVR] Building in {mode}" + (foveationAbSeconds > 0f ? $", foveation A/B every {foveationAbSeconds} s" : "") +
-                          (swingCheck ? ", T076 swing check" : "") + (spinCheck ? ", T082 spin check" : ""));
+                          (swingCheck ? ", T076 swing check" : "") + (spinCheck ? ", T082 spin check" : "") + (wicketCheck ? ", T088 wicket check" : ""));
                 return RunBuild(development, autoRun);
             }
             finally
@@ -79,12 +84,14 @@ namespace CricketVR.Editor
                 var reloaded = AssetDatabase.LoadAssetAtPath<GameConfig>(BattingBuilder.ConfigPath);
                 if (reloaded != null && (reloaded.environment != previous || reloaded.foveationAbSeconds != previousAb ||
                                          reloaded.delivery.swingCheck != previousSwingCheck ||
-                                         reloaded.delivery.spinCheck != previousSpinCheck))
+                                         reloaded.delivery.spinCheck != previousSpinCheck ||
+                                         reloaded.delivery.wicketCheck != previousWicketCheck))
                 {
                     reloaded.environment = previous;
                     reloaded.foveationAbSeconds = previousAb;
                     reloaded.delivery.swingCheck = previousSwingCheck;
                     reloaded.delivery.spinCheck = previousSpinCheck;
+                    reloaded.delivery.wicketCheck = previousWicketCheck;
                     EditorUtility.SetDirty(reloaded);
                     AssetDatabase.SaveAssets();
                 }

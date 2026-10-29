@@ -69,6 +69,7 @@ namespace CricketVR.Editor
                 Object.FindAnyObjectByType<BatSetupControls>(FindObjectsInactive.Include),
                 ui, pointer, log,
                 Object.FindAnyObjectByType<XROrigin>(FindObjectsInactive.Include)?.transform);
+            session.ConfigureWicket(main.GetComponentInChildren<WicketReaction>(true));
             foreach (var c in go.GetComponents<MonoBehaviour>())
                 EditorUtility.SetDirty(c);
             if (ray == null)

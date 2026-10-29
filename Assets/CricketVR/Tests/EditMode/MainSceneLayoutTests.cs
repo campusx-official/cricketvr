@@ -55,6 +55,47 @@ namespace CricketVR.Tests
             Assert.AreEqual(box.bounds.max.y + r, DeliverySolver.ContactHeight(r), 1e-4f, "solver contact height");
         }
 
+        /// <summary>REQ-050: what the player sees is what decides the wicket.</summary>
+        [Test]
+        public void VisibleStumpsMatchTheDetectionBox()
+        {
+            var root = Find("Main/Environment/Stumps");
+            var box = root.GetComponent<BoxCollider>().bounds;
+            var seen = new Bounds();
+            bool first = true;
+            foreach (var name in new[] { "OffStump", "MiddleStump", "LegStump" })
+            {
+                var r = root.transform.Find(name).GetComponent<Renderer>().bounds;
+                if (first) { seen = r; first = false; } else seen.Encapsulate(r);
+            }
+            Assert.Less(Vector3.Distance(seen.min, box.min), 0.001f, $"visible {seen.min} vs box {box.min}");
+            Assert.Less(Vector3.Distance(seen.max, box.max), 0.001f, $"visible {seen.max} vs box {box.max}");
+        }
+
+        /// <summary>REQ-050: flying bails can't touch the ball, the bat, the stumps box or any detector.</summary>
+        [Test]
+        public void WicketDebrisCollidesOnlyWithThePitchTheOutfieldAndItself()
+        {
+            int debris = LayerMask.NameToLayer("WicketDebris");
+            Assert.GreaterOrEqual(debris, 0, "WicketDebris layer");
+            var allowed = new[] { LayerMask.NameToLayer("Pitch"), LayerMask.NameToLayer("Outfield"), debris };
+            for (int layer = 0; layer < 32; layer++)
+                Assert.AreEqual(!allowed.Contains(layer), Physics.GetIgnoreLayerCollision(debris, layer),
+                    $"WicketDebris vs layer {layer} '{LayerMask.LayerToName(layer)}'");
+            var reaction = Find("Main/Environment/Stumps").GetComponent<WicketReaction>();
+            Assert.IsNotNull(reaction, "WicketReaction on the striker's stumps");
+            Assert.AreEqual(3, reaction.Stumps.Length);
+            Assert.IsTrue(reaction.Stumps.All(t => t != null && t.GetComponent<Collider>() == null), "stump visuals have no colliders (scripted knock-back)");
+            Assert.AreEqual(2, reaction.Bails.Length);
+            foreach (var b in reaction.Bails)
+            {
+                Assert.IsNotNull(b);
+                Assert.AreEqual(debris, b.gameObject.layer, $"{b.name} on WicketDebris");
+                Assert.IsTrue(b.isKinematic, $"{b.name} still until the wicket falls");
+                Assert.IsNotNull(b.GetComponent<CapsuleCollider>(), $"{b.name} collider");
+            }
+        }
+
         [Test]
         public void StumpColliderMatchesRegulationSizeAtOrigin()
         {

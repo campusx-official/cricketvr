@@ -30,6 +30,8 @@ namespace CricketVR
         [SerializeField] MenuPointer pointer;
         [SerializeField] BallLogWriter log;
         [SerializeField] Transform xrOrigin;
+        [Tooltip("The striker's wicket reaction (cosmetic; reset before every ball and on restart, menu, pause, mode switch).")]
+        [SerializeField] WicketReaction wicket;
 
         SessionStateMachine _session;
         System.Random _rng;
@@ -120,6 +122,8 @@ namespace CricketVR
 
             if (_session.Phase == SessionPhase.Countdown || _session.Phase == SessionPhase.Delivering)
                 WatchTracking();
+            if (_session.Phase == SessionPhase.Countdown && wicket != null)
+                wicket.ResetAfterHold(); // the next ball is called: put the wicket back once it has been seen
 
             var step = _session.Tick(Time.deltaTime);
             Handle(step);
@@ -152,12 +156,14 @@ namespace CricketVR
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
             var hand = handedness != null ? handedness.Current : Handedness.Right;
             int redraws = 0;
-            var delivery = SpinCheck ? DeliveryPlanner.SpinCheckRequest(ballIndex, hand, _types)
+            var delivery = WicketCheck ? DeliveryPlanner.WicketCheckRequest(ballIndex, hand, _types)
+                : SpinCheck ? DeliveryPlanner.SpinCheckRequest(ballIndex, hand, _types)
                 : SwingCheck ? DeliveryPlanner.SwingCheckRequest(ballIndex, hand, _types)
                 : DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
                     DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out redraws);
             if (redraws > 0)
                 Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
+            if (wicket != null) wicket.ResetWicket(); // never bowl at a broken wicket
             int id = machine.Bowl(delivery);
             _session.BallLaunched(id);
         }
@@ -168,6 +174,8 @@ namespace CricketVR
         bool SwingCheck => _mode == SessionMode.NetPractice && config.delivery.swingCheck;
         /// <summary>T082 (AC-27, AC-28) build: Net Practice bowls the fixed spin-check sequence.</summary>
         bool SpinCheck => _mode == SessionMode.NetPractice && config.delivery.spinCheck;
+        /// <summary>T088 (AC-32/AC-33) build: both modes bowl the fixed wicket-check sequence.</summary>
+        bool WicketCheck => config.delivery.wicketCheck;
 
         /// <summary>The delivery type and its measured swing, shown after a moving ball (nothing for Stock).</summary>
         static string MovementLine(BallRecord r)
@@ -280,6 +288,7 @@ namespace CricketVR
             if (_session.Phase != SessionPhase.Paused)
                 return;
             Handle(step);
+            if (wicket != null) wicket.ResetWicket();
             _untrackedFor = 0f;
             if (bat != null) bat.ResetMotion(MotionResetReason.FocusChanged);
             Debug.Log($"[CricketVR] Session paused: {reason}");
@@ -326,7 +335,7 @@ namespace CricketVR
                 case "Start": StartSession(); break;
                 case "PlayAgain": StartSession(); break;
                 case "NewScenario": StartSession(); break;
-                case "Menu": Handle(_session.ToMenu()); ShowMenu(); break;
+                case "Menu": Handle(_session.ToMenu()); if (wicket != null) wicket.ResetWicket(); ShowMenu(); break;
                 case "Resume":
                     if (bat != null) bat.ResetMotion(MotionResetReason.FocusChanged);
                     var step = _session.Resume();
@@ -358,8 +367,10 @@ namespace CricketVR
             ui.Board(_mode == SessionMode.NetPractice
                 ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls), {BowlerName}, {WicketSide.All[_wicketSide].Label.ToLowerInvariant()} the wicket\nNo runs: every ball gets a result." +
                   (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "") +
-                  (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "")
-                : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");
+                  (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "") +
+                  (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps;\n80, 120, 140 km/h, grazes, spin. Leave them." : "")
+                : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending." +
+                  (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps (LED on)." : ""));
             pointer?.SetVisible(true);
         }
 
@@ -394,6 +405,7 @@ namespace CricketVR
             _lastResultLine = "";
             _contacts.Clear();
             score.ClearResults();
+            if (wicket != null) wicket.ResetWicket();
             log?.BeginSession(_sessionId);
             Handle(_session.Start(options));
             pointer?.SetVisible(false);
@@ -408,6 +420,7 @@ namespace CricketVR
             if (environment != null && environment.Mode != mode)
                 environment.Apply(mode);
             score.SetEnvironment(mode);
+            if (wicket != null) wicket.SetMode(mode);
         }
 
         void ShowEnd()
@@ -477,6 +490,8 @@ namespace CricketVR
             }
             return false;
         }
+
+        public void ConfigureWicket(WicketReaction wicketReaction) => wicket = wicketReaction;
 
         public void Configure(GameConfig cfg, BowlingMachine bowlingMachine, BallController ballController, ScoreManager scoreManager,
             BatBallContactResolver contactResolver, BatController batController, HandednessSetup handednessSetup,
