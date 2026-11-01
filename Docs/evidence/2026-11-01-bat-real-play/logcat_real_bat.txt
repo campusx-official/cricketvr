@@ -1,0 +1,1054 @@
+11-01 19:50:47.416 I/Unity   (13388): [CricketVR] Environment: NetMode
+11-01 19:50:47.425 I/Unity   (13388): [CricketVR] Bat motion reset: HandChanged; contacts suppressed for 0.10 s
+11-01 19:50:47.455 I/Unity   (13388): [CricketVR] Bat motion reset: HandChanged; contacts suppressed for 0.10 s
+11-01 19:50:47.456 I/Unity   (13388): [CricketVR] Handedness: Right; bat in Right hand
+11-01 19:50:47.456 I/Unity   (13388): [CricketVR] Foveated rendering level 0.50 (fixed) on 1 display(s)
+11-01 19:50:47.465 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses False; contact allowed False
+11-01 19:50:47.534 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 19:50:52.421 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:50:57.406 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 71.3 fps, 99.7% frames on time (72 Hz) | CPU 14.04 ms avg / 134.72 max, GPU 0.00 ms avg / 0.00 max | draw calls 25 avg / 85 max, SetPass max 12, triangles 16087 avg / 41780 max, texture memory 559.4 MB
+11-01 19:50:57.420 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:50:58.016 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 19:51:02.420 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:51:07.406 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 23.39 max, GPU 0.00 ms avg / 0.00 max | draw calls 60 avg / 73 max, SetPass max 11, triangles 29618 avg / 41102 max, texture memory 559.4 MB
+11-01 19:51:07.420 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:51:12.419 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:51:12.966 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_195112.csv
+11-01 19:51:12.968 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 19:51:12.969 I/Unity   (13388): [CricketVR] Session 20261101_195112: NetPractice, 18 balls, seed 23868526, real bat, automatic balls
+11-01 19:51:12.990 I/Unity   (13388): [CricketVR] Bat motion reset: TimeGap; contacts suppressed for 0.10 s
+11-01 19:51:17.406 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 70.9 fps, 99.9% frames on time (72 Hz) | CPU 14.10 ms avg / 177.72 max, GPU 0.00 ms avg / 0.00 max | draw calls 56 avg / 71 max, SetPass max 11, triangles 27820 avg / 40642 max, texture memory 559.4 MB
+11-01 19:51:17.420 I/Unity   (13388): [CricketVR] Bat tracking diagnostics (Right, Strapped): XR node 'Meta Quest Touch Plus Controller OpenXR' valid True, isTracked True; Input System isTracked False [MetaQuestTouchPlusControllerOpenXR:1]; step poses True; contact allowed True
+11-01 19:51:20.925 I/Unity   (13388): [CricketVR] Delivery #1 Net Practice: Straighter one, Good length: 91 km/h, line +0.01 m, length 5.81 m: v0 25.28 m/s (91.0 km/h), elevation -2.44 deg, predicted bounce (0.097, 5.811), Straighter one swing 0.04 m (curve 0.01 m), drift 0.02 m, dip 0.5 m/s², turn 0.0 deg toward -X, finishes at x +0.013 m at the crease
+11-01 19:51:21.456 I/Unity   (13388): [CricketVR] Delivery #1 bounced at (0.097, 5.809) after 0.523 s; 0.1 cm from target; rebound starts -11.5 cm along
+11-01 19:51:21.641 I/Unity   (13388): [CricketVR] Bat contact #1 (Right hand): in 24.8 m/s, bat 6.2 m/s, approach 26.7 m/s, out 23.8 m/s (86 km/h), launch -60 deg, direction -58 deg, e 0.46, sweet 0.75, edge 0.00, at 0.08 m from toe, substeps 10
+11-01 19:51:21.792 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 7.2 m/s, peak angular 9.8 rad/s, contact allowed True
+11-01 19:51:21.889 I/Unity   (13388): [CricketVR] Result #1 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.3 m | exit 23.8 m/s, launch -60 deg, direction -58 deg || Balls 1 | contacts 1 | misses 0 | bowled 0
+11-01 19:51:27.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 25.08 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 68 max, SetPass max 9, triangles 16844 avg / 41814 max, texture memory 559.4 MB
+11-01 19:51:29.875 I/Unity   (13388): [CricketVR] Delivery #2 Net Practice: Off-spin (flighted), Good length: 71 km/h, line +0.21 m, length 4.71 m: v0 19.72 m/s (71.0 km/h), elevation 7.02 deg, predicted bounce (0.447, 4.713), Off-spin swing 0.17 m (curve 0.02 m), drift 0.07 m, dip 4.2 m/s², turn 4.5 deg toward -X, finishes at x +0.212 m at the crease
+11-01 19:51:30.614 I/Unity   (13388): [CricketVR] Delivery #2 bounced at (0.447, 4.712) after 0.729 s; 0.1 cm from target; rebound starts -5.1 cm along
+11-01 19:51:30.776 I/Unity   (13388): [CricketVR] Bat contact #2 (Right hand): in 17.8 m/s, bat 6.2 m/s, approach 25.1 m/s, out 20.1 m/s (72 km/h), launch -11 deg, direction -12 deg, e 0.50, sweet 0.98, edge 0.00, at 0.23 m from toe, substeps 7
+11-01 19:51:31.065 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.5 m/s, peak angular 12.3 rad/s, contact allowed True
+11-01 19:51:31.331 I/Unity   (13388): [CricketVR] Result #2 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 2.6 m | exit 20.1 m/s, launch -11 deg, direction -12 deg || Balls 2 | contacts 2 | misses 0 | bowled 0
+11-01 19:51:37.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 21.16 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 73 max, SetPass max 10, triangles 16797 avg / 43130 max, texture memory 559.4 MB
+11-01 19:51:39.332 I/Unity   (13388): [CricketVR] Delivery #3 Net Practice: Off-spin (flighted), Short: 72 km/h, line +0.07 m, length 6.31 m: v0 20.00 m/s (72.0 km/h), elevation 8.35 deg, predicted bounce (0.340, 6.313), Off-spin swing 0.18 m (curve 0.02 m), drift 0.06 m, dip 8.8 m/s², turn 3.3 deg toward -X, finishes at x +0.067 m at the crease
+11-01 19:51:39.981 I/Unity   (13388): [CricketVR] Delivery #3 bounced at (0.340, 6.312) after 0.640 s; 0.1 cm from target; rebound starts -8.3 cm along
+11-01 19:51:40.231 I/Unity   (13388): [CricketVR] Bat contact #3 (Right hand): in 18.0 m/s, bat 2.7 m/s, approach 18.9 m/s, out 10.2 m/s (37 km/h), launch -17 deg, direction -45 deg, e 0.37, sweet 0.15, edge 0.00, at 0.50 m from toe, substeps 7
+11-01 19:51:40.416 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.8 m/s, peak angular 6.1 rad/s, contact allowed True
+11-01 19:51:40.513 I/Unity   (13388): [CricketVR] Result #3 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 2.3 m | exit 10.2 m/s, launch -17 deg, direction -45 deg || Balls 3 | contacts 3 | misses 0 | bowled 0
+11-01 19:51:47.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 19.75 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 75 max, SetPass max 9, triangles 17729 avg / 43214 max, texture memory 559.4 MB
+11-01 19:51:48.497 I/Unity   (13388): [CricketVR] Delivery #4 Net Practice: Straighter one, Good length: 90 km/h, line +0.04 m, length 4.58 m: v0 25.00 m/s (90.0 km/h), elevation -0.99 deg, predicted bounce (0.111, 4.577), Straighter one swing 0.04 m (curve 0.01 m), drift 0.04 m, dip 0.5 m/s², turn 0.4 deg toward -X, finishes at x +0.044 m at the crease
+11-01 19:51:49.080 I/Unity   (13388): [CricketVR] Delivery #4 bounced at (0.111, 4.576) after 0.577 s; 0.1 cm from target; rebound starts -9.2 cm along
+11-01 19:51:49.274 I/Unity   (13388): [CricketVR] Result #4 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 4 | contacts 3 | misses 0 | bowled 1
+11-01 19:51:49.280 I/Unity   (13388): [CricketVR] Wicket sound: using the generated PLACEHOLDER clatter (no StumpHit_N.wav recordings yet).
+11-01 19:51:49.280 I/Unity   (13388): [CricketVR] Wicket #4: 88 km/h at x +0.021 m, h 0.47 m; Middle stump 19 deg (square 0.61); +X bail 3.5 m/s; -X bail 3.5 m/s
+11-01 19:51:49.447 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.6 m/s, peak angular 8.0 rad/s, contact allowed True
+11-01 19:51:50.780 I/Unity   (13388): [CricketVR] No bat contact #4: closest gap 3.8 cm
+11-01 19:51:57.282 I/Unity   (13388): [CricketVR] Delivery #5 Net Practice: Off-spin, Good length: 92 km/h, line +0.12 m, length 5.46 m: v0 25.56 m/s (92.0 km/h), elevation -1.90 deg, predicted bounce (0.533, 5.462), Off-spin swing 0.32 m (curve 0.03 m), drift 0.11 m, dip 1.0 m/s², turn 6.8 deg toward -X, finishes at x +0.123 m at the crease
+11-01 19:51:57.406 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.90 ms avg / 22.46 max, GPU 0.00 ms avg / 0.00 max | draw calls 44 avg / 73 max, SetPass max 9, triangles 12826 avg / 42442 max, texture memory 559.4 MB
+11-01 19:51:57.822 I/Unity   (13388): [CricketVR] Delivery #5 bounced at (0.533, 5.461) after 0.530 s; 0.2 cm from target; rebound starts -13.8 cm along
+11-01 19:51:58.057 I/Unity   (13388): [CricketVR] Result #5 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 5 | contacts 3 | misses 0 | bowled 2
+11-01 19:51:58.057 I/Unity   (13388): [CricketVR] Wicket #5: 83 km/h at x +0.011 m, h 0.63 m; Middle stump 22 deg (square 0.79); +X bail 3.9 m/s; -X bail 3.9 m/s
+11-01 19:51:58.294 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.8 m/s, peak angular 8.2 rad/s, contact allowed True
+11-01 19:51:59.009 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.5 rad/s, contact allowed True
+11-01 19:51:59.550 I/Unity   (13388): [CricketVR] No bat contact #5: closest gap 13.8 cm
+11-01 19:52:02.273 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:06.041 I/Unity   (13388): [CricketVR] Delivery #6 Net Practice: Off-spin (flighted), Good length: 70 km/h, line -0.06 m, length 4.80 m: v0 19.44 m/s (70.0 km/h), elevation 7.33 deg, predicted bounce (0.178, 4.803), Off-spin swing 0.11 m (curve 0.02 m), drift 0.07 m, dip 4.2 m/s², turn 3.5 deg toward -X, finishes at x -0.064 m at the crease
+11-01 19:52:06.786 I/Unity   (13388): [CricketVR] Delivery #6 bounced at (0.178, 4.803) after 0.735 s; 0.0 cm from target; rebound starts -3.6 cm along
+11-01 19:52:06.981 I/Unity   (13388): [CricketVR] Bat contact #6 (Right hand): in 14.6 m/s, bat 2.9 m/s, approach 17.5 m/s, out 11.2 m/s (40 km/h), launch -21 deg, direction -20 deg, e 0.44, sweet 0.59, edge 0.00, at 0.36 m from toe, substeps 6
+11-01 19:52:07.093 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.9 m/s, peak angular 5.7 rad/s, contact allowed True
+11-01 19:52:07.398 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 17.57 max, GPU 0.00 ms avg / 0.00 max | draw calls 44 avg / 74 max, SetPass max 9, triangles 24929 avg / 43050 max, texture memory 559.4 MB
+11-01 19:52:07.579 I/Unity   (13388): [CricketVR] Result #6 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.6 m | exit 11.2 m/s, launch -21 deg, direction -20 deg || Balls 6 | contacts 4 | misses 0 | bowled 2
+11-01 19:52:08.150 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.6 m/s, peak angular 8.9 rad/s, contact allowed True
+11-01 19:52:15.596 I/Unity   (13388): [CricketVR] Delivery #7 Net Practice: Off-spin, Good length: 85 km/h, line -0.06 m, length 4.10 m: v0 23.61 m/s (85.0 km/h), elevation 2.00 deg, predicted bounce (0.203, 4.098), Off-spin swing 0.12 m (curve 0.02 m), drift 0.09 m, dip 2.6 m/s², turn 5.0 deg toward -X, finishes at x -0.060 m at the crease
+11-01 19:52:16.234 I/Unity   (13388): [CricketVR] Delivery #7 bounced at (0.203, 4.097) after 0.632 s; 0.1 cm from target; rebound starts -5.5 cm along
+11-01 19:52:16.470 I/Unity   (13388): [CricketVR] Result #7 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 7 | contacts 4 | misses 0 | bowled 3
+11-01 19:52:16.471 I/Unity   (13388): [CricketVR] Wicket #7: 65 km/h at x -0.164 m, h 0.73 m; Leg stump 0 deg (square 0.00); -X bail 0.9 m/s
+11-01 19:52:16.608 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.8 m/s, peak angular 4.8 rad/s, contact allowed True
+11-01 19:52:17.401 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.95 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 70 max, SetPass max 10, triangles 13575 avg / 42270 max, texture memory 559.4 MB
+11-01 19:52:17.970 I/Unity   (13388): [CricketVR] No bat contact #7: closest gap 13.2 cm
+11-01 19:52:23.957 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:52:24.485 I/Unity   (13388): [CricketVR] Delivery #8 Net Practice: Off-spin, Good length: 83 km/h, line -0.09 m, length 4.59 m: v0 23.06 m/s (83.0 km/h), elevation 2.24 deg, predicted bounce (0.236, 4.594), Off-spin swing 0.17 m (curve 0.03 m), drift 0.10 m, dip 3.1 m/s², turn 5.5 deg toward -X, finishes at x -0.089 m at the crease
+11-01 19:52:24.526 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:24.762 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:25.012 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:25.122 I/Unity   (13388): [CricketVR] Delivery #8 bounced at (0.236, 4.594) after 0.625 s; 0.1 cm from target; rebound starts -6.8 cm along
+11-01 19:52:25.483 I/Unity   (13388): [CricketVR] Result #8 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 8 | contacts 4 | misses 1 | bowled 3
+11-01 19:52:25.553 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.2 m/s, peak angular 6.0 rad/s, contact allowed True
+11-01 19:52:27.402 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.94 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 64 max, SetPass max 9, triangles 6252 avg / 36356 max, texture memory 559.4 MB
+11-01 19:52:32.095 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.2 m/s, peak angular 2.6 rad/s, contact allowed True
+11-01 19:52:32.291 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:32.360 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:52:33.488 I/Unity   (13388): [CricketVR] Delivery #9 Net Practice: Off-spin (flighted), Good length: 73 km/h, line +0.12 m, length 4.30 m: v0 20.28 m/s (73.0 km/h), elevation 5.90 deg, predicted bounce (0.302, 4.297), Off-spin swing 0.11 m (curve 0.01 m), drift 0.06 m, dip 3.3 m/s², turn 3.5 deg toward -X, finishes at x +0.117 m at the crease
+11-01 19:52:34.220 I/Unity   (13388): [CricketVR] Delivery #9 bounced at (0.302, 4.297) after 0.728 s; 0.0 cm from target; rebound starts -3.6 cm along
+11-01 19:52:34.399 I/Unity   (13388): [CricketVR] Bat contact #9 (Right hand): in 16.0 m/s, bat 1.8 m/s, approach 10.6 m/s, out 10.2 m/s (37 km/h), launch -11 deg, direction 129 deg, e 0.26, sweet 0.79, edge +1.00, at 0.31 m from toe, substeps 7
+11-01 19:52:34.622 I/Unity   (13388): [CricketVR] Result #9 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 2.1 m | exit 10.2 m/s, launch -11 deg, direction 129 deg || Balls 9 | contacts 5 | misses 1 | bowled 3
+11-01 19:52:37.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.95 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 72 max, SetPass max 9, triangles 13498 avg / 43050 max, texture memory 559.4 MB
+11-01 19:52:42.622 I/Unity   (13388): [CricketVR] Delivery #10 Net Practice: Straighter one, Good length: 86 km/h, line +0.14 m, length 5.54 m: v0 23.89 m/s (86.0 km/h), elevation -1.41 deg, predicted bounce (0.199, 5.542), Straighter one swing 0.04 m (curve 0.01 m), drift 0.04 m, dip 0.5 m/s², turn 0.3 deg toward -X, finishes at x +0.141 m at the crease
+11-01 19:52:43.190 I/Unity   (13388): [CricketVR] Delivery #10 bounced at (0.199, 5.541) after 0.564 s; 0.1 cm from target; rebound starts -9.2 cm along
+11-01 19:52:43.371 I/Unity   (13388): [CricketVR] Bat contact #10 (Right hand): in 23.5 m/s, bat 5.0 m/s, approach 23.4 m/s, out 14.3 m/s (52 km/h), launch -33 deg, direction 79 deg, e 0.27, sweet 0.98, edge +1.00, at 0.17 m from toe, substeps 10
+11-01 19:52:43.522 I/Unity   (13388): [CricketVR] Result #10 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.7 m | exit 14.3 m/s, launch -33 deg, direction 79 deg || Balls 10 | contacts 6 | misses 1 | bowled 3
+11-01 19:52:43.592 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.1 m/s, peak angular 7.3 rad/s, contact allowed True
+11-01 19:52:44.440 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.5 m/s, peak angular 7.5 rad/s, contact allowed True
+11-01 19:52:47.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.39 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 71 max, SetPass max 9, triangles 12206 avg / 42282 max, texture memory 559.4 MB
+11-01 19:52:51.525 I/Unity   (13388): [CricketVR] Delivery #11 Net Practice: Off-spin, Good length: 83 km/h, line +0.06 m, length 4.43 m: v0 23.06 m/s (83.0 km/h), elevation 2.44 deg, predicted bounce (0.267, 4.434), Off-spin swing 0.13 m (curve 0.01 m), drift 0.05 m, dip 3.1 m/s², turn 3.6 deg toward -X, finishes at x +0.057 m at the crease
+11-01 19:52:52.163 I/Unity   (13388): [CricketVR] Delivery #11 bounced at (0.267, 4.433) after 0.632 s; 0.1 cm from target; rebound starts -7.1 cm along
+11-01 19:52:52.384 I/Unity   (13388): [CricketVR] Result #11 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 11 | contacts 6 | misses 1 | bowled 4
+11-01 19:52:52.384 I/Unity   (13388): [CricketVR] Wicket #11: 75 km/h at x -0.019 m, h 0.67 m; Middle stump 17 deg (square 0.65); +X bail 3.1 m/s; -X bail 3.1 m/s
+11-01 19:52:52.526 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.5 m/s, peak angular 8.6 rad/s, contact allowed True
+11-01 19:52:53.343 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.0 m/s, peak angular 8.2 rad/s, contact allowed True
+11-01 19:52:53.884 I/Unity   (13388): [CricketVR] No bat contact #11: closest gap 2.0 cm
+11-01 19:52:57.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.28 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 72 max, SetPass max 8, triangles 22621 avg / 41826 max, texture memory 559.4 MB
+11-01 19:53:00.386 I/Unity   (13388): [CricketVR] Delivery #12 Net Practice: Straighter one, Good length: 89 km/h, line +0.11 m, length 4.69 m: v0 24.72 m/s (89.0 km/h), elevation -0.96 deg, predicted bounce (0.164, 4.688), Straighter one swing 0.04 m (curve 0.01 m), drift 0.04 m, dip 0.5 m/s², turn 0.3 deg toward -X, finishes at x +0.108 m at the crease
+11-01 19:53:00.968 I/Unity   (13388): [CricketVR] Delivery #12 bounced at (0.164, 4.687) after 0.579 s; 0.2 cm from target; rebound starts -13.9 cm along
+11-01 19:53:01.120 I/Unity   (13388): [CricketVR] Bat contact #12 (Right hand): in 24.3 m/s, bat 5.4 m/s, approach 27.1 m/s, out 21.2 m/s (76 km/h), launch -65 deg, direction -5 deg, e 0.44, sweet 0.62, edge 0.00, at 0.05 m from toe, substeps 10
+11-01 19:53:01.301 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.9 m/s, peak angular 7.0 rad/s, contact allowed True
+11-01 19:53:03.662 I/Unity   (13388): [CricketVR] Result #12 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.2 m | exit 21.2 m/s, launch -65 deg, direction -5 deg || Balls 12 | contacts 7 | misses 1 | bowled 4
+11-01 19:53:07.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.37 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 72 max, SetPass max 10, triangles 14228 avg / 42686 max, texture memory 559.4 MB
+11-01 19:53:11.678 I/Unity   (13388): [CricketVR] Delivery #13 Net Practice: Off-spin, Good length: 78 km/h, line +0.19 m, length 4.73 m: v0 21.67 m/s (78.0 km/h), elevation 4.45 deg, predicted bounce (0.389, 4.735), Off-spin swing 0.14 m (curve 0.02 m), drift 0.06 m, dip 4.3 m/s², turn 3.7 deg toward -X, finishes at x +0.186 m at the crease
+11-01 19:53:12.343 I/Unity   (13388): [CricketVR] Delivery #13 bounced at (0.389, 4.734) after 0.660 s; 0.1 cm from target; rebound starts -6.5 cm along
+11-01 19:53:12.509 I/Unity   (13388): [CricketVR] Bat contact #13 (Right hand): in 19.6 m/s, bat 8.2 m/s, approach 30.5 m/s, out 26.0 m/s (94 km/h), launch -1 deg, direction -4 deg, e 0.49, sweet 0.94, edge 0.00, at 0.25 m from toe, substeps 9
+11-01 19:53:13.315 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.2 m/s, peak angular 12.9 rad/s, contact allowed True
+11-01 19:53:13.398 I/Unity   (13388): [CricketVR] Result #13 Hit, front net, low | end NetHit, zone FrontLow, contact True, bowled False | Measured carry 7.6 m | exit 26.0 m/s, launch -1 deg, direction -4 deg || Balls 13 | contacts 8 | misses 1 | bowled 4
+11-01 19:53:17.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.67 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 72 max, SetPass max 10, triangles 10969 avg / 43050 max, texture memory 559.4 MB
+11-01 19:53:21.400 I/Unity   (13388): [CricketVR] Delivery #14 Net Practice: Straighter one, Full: 84 km/h, line +0.11 m, length 3.84 m: v0 23.33 m/s (84.0 km/h), elevation 0.80 deg, predicted bounce (0.154, 3.835), Straighter one swing 0.04 m (curve 0.01 m), drift 0.04 m, dip 0.5 m/s², turn 0.3 deg toward -X, finishes at x +0.113 m at the crease
+11-01 19:53:22.065 I/Unity   (13388): [CricketVR] Delivery #14 bounced at (0.154, 3.835) after 0.650 s; 0.0 cm from target; rebound starts +0.2 cm along
+11-01 19:53:22.163 I/Unity   (13388): [CricketVR] Bat contact #14 (Right hand): in 20.8 m/s, bat 8.3 m/s, approach 31.6 m/s, out 26.4 m/s (95 km/h), launch -16 deg, direction -9 deg, e 0.48, sweet 0.90, edge 0.00, at 0.13 m from toe, substeps 9
+11-01 19:53:22.496 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.3 m/s, peak angular 12.1 rad/s, contact allowed True
+11-01 19:53:22.676 I/Unity   (13388): [CricketVR] Result #14 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.1 m | exit 26.4 m/s, launch -16 deg, direction -9 deg || Balls 14 | contacts 9 | misses 1 | bowled 4
+11-01 19:53:27.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.38 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 72 max, SetPass max 10, triangles 10918 avg / 43050 max, texture memory 559.4 MB
+11-01 19:53:30.678 I/Unity   (13388): [CricketVR] Delivery #15 Net Practice: Straighter one, Good length: 89 km/h, line +0.15 m, length 4.79 m: v0 24.72 m/s (89.0 km/h), elevation -1.06 deg, predicted bounce (0.184, 4.790), Straighter one swing 0.03 m (curve 0.01 m), drift 0.02 m, dip 0.5 m/s², turn 0.0 deg toward -X, finishes at x +0.146 m at the crease
+11-01 19:53:31.260 I/Unity   (13388): [CricketVR] Delivery #15 bounced at (0.184, 4.790) after 0.575 s; 0.0 cm from target; rebound starts -3.6 cm along
+11-01 19:53:31.411 I/Unity   (13388): [CricketVR] Bat contact #15 (Right hand): in 22.1 m/s, bat 8.3 m/s, approach 31.7 m/s, out 26.7 m/s (96 km/h), launch -32 deg, direction -2 deg, e 0.50, sweet 0.98, edge 0.00, at 0.17 m from toe, substeps 9
+11-01 19:53:31.759 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.1 m/s, peak angular 13.0 rad/s, contact allowed True
+11-01 19:53:32.412 I/Unity   (13388): [CricketVR] Result #15 Hit, front net, high | end NetHit, zone FrontUpper, contact True, bowled False | Measured carry 0.7 m | exit 26.7 m/s, launch -32 deg, direction -2 deg || Balls 15 | contacts 10 | misses 1 | bowled 4
+11-01 19:53:34.621 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 5.2 rad/s, contact allowed True
+11-01 19:53:37.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.66 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 73 max, SetPass max 10, triangles 18439 avg / 42282 max, texture memory 559.4 MB
+11-01 19:53:40.414 I/Unity   (13388): [CricketVR] Delivery #16 Net Practice: Off-spin, Good length: 85 km/h, line -0.02 m, length 5.07 m: v0 23.61 m/s (85.0 km/h), elevation 0.84 deg, predicted bounce (0.252, 5.065), Off-spin swing 0.16 m (curve 0.02 m), drift 0.07 m, dip 2.6 m/s², turn 4.0 deg toward -X, finishes at x -0.022 m at the crease
+11-01 19:53:41.010 I/Unity   (13388): [CricketVR] Delivery #16 bounced at (0.252, 5.064) after 0.590 s; 0.1 cm from target; rebound starts -6.4 cm along
+11-01 19:53:41.401 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.8 m/s, peak angular 11.6 rad/s, contact allowed True
+11-01 19:53:41.455 I/Unity   (13388): [CricketVR] Result #16 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 16 | contacts 10 | misses 2 | bowled 4
+11-01 19:53:41.927 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.4 m/s, peak angular 8.7 rad/s, contact allowed True
+11-01 19:53:42.955 I/Unity   (13388): [CricketVR] No bat contact #16: closest gap 4.0 cm
+11-01 19:53:47.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.03 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 71 max, SetPass max 9, triangles 11561 avg / 42282 max, texture memory 559.4 MB
+11-01 19:53:49.455 I/Unity   (13388): [CricketVR] Delivery #17 Net Practice: Off-spin, Good length: 81 km/h, line -0.07 m, length 5.30 m: v0 22.50 m/s (81.0 km/h), elevation 2.18 deg, predicted bounce (0.294, 5.297), Off-spin swing 0.21 m (curve 0.02 m), drift 0.10 m, dip 3.6 m/s², turn 5.2 deg toward -X, finishes at x -0.066 m at the crease
+11-01 19:53:50.079 I/Unity   (13388): [CricketVR] Delivery #17 bounced at (0.294, 5.296) after 0.609 s; 0.0 cm from target; rebound starts -2.0 cm along
+11-01 19:53:50.537 I/Unity   (13388): [CricketVR] Result #17 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 17 | contacts 10 | misses 3 | bowled 4
+11-01 19:53:51.316 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.5 m/s, peak angular 14.4 rad/s, contact allowed True
+11-01 19:53:52.039 I/Unity   (13388): [CricketVR] No bat contact #17: closest gap 0.4 cm
+11-01 19:53:53.317 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 0.3 rad/s, contact allowed True
+11-01 19:53:54.330 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.6 m/s, peak angular 4.0 rad/s, contact allowed True
+11-01 19:53:54.691 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:53:57.317 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:53:57.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.30 max, GPU 0.00 ms avg / 0.00 max | draw calls 41 avg / 71 max, SetPass max 9, triangles 10500 avg / 42282 max, texture memory 559.4 MB
+11-01 19:53:57.803 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:53:57.803 I/Unity   (13388): [CricketVR] Session paused: The bat controller lost tracking.
+11-01 19:53:57.816 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:54:03.288 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:54:06.276 I/Unity   (13388): [CricketVR] Delivery #18 Net Practice: Off-spin, Short: 81 km/h, line +0.16 m, length 6.83 m: v0 22.50 m/s (81.0 km/h), elevation -0.04 deg, predicted bounce (0.453, 6.828), Off-spin swing 0.26 m (curve 0.01 m), drift 0.06 m, dip 3.6 m/s², turn 3.7 deg toward -X, finishes at x +0.161 m at the crease
+11-01 19:54:06.830 I/Unity   (13388): [CricketVR] Delivery #18 bounced at (0.453, 6.828) after 0.541 s; 0.1 cm from target; rebound starts -4.2 cm along
+11-01 19:54:07.107 I/Unity   (13388): [CricketVR] Bat contact #18 (Right hand): in 18.0 m/s, bat 4.1 m/s, approach 22.5 m/s, out 16.0 m/s (57 km/h), launch 19 deg, direction -15 deg, e 0.46, sweet 0.75, edge 0.00, at 0.32 m from toe, substeps 7
+11-01 19:54:07.329 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.0 m/s, peak angular 7.0 rad/s, contact allowed True
+11-01 19:54:07.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.74 max, GPU 0.00 ms avg / 0.00 max | draw calls 60 avg / 76 max, SetPass max 11, triangles 30418 avg / 43050 max, texture memory 559.4 MB
+11-01 19:54:07.607 I/Unity   (13388): [CricketVR] Result #18 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 16.0 m/s, launch 19 deg, direction -15 deg || Balls 18 | contacts 11 | misses 3 | bowled 4
+11-01 19:54:12.612 I/Unity   (13388): [CricketVR] Session 20261101_195112 ended: Balls 18 | contacts 11 | misses 3 | bowled 4
+11-01 19:54:17.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.69 max, GPU 0.00 ms avg / 0.00 max | draw calls 53 avg / 69 max, SetPass max 11, triangles 17821 avg / 41870 max, texture memory 559.4 MB
+11-01 19:54:19.364 I/Unity   (13388): [CricketVR] Environment: GroundMode
+11-01 19:54:23.197 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_195423.csv
+11-01 19:54:23.198 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 19:54:23.199 I/Unity   (13388): [CricketVR] Session 20261101_195423: MatchSimulation, 12 balls, seed 24058913, real bat, automatic balls, Medium
+11-01 19:54:27.406 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.90 ms avg / 21.00 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 70 max, SetPass max 15, triangles 34701 avg / 50774 max, texture memory 559.4 MB
+11-01 19:54:31.197 I/Unity   (13388): [CricketVR] Delivery #19 Medium: Good length: 80 km/h, line +0.08 m, length 6.84 m: v0 22.22 m/s (80.0 km/h), elevation -2.35 deg, predicted bounce (0.082, 6.835)
+11-01 19:54:31.752 I/Unity   (13388): [CricketVR] Delivery #19 bounced at (0.082, 6.835) after 0.548 s; 0.2 cm from target; rebound starts -3.9 cm along
+11-01 19:54:31.997 I/Unity   (13388): [CricketVR] Bat contact #19 (Right hand): in 20.1 m/s, bat 2.4 m/s, approach 18.3 m/s, out 8.1 m/s (29 km/h), launch -69 deg, direction 95 deg, e 0.20, sweet 0.10, edge +1.00, at 0.53 m from toe, substeps 8
+11-01 19:54:32.273 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.4 m/s, peak angular 6.7 rad/s, contact allowed True
+11-01 19:54:33.011 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.0 m/s, peak angular 7.8 rad/s, contact allowed True
+11-01 19:54:33.495 I/Unity   (13388): [CricketVR] Result #19 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.3 m | exit 8.1 m/s, launch -69 deg, direction 95 deg || Balls 1 | contacts 1 | misses 0 | bowled 0 | 1 hit(s) scoring pending
+11-01 19:54:37.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 16.71 max, GPU 0.00 ms avg / 0.00 max | draw calls 41 avg / 60 max, SetPass max 13, triangles 32620 avg / 52248 max, texture memory 559.4 MB
+11-01 19:54:41.511 I/Unity   (13388): [CricketVR] Delivery #20 Medium: Good length: 80 km/h, line +0.24 m, length 7.01 m: v0 22.22 m/s (80.0 km/h), elevation -2.58 deg, predicted bounce (0.237, 7.011)
+11-01 19:54:42.065 I/Unity   (13388): [CricketVR] Delivery #20 bounced at (0.237, 7.010) after 0.540 s; 0.2 cm from target; rebound starts -2.1 cm along
+11-01 19:54:42.453 I/Unity   (13388): [CricketVR] Result #20 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 2 | contacts 1 | misses 1 | bowled 0 | 1 hit(s) scoring pending
+11-01 19:54:42.620 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.0 m/s, peak angular 11.1 rad/s, contact allowed True
+11-01 19:54:43.954 I/Unity   (13388): [CricketVR] No bat contact #20: closest gap 5.8 cm
+11-01 19:54:47.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.51 max, GPU 0.00 ms avg / 0.00 max | draw calls 35 avg / 60 max, SetPass max 13, triangles 23619 avg / 52250 max, texture memory 559.4 MB
+11-01 19:54:50.455 I/Unity   (13388): [CricketVR] Delivery #21 Medium: Good length: 99 km/h, line +0.05 m, length 6.98 m: v0 27.50 m/s (99.0 km/h), elevation -4.88 deg, predicted bounce (0.053, 6.979)
+11-01 19:54:50.912 I/Unity   (13388): [CricketVR] Delivery #21 bounced at (0.053, 6.979) after 0.439 s; 0.3 cm from target; rebound starts +6.7 cm along
+11-01 19:54:51.120 I/Unity   (13388): [CricketVR] Bat contact #21 (Right hand): in 25.2 m/s, bat 3.3 m/s, approach 19.5 m/s, out 16.0 m/s (58 km/h), launch -70 deg, direction -145 deg, e 0.38, sweet 0.19, edge 0.00, at 0.48 m from toe, substeps 10
+11-01 19:54:51.398 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.1 m/s, peak angular 10.8 rad/s, contact allowed True
+11-01 19:54:52.038 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 7.3 rad/s, contact allowed True
+11-01 19:54:52.621 I/Unity   (13388): [CricketVR] Result #21 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.3 m | exit 16.0 m/s, launch -70 deg, direction -145 deg || Balls 3 | contacts 2 | misses 1 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:54:57.399 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 58 max, SetPass max 13, triangles 24442 avg / 50774 max, texture memory 559.4 MB
+11-01 19:55:00.621 I/Unity   (13388): [CricketVR] Delivery #22 Medium: Good length: 84 km/h, line +0.28 m, length 6.56 m: v0 23.33 m/s (84.0 km/h), elevation -2.64 deg, predicted bounce (0.276, 6.560)
+11-01 19:55:01.163 I/Unity   (13388): [CricketVR] Delivery #22 bounced at (0.276, 6.560) after 0.534 s; 0.3 cm from target; rebound starts -4.2 cm along
+11-01 19:55:01.523 I/Unity   (13388): [CricketVR] Result #22 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 4 | contacts 2 | misses 2 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:55:01.704 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.1 m/s, peak angular 13.8 rad/s, contact allowed True
+11-01 19:55:03.024 I/Unity   (13388): [CricketVR] No bat contact #22: closest gap 7.6 cm
+11-01 19:55:07.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.24 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 58 max, SetPass max 13, triangles 26614 avg / 51402 max, texture memory 559.4 MB
+11-01 19:55:09.538 I/Unity   (13388): [CricketVR] Delivery #23 Medium: Short: 95 km/h, line +0.26 m, length 9.80 m: v0 26.39 m/s (95.0 km/h), elevation -8.46 deg, predicted bounce (0.257, 9.800)
+11-01 19:55:09.899 I/Unity   (13388): [CricketVR] Delivery #23 bounced at (0.257, 9.800) after 0.353 s; 0.2 cm from target; rebound starts -4.0 cm along
+11-01 19:55:10.357 I/Unity   (13388): [CricketVR] Result #23 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 5 | contacts 2 | misses 3 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:55:10.788 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 7.1 m/s, peak angular 10.6 rad/s, contact allowed True
+11-01 19:55:17.400 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 52 max, SetPass max 13, triangles 24835 avg / 50294 max, texture memory 559.4 MB
+11-01 19:55:18.372 I/Unity   (13388): [CricketVR] Delivery #24 Medium: Full: 97 km/h, line -0.04 m, length 4.39 m: v0 26.94 m/s (97.0 km/h), elevation -2.04 deg, predicted bounce (-0.040, 4.385)
+11-01 19:55:18.926 I/Unity   (13388): [CricketVR] Delivery #24 bounced at (-0.040, 4.385) after 0.543 s; 0.1 cm from target; rebound starts +7.0 cm along
+11-01 19:55:19.038 I/Unity   (13388): [CricketVR] Bat contact #24 (Right hand): in 25.0 m/s, bat 5.8 m/s, approach 28.2 m/s, out 18.8 m/s (68 km/h), launch -43 deg, direction -74 deg, e 0.26, sweet 0.76, edge -1.00, at 0.32 m from toe, substeps 10
+11-01 19:55:19.301 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.2 m/s, peak angular 12.8 rad/s, contact allowed True
+11-01 19:55:19.759 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.2 m/s, peak angular 9.4 rad/s, contact allowed True
+11-01 19:55:20.537 I/Unity   (13388): [CricketVR] Result #24 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.5 m | exit 18.8 m/s, launch -43 deg, direction -74 deg || Balls 6 | contacts 3 | misses 3 | bowled 0 | 3 hit(s) scoring pending
+11-01 19:55:27.413 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.19 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 57 max, SetPass max 13, triangles 23457 avg / 50958 max, texture memory 559.4 MB
+11-01 19:55:28.552 I/Unity   (13388): [CricketVR] Delivery #25 Medium: Good length: 88 km/h, line +0.17 m, length 6.16 m: v0 24.44 m/s (88.0 km/h), elevation -2.74 deg, predicted bounce (0.174, 6.164)
+11-01 19:55:29.093 I/Unity   (13388): [CricketVR] Delivery #25 bounced at (0.174, 6.164) after 0.526 s; 0.0 cm from target; rebound starts -2.0 cm along
+11-01 19:55:29.287 I/Unity   (13388): [CricketVR] Bat contact #25 (Right hand): in 22.4 m/s, bat 5.1 m/s, approach 24.4 m/s, out 16.8 m/s (61 km/h), launch -55 deg, direction 36 deg, e 0.41, sweet 0.63, edge +0.18, at 0.35 m from toe, substeps 9
+11-01 19:55:29.607 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.6 m/s, peak angular 14.2 rad/s, contact allowed True
+11-01 19:55:30.787 I/Unity   (13388): [CricketVR] Result #25 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.5 m | exit 16.8 m/s, launch -55 deg, direction 36 deg || Balls 7 | contacts 4 | misses 3 | bowled 0 | 4 hit(s) scoring pending
+11-01 19:55:33.148 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.2 m/s, peak angular 4.9 rad/s, contact allowed True
+11-01 19:55:37.412 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.95 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 59 max, SetPass max 13, triangles 25633 avg / 52170 max, texture memory 559.4 MB
+11-01 19:55:38.801 I/Unity   (13388): [CricketVR] Delivery #26 Medium: Good length: 87 km/h, line +0.01 m, length 5.43 m: v0 24.17 m/s (87.0 km/h), elevation -1.77 deg, predicted bounce (0.008, 5.429)
+11-01 19:55:39.370 I/Unity   (13388): [CricketVR] Delivery #26 bounced at (0.008, 5.428) after 0.562 s; 0.1 cm from target; rebound starts -5.2 cm along
+11-01 19:55:39.536 I/Unity   (13388): [CricketVR] Bat contact #26 (Right hand): in 22.2 m/s, bat 7.5 m/s, approach 31.3 m/s, out 23.2 m/s (83 km/h), launch -13 deg, direction -1 deg, e 0.45, sweet 0.64, edge 0.00, at 0.35 m from toe, substeps 9
+11-01 19:55:39.843 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.9 m/s, peak angular 17.0 rad/s, contact allowed True
+11-01 19:55:41.036 I/Unity   (13388): [CricketVR] Result #26 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 2.7 m | exit 23.2 m/s, launch -13 deg, direction -1 deg || Balls 8 | contacts 5 | misses 3 | bowled 0 | 5 hit(s) scoring pending
+11-01 19:55:47.412 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.67 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 59 max, SetPass max 13, triangles 27091 avg / 52170 max, texture memory 559.4 MB
+11-01 19:55:49.038 I/Unity   (13388): [CricketVR] Delivery #27 Medium: Good length: 95 km/h, line +0.03 m, length 7.28 m: v0 26.39 m/s (95.0 km/h), elevation -4.88 deg, predicted bounce (0.034, 7.289)
+11-01 19:55:49.495 I/Unity   (13388): [CricketVR] Delivery #27 bounced at (0.034, 7.289) after 0.446 s; 0.5 cm from target; rebound starts +7.5 cm along
+11-01 19:55:49.717 I/Unity   (13388): [CricketVR] Bat contact #27 (Right hand): in 24.1 m/s, bat 6.1 m/s, approach 30.8 m/s, out 18.5 m/s (67 km/h), launch -12 deg, direction 4 deg, e 0.38, sweet 0.20, edge 0.00, at 0.48 m from toe, substeps 10
+11-01 19:55:49.980 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.7 m/s, peak angular 17.4 rad/s, contact allowed True
+11-01 19:55:51.216 I/Unity   (13388): [CricketVR] Result #27 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 3.2 m | exit 18.5 m/s, launch -12 deg, direction 4 deg || Balls 9 | contacts 6 | misses 3 | bowled 0 | 6 hit(s) scoring pending
+11-01 19:55:51.912 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.4 m/s, peak angular 6.9 rad/s, contact allowed True
+11-01 19:55:57.412 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.69 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 59 max, SetPass max 13, triangles 23972 avg / 52170 max, texture memory 559.4 MB
+11-01 19:55:59.218 I/Unity   (13388): [CricketVR] Delivery #28 Medium: Full: 82 km/h, line +0.23 m, length 4.53 m: v0 22.78 m/s (82.0 km/h), elevation 0.05 deg, predicted bounce (0.231, 4.527)
+11-01 19:55:59.869 I/Unity   (13388): [CricketVR] Delivery #28 bounced at (0.231, 4.527) after 0.635 s; 0.3 cm from target; rebound starts +2.0 cm along
+11-01 19:56:00.008 I/Unity   (13388): [CricketVR] Bat contact #28 (Right hand): in 20.8 m/s, bat 9.8 m/s, approach 31.8 m/s, out 28.1 m/s (101 km/h), launch -19 deg, direction 25 deg, e 0.50, sweet 0.97, edge 0.00, at 0.24 m from toe, substeps 9
+11-01 19:56:00.925 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.1 m/s, peak angular 18.4 rad/s, contact allowed True
+11-01 19:56:01.508 I/Unity   (13388): [CricketVR] Result #28 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.6 m | exit 28.1 m/s, launch -19 deg, direction 25 deg || Balls 10 | contacts 7 | misses 3 | bowled 0 | 7 hit(s) scoring pending
+11-01 19:56:07.412 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.15 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 60 max, SetPass max 13, triangles 25512 avg / 52170 max, texture memory 559.4 MB
+11-01 19:56:09.517 I/Unity   (13388): [CricketVR] Delivery #29 Medium: Full: 95 km/h, line -0.05 m, length 4.89 m: v0 26.39 m/s (95.0 km/h), elevation -2.28 deg, predicted bounce (-0.051, 4.885)
+11-01 19:56:10.071 I/Unity   (13388): [CricketVR] Delivery #29 bounced at (-0.051, 4.885) after 0.536 s; 0.5 cm from target; rebound starts +8.4 cm along
+11-01 19:56:10.258 I/Unity   (13388): [CricketVR] Result #29 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 11 | contacts 7 | misses 3 | bowled 1 | 7 hit(s) scoring pending
+11-01 19:56:10.259 I/Unity   (13388): [CricketVR] Wicket #29: 88 km/h at x -0.069 m, h 0.74 m; Leg stump 16 deg (square 0.48); -X bail 3.0 m/s; LED
+11-01 19:56:10.413 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.5 m/s, peak angular 19.4 rad/s, contact allowed True
+11-01 19:56:10.897 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.8 m/s, peak angular 9.2 rad/s, contact allowed True
+11-01 19:56:11.760 I/Unity   (13388): [CricketVR] No bat contact #29: closest gap 2.0 cm
+11-01 19:56:11.969 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.9 m/s, peak angular 12.2 rad/s, contact allowed True
+11-01 19:56:12.122 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:13.260 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 3.4 rad/s, contact allowed True
+11-01 19:56:13.427 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 1.6 rad/s, contact allowed True
+11-01 19:56:14.621 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:56:14.774 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:14.941 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.010 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.094 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.177 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.260 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.344 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.413 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:15.900 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:56:15.900 I/Unity   (13388): [CricketVR] Session paused: The bat controller lost tracking.
+11-01 19:56:15.914 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:56:17.413 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 21.77 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 57 max, SetPass max 13, triangles 26617 avg / 50694 max, texture memory 559.4 MB
+11-01 19:56:23.496 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:56:26.497 I/Unity   (13388): [CricketVR] Delivery #30 Medium: Good length: 96 km/h, line +0.24 m, length 5.42 m: v0 26.67 m/s (96.0 km/h), elevation -2.92 deg, predicted bounce (0.243, 5.419)
+11-01 19:56:27.023 I/Unity   (13388): [CricketVR] Delivery #30 bounced at (0.243, 5.419) after 0.510 s; 0.0 cm from target; rebound starts +1.7 cm along
+11-01 19:56:27.273 I/Unity   (13388): [CricketVR] Result #30 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 12 | contacts 7 | misses 4 | bowled 1 | 7 hit(s) scoring pending
+11-01 19:56:27.412 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.20 max, GPU 0.00 ms avg / 0.00 max | draw calls 51 avg / 59 max, SetPass max 15, triangles 43704 avg / 51292 max, texture memory 559.4 MB
+11-01 19:56:27.441 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.7 m/s, peak angular 16.9 rad/s, contact allowed True
+11-01 19:56:28.772 I/Unity   (13388): [CricketVR] No bat contact #30: closest gap 4.1 cm
+11-01 19:56:30.094 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 4.9 rad/s, contact allowed True
+11-01 19:56:32.276 I/Unity   (13388): [CricketVR] Session 20261101_195423 ended: Balls 12 | contacts 7 | misses 4 | bowled 1 | 7 hit(s) scoring pending
+11-01 19:56:35.646 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_195635.csv
+11-01 19:56:35.647 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 19:56:35.648 I/Unity   (13388): [CricketVR] Session 20261101_195635: MatchSimulation, 12 balls, seed 24191358, real bat, automatic balls, Medium
+11-01 19:56:37.419 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.90 ms avg / 21.57 max, GPU 0.00 ms avg / 0.00 max | draw calls 45 avg / 59 max, SetPass max 15, triangles 39026 avg / 51196 max, texture memory 559.4 MB
+11-01 19:56:43.642 I/Unity   (13388): [CricketVR] Delivery #31 Medium: Good length: 90 km/h, line +0.26 m, length 6.24 m: v0 25.00 m/s (90.0 km/h), elevation -3.08 deg, predicted bounce (0.262, 6.237)
+11-01 19:56:44.169 I/Unity   (13388): [CricketVR] Delivery #31 bounced at (0.262, 6.236) after 0.511 s; 0.1 cm from target; rebound starts -1.1 cm along
+11-01 19:56:44.470 I/Unity   (13388): [CricketVR] Result #31 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 1 | contacts 0 | misses 1 | bowled 0
+11-01 19:56:44.579 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.5 m/s, peak angular 14.4 rad/s, contact allowed True
+11-01 19:56:45.970 I/Unity   (13388): [CricketVR] No bat contact #31: closest gap 6.0 cm
+11-01 19:56:46.705 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.9 m/s, peak angular 5.4 rad/s, contact allowed True
+11-01 19:56:47.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 15.98 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 58 max, SetPass max 13, triangles 24455 avg / 51402 max, texture memory 559.4 MB
+11-01 19:56:52.484 I/Unity   (13388): [CricketVR] Delivery #32 Medium: Full: 98 km/h, line +0.07 m, length 4.90 m: v0 27.22 m/s (98.0 km/h), elevation -2.63 deg, predicted bounce (0.073, 4.899)
+11-01 19:56:53.011 I/Unity   (13388): [CricketVR] Delivery #32 bounced at (0.073, 4.899) after 0.519 s; 0.4 cm from target; rebound starts -2.7 cm along
+11-01 19:56:53.149 I/Unity   (13388): [CricketVR] Bat contact #32 (Right hand): in 25.2 m/s, bat 8.1 m/s, approach 31.5 m/s, out 25.7 m/s (92 km/h), launch -33 deg, direction 37 deg, e 0.49, sweet 0.96, edge 0.00, at 0.25 m from toe, substeps 10
+11-01 19:56:53.469 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.5 m/s, peak angular 17.6 rad/s, contact allowed True
+11-01 19:56:54.652 I/Unity   (13388): [CricketVR] Result #32 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.9 m | exit 25.7 m/s, launch -33 deg, direction 37 deg || Balls 2 | contacts 1 | misses 1 | bowled 0 | 1 hit(s) scoring pending
+11-01 19:56:57.415 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.97 max, GPU 0.00 ms avg / 0.00 max | draw calls 35 avg / 58 max, SetPass max 13, triangles 23212 avg / 51402 max, texture memory 559.4 MB
+11-01 19:57:02.664 I/Unity   (13388): [CricketVR] Delivery #33 Medium: Full: 85 km/h, line -0.06 m, length 4.31 m: v0 23.61 m/s (85.0 km/h), elevation -0.28 deg, predicted bounce (-0.057, 4.318)
+11-01 19:57:03.301 I/Unity   (13388): [CricketVR] Delivery #33 bounced at (-0.057, 4.318) after 0.622 s; 0.4 cm from target; rebound starts +1.1 cm along
+11-01 19:57:03.413 I/Unity   (13388): [CricketVR] Bat contact #33 (Right hand): in 21.7 m/s, bat 7.2 m/s, approach 30.7 m/s, out 23.3 m/s (84 km/h), launch -1 deg, direction -11 deg, e 0.45, sweet 0.69, edge 0.00, at 0.34 m from toe, substeps 9
+11-01 19:57:03.719 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.0 m/s, peak angular 15.6 rad/s, contact allowed True
+11-01 19:57:04.525 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 8.0 rad/s, contact allowed True
+11-01 19:57:04.913 I/Unity   (13388): [CricketVR] Result #33 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 6.5 m | exit 23.3 m/s, launch -1 deg, direction -11 deg || Balls 3 | contacts 2 | misses 1 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:57:07.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.02 max, GPU 0.00 ms avg / 0.00 max | draw calls 35 avg / 59 max, SetPass max 13, triangles 20899 avg / 52170 max, texture memory 559.4 MB
+11-01 19:57:12.934 I/Unity   (13388): [CricketVR] Delivery #34 Medium: Good length: 100 km/h, line +0.14 m, length 7.29 m: v0 27.78 m/s (100.0 km/h), elevation -5.33 deg, predicted bounce (0.144, 7.290)
+11-01 19:57:13.377 I/Unity   (13388): [CricketVR] Delivery #34 bounced at (0.144, 7.290) after 0.424 s; 0.2 cm from target; rebound starts +10.5 cm along
+11-01 19:57:13.585 I/Unity   (13388): [CricketVR] Bat contact #34 (Right hand): in 25.5 m/s, bat 7.2 m/s, approach 33.0 m/s, out 23.7 m/s (85 km/h), launch -23 deg, direction 16 deg, e 0.46, sweet 0.71, edge 0.00, at 0.33 m from toe, substeps 10
+11-01 19:57:13.850 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.4 m/s, peak angular 16.6 rad/s, contact allowed True
+11-01 19:57:15.079 I/Unity   (13388): [CricketVR] Result #34 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.9 m | exit 23.7 m/s, launch -23 deg, direction 16 deg || Balls 4 | contacts 3 | misses 1 | bowled 0 | 3 hit(s) scoring pending
+11-01 19:57:17.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.79 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 59 max, SetPass max 13, triangles 26217 avg / 52170 max, texture memory 559.4 MB
+11-01 19:57:23.081 I/Unity   (13388): [CricketVR] Delivery #35 Medium: Good length: 82 km/h, line 0.00 m, length 6.37 m: v0 22.78 m/s (82.0 km/h), elevation -2.08 deg, predicted bounce (-0.002, 6.362)
+11-01 19:57:23.653 I/Unity   (13388): [CricketVR] Delivery #35 bounced at (-0.002, 6.361) after 0.555 s; 0.4 cm from target; rebound starts -5.1 cm along
+11-01 19:57:23.842 I/Unity   (13388): [CricketVR] Bat contact #35 (Right hand): in 20.8 m/s, bat 7.3 m/s, approach 28.9 m/s, out 24.2 m/s (87 km/h), launch 25 deg, direction 0 deg, e 0.49, sweet 0.95, edge 0.00, at 0.25 m from toe, substeps 9
+11-01 19:57:24.037 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.7 m/s, peak angular 10.8 rad/s, contact allowed True
+11-01 19:57:25.343 I/Unity   (13388): [CricketVR] Result #35 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 24.2 m/s, launch 25 deg, direction 0 deg || Balls 5 | contacts 4 | misses 1 | bowled 0 | 4 hit(s) scoring pending
+11-01 19:57:27.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.68 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 59 max, SetPass max 13, triangles 30796 avg / 52170 max, texture memory 559.4 MB
+11-01 19:57:27.816 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:57:33.358 I/Unity   (13388): [CricketVR] Delivery #36 Medium: Good length: 94 km/h, line +0.01 m, length 6.55 m: v0 26.11 m/s (94.0 km/h), elevation -3.90 deg, predicted bounce (0.006, 6.548)
+11-01 19:57:33.844 I/Unity   (13388): [CricketVR] Delivery #36 bounced at (0.006, 6.547) after 0.478 s; 0.4 cm from target; rebound starts -5.1 cm along
+11-01 19:57:34.052 I/Unity   (13388): [CricketVR] Bat contact #36 (Right hand): in 24.0 m/s, bat 5.8 m/s, approach 30.0 m/s, out 14.7 m/s (53 km/h), launch -24 deg, direction -40 deg, e 0.21, sweet 0.23, edge -1.00, at 0.47 m from toe, substeps 10
+11-01 19:57:34.414 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.7 m/s, peak angular 19.7 rad/s, contact allowed True
+11-01 19:57:35.552 I/Unity   (13388): [CricketVR] Result #36 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.7 m | exit 14.7 m/s, launch -24 deg, direction -40 deg || Balls 6 | contacts 5 | misses 1 | bowled 0 | 5 hit(s) scoring pending
+11-01 19:57:37.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.38 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 59 max, SetPass max 13, triangles 27107 avg / 52170 max, texture memory 559.4 MB
+11-01 19:57:43.567 I/Unity   (13388): [CricketVR] Delivery #37 Medium: Yorker: 99 km/h, line +0.16 m, length 1.49 m: v0 27.50 m/s (99.0 km/h), elevation 0.08 deg, predicted bounce (0.164, 1.492)
+11-01 19:57:44.218 I/Unity   (13388): [CricketVR] Delivery #37 bounced at (0.164, 1.492) after 0.637 s; 0.3 cm from target; rebound starts -3.1 cm along
+11-01 19:57:44.315 I/Unity   (13388): [CricketVR] Result #37 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 7 | contacts 5 | misses 2 | bowled 0 | 5 hit(s) scoring pending
+11-01 19:57:44.608 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.3 m/s, peak angular 16.7 rad/s, contact allowed True
+11-01 19:57:45.427 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.9 m/s, peak angular 4.9 rad/s, contact allowed True
+11-01 19:57:47.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.82 max, GPU 0.00 ms avg / 0.00 max | draw calls 33 avg / 58 max, SetPass max 12, triangles 24548 avg / 51038 max, texture memory 559.4 MB
+11-01 19:57:52.317 I/Unity   (13388): [CricketVR] Delivery #38 Medium: Yorker: 82 km/h, line -0.03 m, length 0.98 m: v0 22.78 m/s (82.0 km/h), elevation 3.55 deg, predicted bounce (-0.025, 0.979)
+11-01 19:57:53.121 I/Unity   (13388): [CricketVR] Delivery #38 bounced at (-0.025, 0.979) after 0.792 s; 0.2 cm from target; rebound starts +7.7 cm along
+11-01 19:57:53.162 I/Unity   (13388): [CricketVR] Result #38 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 8 | contacts 5 | misses 2 | bowled 1 | 5 hit(s) scoring pending
+11-01 19:57:53.163 I/Unity   (13388): [CricketVR] Wicket #38: 76 km/h at x -0.027 m, h 0.20 m; Middle stump 14 deg (square 0.50); +X bail 2.6 m/s; -X bail 2.6 m/s; LED
+11-01 19:57:53.511 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.8 m/s, peak angular 14.9 rad/s, contact allowed True
+11-01 19:57:54.663 I/Unity   (13388): [CricketVR] No bat contact #38: closest gap 11.5 cm
+11-01 19:57:54.678 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.9 m/s, peak angular 7.5 rad/s, contact allowed True
+11-01 19:57:54.845 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:57:56.358 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.7 m/s, peak angular 2.8 rad/s, contact allowed True
+11-01 19:57:56.692 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:57:57.344 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:57:57.413 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.39 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 58 max, SetPass max 13, triangles 20846 avg / 51242 max, texture memory 559.4 MB
+11-01 19:57:57.427 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:57:57.663 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.6 m/s, peak angular 6.0 rad/s, contact allowed True
+11-01 19:57:57.983 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:57:58.066 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:57:58.205 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.3 m/s, peak angular 4.0 rad/s, contact allowed True
+11-01 19:57:58.219 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:01.164 I/Unity   (13388): [CricketVR] Delivery #39 Medium: Short: 95 km/h, line 0.00 m, length 9.13 m: v0 26.39 m/s (95.0 km/h), elevation -7.38 deg, predicted bounce (-0.005, 9.129)
+11-01 19:58:01.552 I/Unity   (13388): [CricketVR] Delivery #39 bounced at (-0.005, 9.129) after 0.377 s; 0.3 cm from target; rebound starts +4.3 cm along
+11-01 19:58:01.858 I/Unity   (13388): [CricketVR] Bat contact #39 (Right hand): in 23.8 m/s, bat 5.5 m/s, approach 28.0 m/s, out 18.4 m/s (66 km/h), launch 40 deg, direction -23 deg, e 0.37, sweet 0.10, edge 0.00, at 0.53 m from toe, substeps 10
+11-01 19:58:02.136 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.7 m/s, peak angular 14.8 rad/s, contact allowed True
+11-01 19:58:03.357 I/Unity   (13388): [CricketVR] Result #39 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 18.4 m/s, launch 40 deg, direction -23 deg || Balls 9 | contacts 6 | misses 2 | bowled 1 | 6 hit(s) scoring pending
+11-01 19:58:06.024 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 1.7 rad/s, contact allowed True
+11-01 19:58:06.066 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:06.233 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 19.9 m/s, peak angular 1.3 rad/s, contact allowed True
+11-01 19:58:07.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.87 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 59 max, SetPass max 13, triangles 35652 avg / 52170 max, texture memory 559.4 MB
+11-01 19:58:11.358 I/Unity   (13388): [CricketVR] Delivery #40 Medium: Full: 92 km/h, line +0.10 m, length 4.92 m: v0 25.56 m/s (92.0 km/h), elevation -1.94 deg, predicted bounce (0.102, 4.917)
+11-01 19:58:11.924 I/Unity   (13388): [CricketVR] Delivery #40 bounced at (0.102, 4.917) after 0.552 s; 0.2 cm from target; rebound starts +2.8 cm along
+11-01 19:58:12.049 I/Unity   (13388): [CricketVR] Bat contact #40 (Right hand): in 23.6 m/s, bat 6.7 m/s, approach 30.6 m/s, out 22.4 m/s (81 km/h), launch -30 deg, direction 12 deg, e 0.47, sweet 0.78, edge 0.00, at 0.31 m from toe, substeps 10
+11-01 19:58:12.244 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.6 m/s, peak angular 13.2 rad/s, contact allowed True
+11-01 19:58:13.553 I/Unity   (13388): [CricketVR] Result #40 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.9 m | exit 22.4 m/s, launch -30 deg, direction 12 deg || Balls 10 | contacts 7 | misses 2 | bowled 1 | 7 hit(s) scoring pending
+11-01 19:58:14.011 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:58:14.135 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:14.678 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.0 m/s, peak angular 2.7 rad/s, contact allowed True
+11-01 19:58:14.761 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.6 m/s, peak angular 1.8 rad/s, contact allowed True
+11-01 19:58:16.136 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 19:58:16.219 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.539 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.622 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.705 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.788 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.858 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:16.928 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:58:17.414 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.66 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 58 max, SetPass max 13, triangles 27053 avg / 51402 max, texture memory 559.4 MB
+11-01 19:58:21.566 I/Unity   (13388): [CricketVR] Delivery #41 Medium: Good length: 95 km/h, line -0.05 m, length 6.21 m: v0 26.39 m/s (95.0 km/h), elevation -3.64 deg, predicted bounce (-0.049, 6.209)
+11-01 19:58:22.065 I/Unity   (13388): [CricketVR] Delivery #41 bounced at (-0.049, 6.208) after 0.486 s; 0.5 cm from target; rebound starts -7.3 cm along
+11-01 19:58:22.259 I/Unity   (13388): [CricketVR] Bat contact #41 (Right hand): in 24.3 m/s, bat 5.9 m/s, approach 31.1 m/s, out 20.2 m/s (73 km/h), launch -6 deg, direction -23 deg, e 0.40, sweet 0.35, edge 0.00, at 0.43 m from toe, substeps 10
+11-01 19:58:22.579 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.7 m/s, peak angular 16.8 rad/s, contact allowed True
+11-01 19:58:23.760 I/Unity   (13388): [CricketVR] Result #41 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 4.9 m | exit 20.2 m/s, launch -6 deg, direction -23 deg || Balls 11 | contacts 8 | misses 2 | bowled 1 | 8 hit(s) scoring pending
+11-01 19:58:27.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.06 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 60 max, SetPass max 13, triangles 31127 avg / 52238 max, texture memory 559.4 MB
+11-01 19:58:31.761 I/Unity   (13388): [CricketVR] Delivery #42 Medium: Short: 89 km/h, line +0.19 m, length 9.64 m: v0 24.72 m/s (89.0 km/h), elevation -7.68 deg, predicted bounce (0.191, 9.642)
+11-01 19:58:32.163 I/Unity   (13388): [CricketVR] Delivery #42 bounced at (0.191, 9.642) after 0.382 s; 0.1 cm from target; rebound starts +9.8 cm along
+11-01 19:58:32.634 I/Unity   (13388): [CricketVR] Result #42 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 12 | contacts 8 | misses 3 | bowled 1 | 8 hit(s) scoring pending
+11-01 19:58:32.774 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.1 m/s, peak angular 11.3 rad/s, contact allowed True
+11-01 19:58:34.134 I/Unity   (13388): [CricketVR] No bat contact #42: closest gap 3.6 cm
+11-01 19:58:37.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.01 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 58 max, SetPass max 13, triangles 26720 avg / 51002 max, texture memory 559.4 MB
+11-01 19:58:37.637 I/Unity   (13388): [CricketVR] Session 20261101_195635 ended: Balls 12 | contacts 8 | misses 3 | bowled 1 | 8 hit(s) scoring pending
+11-01 19:58:47.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.15 max, GPU 0.00 ms avg / 0.00 max | draw calls 56 avg / 58 max, SetPass max 15, triangles 44426 avg / 45696 max, texture memory 559.4 MB
+11-01 19:58:48.511 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_195848.csv
+11-01 19:58:48.512 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 19:58:48.513 I/Unity   (13388): [CricketVR] Session 20261101_195848: MatchSimulation, 12 balls, seed 24324228, real bat, automatic balls, Hard
+11-01 19:58:56.511 I/Unity   (13388): [CricketVR] Delivery #43 Hard: Yorker: 95 km/h, line -0.07 m, length 0.92 m: v0 26.39 m/s (95.0 km/h), elevation 1.08 deg, predicted bounce (-0.073, 0.922)
+11-01 19:58:57.190 I/Unity   (13388): [CricketVR] Bat contact #43 (Right hand): in 27.1 m/s, bat 10.5 m/s, approach 28.7 m/s, out 27.7 m/s (100 km/h), launch -69 deg, direction 11 deg, e 0.42, sweet 0.44, edge 0.00, at 0.00 m from toe, substeps 11
+11-01 19:58:57.414 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.5 m/s, peak angular 13.3 rad/s, contact allowed True
+11-01 19:58:57.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.62 max, GPU 0.00 ms avg / 0.00 max | draw calls 40 avg / 58 max, SetPass max 15, triangles 31285 avg / 50774 max, texture memory 559.4 MB
+11-01 19:58:58.691 I/Unity   (13388): [CricketVR] Result #43 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.1 m | exit 27.7 m/s, launch -69 deg, direction 11 deg || Balls 1 | contacts 1 | misses 0 | bowled 0 | 1 hit(s) scoring pending
+11-01 19:58:59.983 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.1 rad/s, contact allowed True
+11-01 19:59:06.705 I/Unity   (13388): [CricketVR] Delivery #44 Hard: Short: 99 km/h, line 0.00 m, length 8.59 m: v0 27.50 m/s (99.0 km/h), elevation -6.91 deg, predicted bounce (-0.004, 8.588)
+11-01 19:59:07.094 I/Unity   (13388): [CricketVR] Delivery #44 bounced at (-0.004, 8.587) after 0.382 s; 0.1 cm from target; rebound starts -7.5 cm along
+11-01 19:59:07.371 I/Unity   (13388): [CricketVR] Bat contact #44 (Right hand): in 25.0 m/s, bat 7.0 m/s, approach 29.7 m/s, out 18.7 m/s (67 km/h), launch 54 deg, direction -43 deg, e 0.21, sweet 0.21, edge +0.97, at 0.48 m from toe, substeps 10
+11-01 19:59:07.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.00 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 59 max, SetPass max 13, triangles 20834 avg / 52170 max, texture memory 559.4 MB
+11-01 19:59:07.677 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.7 m/s, peak angular 19.8 rad/s, contact allowed True
+11-01 19:59:08.872 I/Unity   (13388): [CricketVR] Result #44 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 18.7 m/s, launch 54 deg, direction -43 deg || Balls 2 | contacts 2 | misses 0 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:59:10.539 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:59:16.886 I/Unity   (13388): [CricketVR] Delivery #45 Hard: Short: 111 km/h, line +0.15 m, length 8.57 m: v0 30.83 m/s (111.0 km/h), elevation -7.66 deg, predicted bounce (0.154, 8.568)
+11-01 19:59:17.246 I/Unity   (13388): [CricketVR] Delivery #45 bounced at (0.154, 8.568) after 0.342 s; 0.4 cm from target; rebound starts +6.5 cm along
+11-01 19:59:17.427 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 15.90 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 59 max, SetPass max 14, triangles 23222 avg / 52170 max, texture memory 559.4 MB
+11-01 19:59:17.578 I/Unity   (13388): [CricketVR] Result #45 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 3 | contacts 2 | misses 1 | bowled 0 | 2 hit(s) scoring pending
+11-01 19:59:17.774 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.6 m/s, peak angular 14.0 rad/s, contact allowed True
+11-01 19:59:19.080 I/Unity   (13388): [CricketVR] No bat contact #45: closest gap 6.2 cm
+11-01 19:59:25.594 I/Unity   (13388): [CricketVR] Delivery #46 Hard: Full: 101 km/h, line +0.18 m, length 4.90 m: v0 28.06 m/s (101.0 km/h), elevation -2.95 deg, predicted bounce (0.181, 4.902)
+11-01 19:59:26.107 I/Unity   (13388): [CricketVR] Delivery #46 bounced at (0.181, 4.902) after 0.504 s; 0.2 cm from target; rebound starts +1.0 cm along
+11-01 19:59:26.246 I/Unity   (13388): [CricketVR] Bat contact #46 (Right hand): in 26.0 m/s, bat 9.2 m/s, approach 33.3 m/s, out 28.1 m/s (101 km/h), launch -35 deg, direction 37 deg, e 0.50, sweet 1.00, edge 0.00, at 0.19 m from toe, substeps 11
+11-01 19:59:26.524 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.1 m/s, peak angular 15.5 rad/s, contact allowed True
+11-01 19:59:27.425 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.30 max, GPU 0.00 ms avg / 0.00 max | draw calls 35 avg / 60 max, SetPass max 14, triangles 22898 avg / 52370 max, texture memory 559.4 MB
+11-01 19:59:27.744 I/Unity   (13388): [CricketVR] Result #46 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.8 m | exit 28.1 m/s, launch -35 deg, direction 37 deg || Balls 4 | contacts 3 | misses 1 | bowled 0 | 3 hit(s) scoring pending
+11-01 19:59:28.120 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.4 m/s, peak angular 8.8 rad/s, contact allowed True
+11-01 19:59:28.495 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:59:35.745 I/Unity   (13388): [CricketVR] Delivery #47 Hard: Good length: 118 km/h, line -0.04 m, length 7.45 m: v0 32.78 m/s (118.0 km/h), elevation -6.70 deg, predicted bounce (-0.037, 7.455)
+11-01 19:59:36.119 I/Unity   (13388): [CricketVR] Delivery #47 bounced at (-0.037, 7.455) after 0.356 s; 0.2 cm from target; rebound starts +8.5 cm along
+11-01 19:59:36.397 I/Unity   (13388): [CricketVR] Result #47 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 5 | contacts 3 | misses 2 | bowled 0 | 3 hit(s) scoring pending
+11-01 19:59:36.648 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.5 m/s, peak angular 19.6 rad/s, contact allowed True
+11-01 19:59:37.426 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 15.85 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 58 max, SetPass max 14, triangles 18869 avg / 50834 max, texture memory 559.4 MB
+11-01 19:59:37.897 I/Unity   (13388): [CricketVR] No bat contact #47: closest gap 6.6 cm
+11-01 19:59:38.190 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 5.3 rad/s, contact allowed True
+11-01 19:59:39.746 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:59:41.899 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:59:41.900 I/Unity   (13388): [CricketVR] Session paused: The bat controller lost tracking.
+11-01 19:59:41.913 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:59:45.192 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 19:59:47.425 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.58 max, GPU 0.00 ms avg / 0.00 max | draw calls 17 avg / 42 max, SetPass max 12, triangles 14427 avg / 28730 max, texture memory 559.4 MB
+11-01 19:59:53.353 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:59:53.353 I/Unity   (13388): [CricketVR] Session paused: The app was paused.
+11-01 19:59:53.451 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 19:59:53.451 I/Unity   (13388): [CricketVR] Session paused: The headset lost focus.
+11-01 22:41:14.940 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 22:41:14.940 I/Unity   (13388): [CricketVR] Session paused: The headset lost focus.
+11-01 22:41:16.330 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 22:41:16.330 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:16.330 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 0.0 fps, 99.8% frames on time (72 Hz) | CPU 13.89 ms avg / 15.79 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 62 max, SetPass max 24, triangles 15038 avg / 30008 max, texture memory 559.4 MB
+11-01 22:41:16.379 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 22:41:16.379 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:16.394 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:16.394 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:16.408 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:16.408 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:17.484 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:17.484 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:18.582 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:18.582 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:41:25.068 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 62.6 fps, 99.5% frames on time (72 Hz) | CPU 16.22 ms avg / 1301.32 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 48 max, SetPass max 15, triangles 25640 avg / 50548 max, texture memory 1103.1 MB
+11-01 22:41:28.345 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:41:28.359 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:35.067 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.01 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 61 max, SetPass max 15, triangles 45398 avg / 51452 max, texture memory 1103.1 MB
+11-01 22:41:39.664 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:39.678 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:41:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.35 max, GPU 0.00 ms avg / 0.00 max | draw calls 53 avg / 60 max, SetPass max 15, triangles 43050 avg / 51372 max, texture memory 1103.1 MB
+11-01 22:41:48.249 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_224148.csv
+11-01 22:41:48.251 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:41:48.251 I/Unity   (13388): [CricketVR] Session 20261101_224148: MatchSimulation, 12 balls, seed 24749730, real bat, automatic balls, Hard
+11-01 22:41:55.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.99 max, GPU 0.00 ms avg / 0.00 max | draw calls 42 avg / 58 max, SetPass max 15, triangles 31360 avg / 50774 max, texture memory 1103.1 MB
+11-01 22:41:56.250 I/Unity   (13388): [CricketVR] Delivery #48 Hard: Yorker: 115 km/h, line +0.08 m, length 1.07 m: v0 31.94 m/s (115.0 km/h), elevation -1.33 deg, predicted bounce (0.084, 1.065)
+11-01 22:41:56.818 I/Unity   (13388): [CricketVR] Delivery #48 bounced at (0.084, 1.064) after 0.564 s; 0.2 cm from target; rebound starts -9.4 cm along
+11-01 22:41:56.859 I/Unity   (13388): [CricketVR] Result #48 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 1 | contacts 0 | misses 0 | bowled 1
+11-01 22:41:56.859 I/Unity   (13388): [CricketVR] Wicket #48: 108 km/h at x +0.089 m, h 0.22 m; Off stump 30 deg (square 0.85); +X bail 5.4 m/s; LED
+11-01 22:41:57.054 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.6 m/s, peak angular 10.0 rad/s, contact allowed True
+11-01 22:41:57.833 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 4.3 rad/s, contact allowed True
+11-01 22:42:04.875 I/Unity   (13388): [CricketVR] Delivery #49 Hard: Short: 100 km/h, line +0.28 m, length 8.98 m: v0 27.78 m/s (100.0 km/h), elevation -7.54 deg, predicted bounce (0.283, 8.984)
+11-01 22:42:05.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.81 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 53 max, SetPass max 12, triangles 30833 avg / 50698 max, texture memory 1103.1 MB
+11-01 22:42:05.249 I/Unity   (13388): [CricketVR] Delivery #49 bounced at (0.283, 8.984) after 0.366 s; 0.1 cm from target; rebound starts +2.4 cm along
+11-01 22:42:05.651 I/Unity   (13388): [CricketVR] Result #49 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 2 | contacts 0 | misses 1 | bowled 1
+11-01 22:42:05.916 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.0 m/s, peak angular 11.9 rad/s, contact allowed True
+11-01 22:42:13.667 I/Unity   (13388): [CricketVR] Delivery #50 Hard: Good length: 119 km/h, line -0.02 m, length 5.32 m: v0 33.06 m/s (119.0 km/h), elevation -4.70 deg, predicted bounce (-0.023, 5.324)
+11-01 22:42:14.095 I/Unity   (13388): [CricketVR] Delivery #50 bounced at (-0.023, 5.324) after 0.418 s; 0.2 cm from target; rebound starts -7.8 cm along
+11-01 22:42:14.207 I/Unity   (13388): [CricketVR] Bat contact #50 (Right hand): in 30.8 m/s, bat 6.7 m/s, approach 21.6 m/s, out 22.7 m/s (82 km/h), launch -15 deg, direction -123 deg, e 0.25, sweet 0.66, edge -1.00, at 0.34 m from toe, substeps 12
+11-01 22:42:14.526 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.5 m/s, peak angular 14.7 rad/s, contact allowed True
+11-01 22:42:15.068 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.37 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 58 max, SetPass max 14, triangles 21669 avg / 51002 max, texture memory 1103.1 MB
+11-01 22:42:15.707 I/Unity   (13388): [CricketVR] Result #50 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 2.0 m | exit 22.7 m/s, launch -15 deg, direction -123 deg || Balls 3 | contacts 1 | misses 1 | bowled 1 | 1 hit(s) scoring pending
+11-01 22:42:23.722 I/Unity   (13388): [CricketVR] Delivery #51 Hard: Good length: 112 km/h, line +0.14 m, length 7.20 m: v0 31.11 m/s (112.0 km/h), elevation -6.08 deg, predicted bounce (0.137, 7.197)
+11-01 22:42:24.123 I/Unity   (13388): [CricketVR] Delivery #51 bounced at (0.137, 7.197) after 0.384 s; 0.5 cm from target; rebound starts +11.2 cm along
+11-01 22:42:24.304 I/Unity   (13388): [CricketVR] Bat contact #51 (Right hand): in 28.7 m/s, bat 3.3 m/s, approach 24.6 m/s, out 15.5 m/s (56 km/h), launch -25 deg, direction 105 deg, e 0.20, sweet 0.14, edge +1.00, at 0.51 m from toe, substeps 12
+11-01 22:42:24.610 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.3 m/s, peak angular 11.2 rad/s, contact allowed True
+11-01 22:42:25.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.67 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 60 max, SetPass max 14, triangles 20541 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:42:25.805 I/Unity   (13388): [CricketVR] Result #51 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.6 m | exit 15.5 m/s, launch -25 deg, direction 105 deg || Balls 4 | contacts 2 | misses 1 | bowled 1 | 2 hit(s) scoring pending
+11-01 22:42:33.819 I/Unity   (13388): [CricketVR] Delivery #52 Hard: Short: 106 km/h, line +0.14 m, length 9.91 m: v0 29.44 m/s (106.0 km/h), elevation -9.36 deg, predicted bounce (0.144, 9.909)
+11-01 22:42:34.151 I/Unity   (13388): [CricketVR] Delivery #52 bounced at (0.144, 9.909) after 0.315 s; 0.2 cm from target; rebound starts +8.7 cm along
+11-01 22:42:34.554 I/Unity   (13388): [CricketVR] Result #52 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 5 | contacts 2 | misses 2 | bowled 1 | 2 hit(s) scoring pending
+11-01 22:42:34.805 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.8 m/s, peak angular 8.7 rad/s, contact allowed True
+11-01 22:42:35.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.49 max, GPU 0.00 ms avg / 0.00 max | draw calls 31 avg / 53 max, SetPass max 14, triangles 18876 avg / 50754 max, texture memory 1103.1 MB
+11-01 22:42:36.054 I/Unity   (13388): [CricketVR] No bat contact #52: closest gap 10.4 cm
+11-01 22:42:42.569 I/Unity   (13388): [CricketVR] Delivery #53 Hard: Good length: 104 km/h, line -0.01 m, length 7.05 m: v0 28.89 m/s (104.0 km/h), elevation -5.38 deg, predicted bounce (-0.011, 7.050)
+11-01 22:42:42.998 I/Unity   (13388): [CricketVR] Delivery #53 bounced at (-0.011, 7.049) after 0.418 s; 0.1 cm from target; rebound starts -6.6 cm along
+11-01 22:42:43.192 I/Unity   (13388): [CricketVR] Bat contact #53 (Right hand): in 26.6 m/s, bat 4.8 m/s, approach 31.9 m/s, out 18.4 m/s (66 km/h), launch 13 deg, direction -18 deg, e 0.38, sweet 0.18, edge 0.00, at 0.49 m from toe, substeps 11
+11-01 22:42:43.401 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.1 m/s, peak angular 14.7 rad/s, contact allowed True
+11-01 22:42:44.693 I/Unity   (13388): [CricketVR] Result #53 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 17.9 m | exit 18.4 m/s, launch 13 deg, direction -18 deg || Balls 6 | contacts 3 | misses 2 | bowled 1 | 3 hit(s) scoring pending
+11-01 22:42:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.68 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 60 max, SetPass max 14, triangles 30760 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:42:45.138 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.4 m/s, peak angular 9.0 rad/s, contact allowed True
+11-01 22:42:45.319 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:42:46.431 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:42:52.708 I/Unity   (13388): [CricketVR] Delivery #54 Hard: Good length: 111 km/h, line +0.06 m, length 5.32 m: v0 30.83 m/s (111.0 km/h), elevation -4.16 deg, predicted bounce (0.058, 5.311)
+11-01 22:42:53.166 I/Unity   (13388): [CricketVR] Delivery #54 bounced at (0.058, 5.311) after 0.448 s; 0.5 cm from target; rebound starts +7.8 cm along
+11-01 22:42:53.290 I/Unity   (13388): [CricketVR] Bat contact #54 (Right hand): in 28.7 m/s, bat 7.8 m/s, approach 32.1 m/s, out 18.4 m/s (66 km/h), launch -41 deg, direction 54 deg, e 0.27, sweet 0.99, edge -1.00, at 0.22 m from toe, substeps 12
+11-01 22:42:53.540 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.9 m/s, peak angular 14.3 rad/s, contact allowed True
+11-01 22:42:54.194 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 7.6 rad/s, contact allowed True
+11-01 22:42:54.790 I/Unity   (13388): [CricketVR] Result #54 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.6 m | exit 18.4 m/s, launch -41 deg, direction 54 deg || Balls 7 | contacts 4 | misses 2 | bowled 1 | 4 hit(s) scoring pending
+11-01 22:42:55.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.91 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 59 max, SetPass max 14, triangles 19759 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:42:55.333 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.8 m/s, peak angular 9.1 rad/s, contact allowed True
+11-01 22:42:55.722 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:42:56.569 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:42:58.513 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.8 m/s, peak angular 7.3 rad/s, contact allowed True
+11-01 22:42:59.319 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 4.3 rad/s, contact allowed True
+11-01 22:43:02.805 I/Unity   (13388): [CricketVR] Delivery #55 Hard: Good length: 110 km/h, line -0.03 m, length 5.76 m: v0 30.56 m/s (110.0 km/h), elevation -4.50 deg, predicted bounce (-0.028, 5.760)
+11-01 22:43:03.248 I/Unity   (13388): [CricketVR] Delivery #55 bounced at (-0.028, 5.760) after 0.437 s; 0.5 cm from target; rebound starts -2.5 cm along
+11-01 22:43:03.387 I/Unity   (13388): [CricketVR] Bat contact #55 (Right hand): in 28.4 m/s, bat 9.0 m/s, approach 39.3 m/s, out 28.9 m/s (104 km/h), launch -13 deg, direction -11 deg, e 0.45, sweet 0.65, edge 0.00, at 0.34 m from toe, substeps 11
+11-01 22:43:03.691 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.4 m/s, peak angular 16.3 rad/s, contact allowed True
+11-01 22:43:04.887 I/Unity   (13388): [CricketVR] Result #55 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 2.4 m | exit 28.9 m/s, launch -13 deg, direction -11 deg || Balls 8 | contacts 5 | misses 2 | bowled 1 | 5 hit(s) scoring pending
+11-01 22:43:05.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.70 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 59 max, SetPass max 14, triangles 26171 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:43:12.903 I/Unity   (13388): [CricketVR] Delivery #56 Hard: Full: 102 km/h, line +0.29 m, length 4.53 m: v0 28.33 m/s (102.0 km/h), elevation -2.71 deg, predicted bounce (0.289, 4.531)
+11-01 22:43:13.429 I/Unity   (13388): [CricketVR] Delivery #56 bounced at (0.289, 4.530) after 0.514 s; 0.1 cm from target; rebound starts -2.5 cm along
+11-01 22:43:13.637 I/Unity   (13388): [CricketVR] Result #56 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 9 | contacts 5 | misses 3 | bowled 1 | 5 hit(s) scoring pending
+11-01 22:43:13.818 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.7 m/s, peak angular 15.6 rad/s, contact allowed True
+11-01 22:43:15.068 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.61 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 60 max, SetPass max 14, triangles 26576 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:43:15.136 I/Unity   (13388): [CricketVR] No bat contact #56: closest gap 2.7 cm
+11-01 22:43:16.263 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.3 rad/s, contact allowed True
+11-01 22:43:21.653 I/Unity   (13388): [CricketVR] Delivery #57 Hard: Full: 116 km/h, line +0.24 m, length 4.42 m: v0 32.22 m/s (116.0 km/h), elevation -3.76 deg, predicted bounce (0.238, 4.420)
+11-01 22:43:22.124 I/Unity   (13388): [CricketVR] Delivery #57 bounced at (0.238, 4.420) after 0.456 s; 0.2 cm from target; rebound starts +3.2 cm along
+11-01 22:43:22.290 I/Unity   (13388): [CricketVR] Result #57 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 10 | contacts 5 | misses 4 | bowled 1 | 5 hit(s) scoring pending
+11-01 22:43:22.568 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.7 m/s, peak angular 18.5 rad/s, contact allowed True
+11-01 22:43:23.790 I/Unity   (13388): [CricketVR] No bat contact #57: closest gap 11.2 cm
+11-01 22:43:25.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.65 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 59 max, SetPass max 14, triangles 28394 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:43:30.303 I/Unity   (13388): [CricketVR] Delivery #58 Hard: Good length: 106 km/h, line +0.19 m, length 6.39 m: v0 29.44 m/s (106.0 km/h), elevation -4.83 deg, predicted bounce (0.195, 6.393)
+11-01 22:43:30.742 I/Unity   (13388): [CricketVR] Delivery #58 bounced at (0.195, 6.392) after 0.432 s; 0.2 cm from target; rebound starts -8.0 cm along
+11-01 22:43:30.896 I/Unity   (13388): [CricketVR] Bat contact #58 (Right hand): in 27.2 m/s, bat 6.9 m/s, approach 18.5 m/s, out 18.8 m/s (68 km/h), launch 12 deg, direction 120 deg, e 0.23, sweet 0.46, edge +1.00, at 0.39 m from toe, substeps 11
+11-01 22:43:31.206 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.7 m/s, peak angular 16.5 rad/s, contact allowed True
+11-01 22:43:31.903 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 5.9 rad/s, contact allowed True
+11-01 22:43:32.402 I/Unity   (13388): [CricketVR] Result #58 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 17.4 m | exit 18.8 m/s, launch 12 deg, direction 120 deg || Balls 11 | contacts 6 | misses 4 | bowled 1 | 6 hit(s) scoring pending
+11-01 22:43:35.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.04 max, GPU 0.00 ms avg / 0.00 max | draw calls 30 avg / 60 max, SetPass max 14, triangles 18056 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:43:40.416 I/Unity   (13388): [CricketVR] Delivery #59 Hard: Good length: 108 km/h, line -0.05 m, length 5.55 m: v0 30.00 m/s (108.0 km/h), elevation -4.16 deg, predicted bounce (-0.050, 5.552)
+11-01 22:43:40.874 I/Unity   (13388): [CricketVR] Delivery #59 bounced at (-0.050, 5.551) after 0.452 s; 0.4 cm from target; rebound starts -5.0 cm along
+11-01 22:43:41.012 I/Unity   (13388): [CricketVR] Bat contact #59 (Right hand): in 27.9 m/s, bat 8.2 m/s, approach 20.0 m/s, out 21.4 m/s (77 km/h), launch 4 deg, direction -120 deg, e 0.22, sweet 0.32, edge -1.00, at 0.44 m from toe, substeps 13
+11-01 22:43:41.332 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.8 m/s, peak angular 19.4 rad/s, contact allowed True
+11-01 22:43:42.513 I/Unity   (13388): [CricketVR] Result #59 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 10.7 m | exit 21.4 m/s, launch 4 deg, direction -120 deg || Balls 12 | contacts 7 | misses 4 | bowled 1 | 7 hit(s) scoring pending
+11-01 22:43:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.73 max, GPU 0.00 ms avg / 0.00 max | draw calls 30 avg / 59 max, SetPass max 14, triangles 22194 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:43:47.514 I/Unity   (13388): [CricketVR] Session 20261101_224148 ended: Balls 12 | contacts 7 | misses 4 | bowled 1 | 7 hit(s) scoring pending
+11-01 22:43:49.234 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_224349.csv
+11-01 22:43:49.235 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:43:49.237 I/Unity   (13388): [CricketVR] Session 20261101_224349: MatchSimulation, 12 balls, seed 24870715, real bat, automatic balls, Hard
+11-01 22:43:50.846 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 4.6 rad/s, contact allowed True
+11-01 22:43:55.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 22.72 max, GPU 0.00 ms avg / 0.00 max | draw calls 41 avg / 59 max, SetPass max 15, triangles 30150 avg / 51196 max, texture memory 1103.1 MB
+11-01 22:43:57.236 I/Unity   (13388): [CricketVR] Delivery #60 Hard: Good length: 117 km/h, line +0.24 m, length 6.21 m: v0 32.50 m/s (117.0 km/h), elevation -5.38 deg, predicted bounce (0.241, 6.212)
+11-01 22:43:57.646 I/Unity   (13388): [CricketVR] Delivery #60 bounced at (0.241, 6.212) after 0.398 s; 0.4 cm from target; rebound starts +11.8 cm along
+11-01 22:43:57.784 I/Unity   (13388): [CricketVR] Bat contact #60 (Right hand): in 30.2 m/s, bat 7.7 m/s, approach 27.6 m/s, out 21.7 m/s (78 km/h), launch -19 deg, direction 98 deg, e 0.26, sweet 0.81, edge +1.00, at 0.30 m from toe, substeps 12
+11-01 22:43:58.333 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:43:59.291 I/Unity   (13388): [CricketVR] Result #60 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.7 m | exit 21.7 m/s, launch -19 deg, direction 98 deg || Balls 1 | contacts 1 | misses 0 | bowled 0 | 1 hit(s) scoring pending
+11-01 22:44:05.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.46 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 57 max, SetPass max 14, triangles 19701 avg / 50634 max, texture memory 1103.1 MB
+11-01 22:44:07.305 I/Unity   (13388): [CricketVR] Delivery #61 Hard: Short: 103 km/h, line 0.00 m, length 9.77 m: v0 28.61 m/s (103.0 km/h), elevation -8.96 deg, predicted bounce (-0.002, 9.772)
+11-01 22:44:07.651 I/Unity   (13388): [CricketVR] Delivery #61 bounced at (-0.002, 9.772) after 0.329 s; 0.0 cm from target; rebound starts +9.6 cm along
+11-01 22:44:07.943 I/Unity   (13388): [CricketVR] Bat contact #61 (Right hand): in 25.7 m/s, bat 7.0 m/s, approach 25.1 m/s, out 20.7 m/s (75 km/h), launch 78 deg, direction 98 deg, e 0.23, sweet 0.44, edge +1.00, at 0.40 m from toe, substeps 10
+11-01 22:44:08.361 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 11.9 m/s, peak angular 14.9 rad/s, contact allowed True
+11-01 22:44:09.444 I/Unity   (13388): [CricketVR] Result #61 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 20.7 m/s, launch 78 deg, direction 98 deg || Balls 2 | contacts 2 | misses 0 | bowled 0 | 2 hit(s) scoring pending
+11-01 22:44:15.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 19.45 max, GPU 0.00 ms avg / 0.00 max | draw calls 26 avg / 59 max, SetPass max 14, triangles 22966 avg / 51970 max, texture memory 1103.1 MB
+11-01 22:44:17.458 I/Unity   (13388): [CricketVR] Delivery #62 Hard: Good length: 102 km/h, line +0.27 m, length 6.55 m: v0 28.33 m/s (102.0 km/h), elevation -4.67 deg, predicted bounce (0.272, 6.553)
+11-01 22:44:17.916 I/Unity   (13388): [CricketVR] Delivery #62 bounced at (0.272, 6.553) after 0.443 s; 0.1 cm from target; rebound starts +0.4 cm along
+11-01 22:44:18.193 I/Unity   (13388): [CricketVR] Result #62 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 3 | contacts 2 | misses 1 | bowled 0 | 2 hit(s) scoring pending
+11-01 22:44:19.041 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.6 m/s, peak angular 15.7 rad/s, contact allowed True
+11-01 22:44:19.694 I/Unity   (13388): [CricketVR] No bat contact #62: closest gap 4.8 cm
+11-01 22:44:25.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.68 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 60 max, SetPass max 14, triangles 25654 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:44:26.208 I/Unity   (13388): [CricketVR] Delivery #63 Hard: Good length: 114 km/h, line 0.00 m, length 7.49 m: v0 31.67 m/s (114.0 km/h), elevation -6.53 deg, predicted bounce (0.001, 7.499)
+11-01 22:44:26.583 I/Unity   (13388): [CricketVR] Delivery #63 bounced at (0.001, 7.499) after 0.368 s; 0.4 cm from target; rebound starts -4.1 cm along
+11-01 22:44:26.873 I/Unity   (13388): [CricketVR] Result #63 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 4 | contacts 2 | misses 2 | bowled 0 | 2 hit(s) scoring pending
+11-01 22:44:27.124 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.2 m/s, peak angular 20.2 rad/s, contact allowed True
+11-01 22:44:28.374 I/Unity   (13388): [CricketVR] No bat contact #63: closest gap 0.3 cm
+11-01 22:44:34.889 I/Unity   (13388): [CricketVR] Delivery #64 Hard: Good length: 109 km/h, line +0.14 m, length 5.96 m: v0 30.28 m/s (109.0 km/h), elevation -4.61 deg, predicted bounce (0.137, 5.952)
+11-01 22:44:35.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 71.9 fps, 99.9% frames on time (72 Hz) | CPU 13.91 ms avg / 27.50 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 59 max, SetPass max 14, triangles 28932 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:44:35.332 I/Unity   (13388): [CricketVR] Delivery #64 bounced at (0.137, 5.952) after 0.435 s; 0.4 cm from target; rebound starts +4.5 cm along
+11-01 22:44:35.472 I/Unity   (13388): [CricketVR] Bat contact #64 (Right hand): in 28.1 m/s, bat 8.9 m/s, approach 38.7 m/s, out 29.6 m/s (106 km/h), launch -4 deg, direction 12 deg, e 0.48, sweet 0.86, edge 0.00, at 0.29 m from toe, substeps 11
+11-01 22:44:35.790 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.5 m/s, peak angular 17.0 rad/s, contact allowed True
+11-01 22:44:36.970 I/Unity   (13388): [CricketVR] Result #64 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 5.6 m | exit 29.6 m/s, launch -4 deg, direction 12 deg || Balls 5 | contacts 3 | misses 2 | bowled 0 | 3 hit(s) scoring pending
+11-01 22:44:44.985 I/Unity   (13388): [CricketVR] Delivery #65 Hard: Yorker: 106 km/h, line +0.23 m, length 1.45 m: v0 29.44 m/s (106.0 km/h), elevation -0.72 deg, predicted bounce (0.234, 1.451)
+11-01 22:44:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.38 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 60 max, SetPass max 14, triangles 28976 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:44:45.589 I/Unity   (13388): [CricketVR] Delivery #65 bounced at (0.234, 1.450) after 0.599 s; 0.2 cm from target; rebound starts -7.2 cm along
+11-01 22:44:45.672 I/Unity   (13388): [CricketVR] Result #65 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 6 | contacts 3 | misses 3 | bowled 0 | 3 hit(s) scoring pending
+11-01 22:44:45.881 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.8 m/s, peak angular 16.0 rad/s, contact allowed True
+11-01 22:44:47.179 I/Unity   (13388): [CricketVR] No bat contact #65: closest gap 7.6 cm
+11-01 22:44:47.541 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.9 m/s, peak angular 6.9 rad/s, contact allowed True
+11-01 22:44:48.291 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:44:48.527 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:44:48.652 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:44:48.722 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:44:53.694 I/Unity   (13388): [CricketVR] Delivery #66 Hard: Good length: 103 km/h, line +0.17 m, length 7.05 m: v0 28.61 m/s (103.0 km/h), elevation -5.30 deg, predicted bounce (0.166, 7.053)
+11-01 22:44:54.124 I/Unity   (13388): [CricketVR] Delivery #66 bounced at (0.166, 7.053) after 0.422 s; 0.0 cm from target; rebound starts +2.2 cm along
+11-01 22:44:54.318 I/Unity   (13388): [CricketVR] Bat contact #66 (Right hand): in 26.3 m/s, bat 10.2 m/s, approach 27.2 m/s, out 22.1 m/s (80 km/h), launch 39 deg, direction 83 deg, e 0.26, sweet 0.85, edge +1.00, at 0.29 m from toe, substeps 11
+11-01 22:44:54.597 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.1 m/s, peak angular 17.3 rad/s, contact allowed True
+11-01 22:44:55.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 60 max, SetPass max 14, triangles 32174 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:44:55.819 I/Unity   (13388): [CricketVR] Result #66 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 22.1 m/s, launch 39 deg, direction 83 deg || Balls 7 | contacts 4 | misses 3 | bowled 0 | 4 hit(s) scoring pending
+11-01 22:44:56.278 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.2 m/s, peak angular 7.8 rad/s, contact allowed True
+11-01 22:44:56.764 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:44:57.875 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:03.833 I/Unity   (13388): [CricketVR] Delivery #67 Hard: Short: 110 km/h, line +0.08 m, length 9.90 m: v0 30.56 m/s (110.0 km/h), elevation -9.55 deg, predicted bounce (0.082, 9.898)
+11-01 22:45:04.151 I/Unity   (13388): [CricketVR] Delivery #67 bounced at (0.082, 9.898) after 0.305 s; 0.3 cm from target; rebound starts -0.5 cm along
+11-01 22:45:04.540 I/Unity   (13388): [CricketVR] Result #67 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 8 | contacts 4 | misses 4 | bowled 0 | 4 hit(s) scoring pending
+11-01 22:45:04.778 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.9 m/s, peak angular 19.5 rad/s, contact allowed True
+11-01 22:45:05.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.95 max, GPU 0.00 ms avg / 0.00 max | draw calls 27 avg / 55 max, SetPass max 14, triangles 18922 avg / 51970 max, texture memory 1103.1 MB
+11-01 22:45:06.041 I/Unity   (13388): [CricketVR] No bat contact #67: closest gap 13.5 cm
+11-01 22:45:12.556 I/Unity   (13388): [CricketVR] Delivery #68 Hard: Good length: 112 km/h, line -0.01 m, length 5.12 m: v0 31.11 m/s (112.0 km/h), elevation -4.07 deg, predicted bounce (-0.011, 5.123)
+11-01 22:45:13.013 I/Unity   (13388): [CricketVR] Delivery #68 bounced at (-0.011, 5.123) after 0.450 s; 0.1 cm from target; rebound starts +1.5 cm along
+11-01 22:45:13.136 I/Unity   (13388): [CricketVR] Bat contact #68 (Right hand): in 29.0 m/s, bat 8.4 m/s, approach 9.2 m/s, out 20.0 m/s (72 km/h), launch 2 deg, direction -151 deg, e 0.25, sweet 0.74, edge -1.00, at 0.32 m from toe, substeps 12
+11-01 22:45:13.499 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.7 m/s, peak angular 18.8 rad/s, contact allowed True
+11-01 22:45:14.403 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.8 m/s, peak angular 6.3 rad/s, contact allowed True
+11-01 22:45:14.638 I/Unity   (13388): [CricketVR] Result #68 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 8.2 m | exit 20.0 m/s, launch 2 deg, direction -151 deg || Balls 9 | contacts 5 | misses 4 | bowled 0 | 5 hit(s) scoring pending
+11-01 22:45:15.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.84 max, GPU 0.00 ms avg / 0.00 max | draw calls 34 avg / 58 max, SetPass max 14, triangles 23238 avg / 50834 max, texture memory 1103.1 MB
+11-01 22:45:15.167 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.0 rad/s, contact allowed True
+11-01 22:45:15.209 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:45:15.611 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:17.402 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.7 m/s, peak angular 1.7 rad/s, contact allowed True
+11-01 22:45:17.472 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 0.6 rad/s, contact allowed True
+11-01 22:45:17.694 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:18.167 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:18.902 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:45:18.972 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:22.653 I/Unity   (13388): [CricketVR] Delivery #69 Hard: Full: 114 km/h, line +0.10 m, length 4.89 m: v0 31.67 m/s (114.0 km/h), elevation -4.01 deg, predicted bounce (0.101, 4.892)
+11-01 22:45:23.110 I/Unity   (13388): [CricketVR] Delivery #69 bounced at (0.101, 4.892) after 0.449 s; 0.1 cm from target; rebound starts +3.1 cm along
+11-01 22:45:23.221 I/Unity   (13388): [CricketVR] Bat contact #69 (Right hand): in 29.5 m/s, bat 8.8 m/s, approach 28.7 m/s, out 24.3 m/s (87 km/h), launch -46 deg, direction -104 deg, e 0.27, sweet 0.98, edge -1.00, at 0.23 m from toe, substeps 12
+11-01 22:45:23.568 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.7 m/s, peak angular 22.2 rad/s, contact allowed True
+11-01 22:45:24.721 I/Unity   (13388): [CricketVR] Result #69 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.5 m | exit 24.3 m/s, launch -46 deg, direction -104 deg || Balls 10 | contacts 6 | misses 4 | bowled 0 | 6 hit(s) scoring pending
+11-01 22:45:25.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.67 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 58 max, SetPass max 14, triangles 25559 avg / 50834 max, texture memory 1103.1 MB
+11-01 22:45:26.555 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:45:32.735 I/Unity   (13388): [CricketVR] Delivery #70 Hard: Full: 110 km/h, line +0.25 m, length 4.70 m: v0 30.56 m/s (110.0 km/h), elevation -3.55 deg, predicted bounce (0.254, 4.700)
+11-01 22:45:33.210 I/Unity   (13388): [CricketVR] Delivery #70 bounced at (0.254, 4.699) after 0.472 s; 0.5 cm from target; rebound starts -1.3 cm along
+11-01 22:45:33.307 I/Unity   (13388): [CricketVR] Bat contact #70 (Right hand): in 28.5 m/s, bat 9.3 m/s, approach 38.4 m/s, out 31.2 m/s (112 km/h), launch -32 deg, direction 17 deg, e 0.50, sweet 1.00, edge 0.00, at 0.18 m from toe, substeps 11
+11-01 22:45:33.615 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.5 m/s, peak angular 16.0 rad/s, contact allowed True
+11-01 22:45:34.818 I/Unity   (13388): [CricketVR] Result #70 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.8 m | exit 31.2 m/s, launch -32 deg, direction 17 deg || Balls 11 | contacts 7 | misses 4 | bowled 0 | 7 hit(s) scoring pending
+11-01 22:45:35.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.80 max, GPU 0.00 ms avg / 0.00 max | draw calls 33 avg / 59 max, SetPass max 14, triangles 26740 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:45:37.596 I/Unity   (13388): [CricketVR] Ball #70 safety despawn at (28.95, -0.53, 95.93)
+11-01 22:45:42.833 I/Unity   (13388): [CricketVR] Delivery #71 Hard: Good length: 100 km/h, line +0.09 m, length 6.33 m: v0 27.78 m/s (100.0 km/h), elevation -4.27 deg, predicted bounce (0.085, 6.336)
+11-01 22:45:43.304 I/Unity   (13388): [CricketVR] Delivery #71 bounced at (0.085, 6.336) after 0.460 s; 0.2 cm from target; rebound starts -6.1 cm along
+11-01 22:45:43.471 I/Unity   (13388): [CricketVR] Bat contact #71 (Right hand): in 25.6 m/s, bat 10.7 m/s, approach 36.3 m/s, out 25.7 m/s (93 km/h), launch 47 deg, direction 13 deg, e 0.26, sweet 0.79, edge +1.00, at 0.31 m from toe, substeps 11
+11-01 22:45:43.805 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.2 m/s, peak angular 18.0 rad/s, contact allowed True
+11-01 22:45:44.971 I/Unity   (13388): [CricketVR] Result #71 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 25.7 m/s, launch 47 deg, direction 13 deg || Balls 12 | contacts 8 | misses 4 | bowled 0 | 8 hit(s) scoring pending
+11-01 22:45:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.83 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 60 max, SetPass max 14, triangles 31717 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:45:48.652 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.2 m/s, peak angular 5.9 rad/s, contact allowed True
+11-01 22:45:49.916 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.8 m/s, peak angular 4.9 rad/s, contact allowed True
+11-01 22:45:49.972 I/Unity   (13388): [CricketVR] Session 20261101_224349 ended: Balls 12 | contacts 8 | misses 4 | bowled 0 | 8 hit(s) scoring pending
+11-01 22:45:55.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.91 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 59 max, SetPass max 15, triangles 40503 avg / 51276 max, texture memory 1103.1 MB
+11-01 22:45:55.848 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_224555.csv
+11-01 22:45:55.849 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:45:55.850 I/Unity   (13388): [CricketVR] Session 20261101_224555: MatchSimulation, 12 balls, seed 24997328, real bat, automatic balls, Medium
+11-01 22:45:57.221 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.0 m/s, peak angular 4.0 rad/s, contact allowed True
+11-01 22:46:03.847 I/Unity   (13388): [CricketVR] Delivery #72 Medium: Full: 97 km/h, line +0.10 m, length 4.85 m: v0 26.94 m/s (97.0 km/h), elevation -2.48 deg, predicted bounce (0.101, 4.854)
+11-01 22:46:04.387 I/Unity   (13388): [CricketVR] Delivery #72 bounced at (0.101, 4.854) after 0.528 s; 0.5 cm from target; rebound starts -2.6 cm along
+11-01 22:46:04.512 I/Unity   (13388): [CricketVR] Bat contact #72 (Right hand): in 25.0 m/s, bat 9.4 m/s, approach 35.8 m/s, out 27.1 m/s (98 km/h), launch -24 deg, direction 6 deg, e 0.44, sweet 0.58, edge 0.00, at 0.36 m from toe, substeps 12
+11-01 22:46:04.819 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.4 m/s, peak angular 18.6 rad/s, contact allowed True
+11-01 22:46:05.068 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.05 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 59 max, SetPass max 15, triangles 26118 avg / 52170 max, texture memory 1103.1 MB
+11-01 22:46:06.012 I/Unity   (13388): [CricketVR] Result #72 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 1.2 m | exit 27.1 m/s, launch -24 deg, direction 6 deg || Balls 1 | contacts 1 | misses 0 | bowled 0 | 1 hit(s) scoring pending
+11-01 22:46:14.028 I/Unity   (13388): [CricketVR] Delivery #73 Medium: Good length: 83 km/h, line -0.10 m, length 6.35 m: v0 23.06 m/s (83.0 km/h), elevation -2.22 deg, predicted bounce (-0.095, 6.344)
+11-01 22:46:14.596 I/Unity   (13388): [CricketVR] Delivery #73 bounced at (-0.095, 6.344) after 0.551 s; 0.4 cm from target; rebound starts +8.3 cm along
+11-01 22:46:14.790 I/Unity   (13388): [CricketVR] Bat contact #73 (Right hand): in 21.0 m/s, bat 11.4 m/s, approach 30.6 m/s, out 32.9 m/s (119 km/h), launch 56 deg, direction -23 deg, e 0.49, sweet 0.95, edge 0.00, at 0.15 m from toe, substeps 10
+11-01 22:46:15.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.47 max, GPU 0.00 ms avg / 0.00 max | draw calls 38 avg / 60 max, SetPass max 14, triangles 27052 avg / 52370 max, texture memory 1103.1 MB
+11-01 22:46:15.096 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.3 m/s, peak angular 17.2 rad/s, contact allowed True
+11-01 22:46:16.290 I/Unity   (13388): [CricketVR] Result #73 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 32.9 m/s, launch 56 deg, direction -23 deg || Balls 2 | contacts 2 | misses 0 | bowled 0 | 2 hit(s) scoring pending
+11-01 22:46:17.166 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.3 m/s, peak angular 8.6 rad/s, contact allowed True
+11-01 22:46:18.847 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:19.583 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 0.9 rad/s, contact allowed True
+11-01 22:46:20.541 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.2 m/s, peak angular 0.5 rad/s, contact allowed True
+11-01 22:46:21.305 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:46:21.374 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:21.444 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:24.305 I/Unity   (13388): [CricketVR] Delivery #74 Medium: Good length: 99 km/h, line +0.11 m, length 5.44 m: v0 27.50 m/s (99.0 km/h), elevation -3.26 deg, predicted bounce (0.111, 5.445)
+11-01 22:46:24.817 I/Unity   (13388): [CricketVR] Delivery #74 bounced at (0.111, 5.445) after 0.496 s; 0.3 cm from target; rebound starts +8.1 cm along
+11-01 22:46:24.970 I/Unity   (13388): [CricketVR] Bat contact #74 (Right hand): in 25.4 m/s, bat 9.1 m/s, approach 34.9 m/s, out 27.2 m/s (98 km/h), launch -39 deg, direction 1 deg, e 0.44, sweet 0.62, edge 0.00, at 0.35 m from toe, substeps 12
+11-01 22:46:25.068 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.76 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 61 max, SetPass max 14, triangles 23602 avg / 52450 max, texture memory 1103.1 MB
+11-01 22:46:25.304 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.4 m/s, peak angular 22.0 rad/s, contact allowed True
+11-01 22:46:26.470 I/Unity   (13388): [CricketVR] Result #74 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.8 m | exit 27.2 m/s, launch -39 deg, direction 1 deg || Balls 3 | contacts 3 | misses 0 | bowled 0 | 3 hit(s) scoring pending
+11-01 22:46:28.443 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.2 m/s, peak angular 4.1 rad/s, contact allowed True
+11-01 22:46:34.486 I/Unity   (13388): [CricketVR] Delivery #75 Medium: Short: 86 km/h, line +0.19 m, length 8.62 m: v0 23.89 m/s (86.0 km/h), elevation -5.72 deg, predicted bounce (0.187, 8.620)
+11-01 22:46:34.929 I/Unity   (13388): [CricketVR] Delivery #75 bounced at (0.187, 8.619) after 0.439 s; 0.1 cm from target; rebound starts -4.8 cm along
+11-01 22:46:35.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.45 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 59 max, SetPass max 14, triangles 27770 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:46:35.373 I/Unity   (13388): [CricketVR] Result #75 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 4 | contacts 3 | misses 1 | bowled 0 | 3 hit(s) scoring pending
+11-01 22:46:35.680 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.6 m/s, peak angular 17.1 rad/s, contact allowed True
+11-01 22:46:36.874 I/Unity   (13388): [CricketVR] No bat contact #75: closest gap 11.6 cm
+11-01 22:46:37.444 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.1 m/s, peak angular 6.5 rad/s, contact allowed True
+11-01 22:46:38.013 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:46:38.249 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:39.346 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.0 m/s, peak angular 4.8 rad/s, contact allowed True
+11-01 22:46:39.374 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:39.444 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:43.388 I/Unity   (13388): [CricketVR] Delivery #76 Medium: Good length: 80 km/h, line +0.21 m, length 5.87 m: v0 22.22 m/s (80.0 km/h), elevation -1.11 deg, predicted bounce (0.205, 5.866)
+11-01 22:46:43.998 I/Unity   (13388): [CricketVR] Delivery #76 bounced at (0.205, 5.866) after 0.593 s; 0.2 cm from target; rebound starts +7.9 cm along
+11-01 22:46:44.178 I/Unity   (13388): [CricketVR] Bat contact #76 (Right hand): in 20.2 m/s, bat 11.3 m/s, approach 24.1 m/s, out 21.9 m/s (79 km/h), launch 55 deg, direction 70 deg, e 0.27, sweet 0.99, edge +1.00, at 0.22 m from toe, substeps 11
+11-01 22:46:44.499 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.5 m/s, peak angular 17.1 rad/s, contact allowed True
+11-01 22:46:45.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.22 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 55 max, SetPass max 14, triangles 26426 avg / 51970 max, texture memory 1103.1 MB
+11-01 22:46:45.680 I/Unity   (13388): [CricketVR] Result #76 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 21.9 m/s, launch 55 deg, direction 70 deg || Balls 5 | contacts 4 | misses 1 | bowled 0 | 4 hit(s) scoring pending
+11-01 22:46:46.014 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.5 m/s, peak angular 5.3 rad/s, contact allowed True
+11-01 22:46:46.806 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 7.0 m/s, peak angular 1.2 rad/s, contact allowed True
+11-01 22:46:47.597 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.7 m/s, peak angular 1.7 rad/s, contact allowed True
+11-01 22:46:48.042 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 0.8 rad/s, contact allowed True
+11-01 22:46:48.403 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:46:53.694 I/Unity   (13388): [CricketVR] Delivery #77 Medium: Short: 93 km/h, line +0.13 m, length 9.62 m: v0 25.83 m/s (93.0 km/h), elevation -8.01 deg, predicted bounce (0.125, 9.625)
+11-01 22:46:54.069 I/Unity   (13388): [CricketVR] Delivery #77 bounced at (0.125, 9.624) after 0.369 s; 0.4 cm from target; rebound starts -3.9 cm along
+11-01 22:46:54.430 I/Unity   (13388): [CricketVR] Bat contact #77 (Right hand): in 23.2 m/s, bat 2.4 m/s, approach 12.7 m/s, out 15.0 m/s (54 km/h), launch -11 deg, direction 128 deg, e 0.39, sweet 0.29, edge 0.00, at 0.44 m from toe, substeps 9
+11-01 22:46:54.653 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.7 m/s, peak angular 8.3 rad/s, contact allowed True
+11-01 22:46:55.070 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.15 max, GPU 0.00 ms avg / 0.00 max | draw calls 29 avg / 54 max, SetPass max 14, triangles 23795 avg / 51202 max, texture memory 1103.1 MB
+11-01 22:46:55.930 I/Unity   (13388): [CricketVR] Result #77 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 4.3 m | exit 15.0 m/s, launch -11 deg, direction 128 deg || Balls 6 | contacts 5 | misses 1 | bowled 0 | 5 hit(s) scoring pending
+11-01 22:47:03.945 I/Unity   (13388): [CricketVR] Delivery #78 Medium: Full: 95 km/h, line -0.06 m, length 4.71 m: v0 26.39 m/s (95.0 km/h), elevation -2.11 deg, predicted bounce (-0.065, 4.705)
+11-01 22:47:04.499 I/Unity   (13388): [CricketVR] Delivery #78 bounced at (-0.065, 4.705) after 0.545 s; 0.5 cm from target; rebound starts +8.9 cm along
+11-01 22:47:04.692 I/Unity   (13388): [CricketVR] Result #78 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 7 | contacts 5 | misses 1 | bowled 1 | 5 hit(s) scoring pending
+11-01 22:47:04.693 I/Unity   (13388): [CricketVR] Wicket #78: 88 km/h at x -0.086 m, h 0.71 m; Leg stump 23 deg (square 0.80); -X bail 4.2 m/s; LED
+11-01 22:47:04.957 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.2 m/s, peak angular 17.0 rad/s, contact allowed True
+11-01 22:47:05.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.57 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 58 max, SetPass max 14, triangles 23956 avg / 50834 max, texture memory 1103.1 MB
+11-01 22:47:06.193 I/Unity   (13388): [CricketVR] No bat contact #78: closest gap 5.0 cm
+11-01 22:47:07.680 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.9 m/s, peak angular 0.8 rad/s, contact allowed True
+11-01 22:47:09.888 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.0 m/s, peak angular 5.0 rad/s, contact allowed True
+11-01 22:47:12.708 I/Unity   (13388): [CricketVR] Delivery #79 Medium: Good length: 86 km/h, line -0.03 m, length 7.25 m: v0 23.89 m/s (86.0 km/h), elevation -3.80 deg, predicted bounce (-0.027, 7.250)
+11-01 22:47:13.208 I/Unity   (13388): [CricketVR] Delivery #79 bounced at (-0.027, 7.249) after 0.495 s; 0.1 cm from target; rebound starts -6.4 cm along
+11-01 22:47:13.595 I/Unity   (13388): [CricketVR] Result #79 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 8 | contacts 5 | misses 2 | bowled 1 | 5 hit(s) scoring pending
+11-01 22:47:15.069 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.82 max, GPU 0.00 ms avg / 0.00 max | draw calls 35 avg / 59 max, SetPass max 14, triangles 34677 avg / 51538 max, texture memory 1103.1 MB
+11-01 22:47:15.096 I/Unity   (13388): [CricketVR] No bat contact #79: closest gap 9.8 cm
+11-01 22:47:21.611 I/Unity   (13388): [CricketVR] Delivery #80 Medium: Good length: 85 km/h, line +0.05 m, length 6.06 m: v0 23.61 m/s (85.0 km/h), elevation -2.19 deg, predicted bounce (0.052, 6.059)
+11-01 22:47:22.165 I/Unity   (13388): [CricketVR] Delivery #80 bounced at (0.052, 6.059) after 0.551 s; 0.3 cm from target; rebound starts -6.1 cm along
+11-01 22:47:22.346 I/Unity   (13388): [CricketVR] Bat contact #80 (Right hand): in 21.6 m/s, bat 10.7 m/s, approach 32.9 m/s, out 24.4 m/s (88 km/h), launch 46 deg, direction -4 deg, e 0.26, sweet 0.77, edge +1.00, at 0.31 m from toe, substeps 9
+11-01 22:47:22.693 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.2 m/s, peak angular 17.6 rad/s, contact allowed True
+11-01 22:47:23.846 I/Unity   (13388): [CricketVR] Result #80 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Carry: N/A | exit 24.4 m/s, launch 46 deg, direction -4 deg || Balls 9 | contacts 6 | misses 2 | bowled 1 | 6 hit(s) scoring pending
+11-01 22:47:25.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.71 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 55 max, SetPass max 14, triangles 23186 avg / 51970 max, texture memory 1103.1 MB
+11-01 22:47:25.347 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 4.7 rad/s, contact allowed True
+11-01 22:47:25.652 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:26.707 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.3 m/s, peak angular 2.2 rad/s, contact allowed True
+11-01 22:47:26.874 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 1.5 rad/s, contact allowed True
+11-01 22:47:27.888 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.3 m/s, peak angular 2.2 rad/s, contact allowed True
+11-01 22:47:28.666 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:47:28.818 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:28.901 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:28.985 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:29.040 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:29.540 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 22:47:29.540 I/Unity   (13388): [CricketVR] Session paused: The bat controller lost tracking.
+11-01 22:47:29.554 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:33.193 I/Unity   (13388): [CricketVR] Bat motion reset: FocusChanged; contacts suppressed for 0.10 s
+11-01 22:47:35.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 56 max, SetPass max 15, triangles 28083 avg / 50156 max, texture memory 1103.1 MB
+11-01 22:47:36.194 I/Unity   (13388): [CricketVR] Delivery #81 Medium: Good length: 90 km/h, line +0.20 m, length 7.03 m: v0 25.00 m/s (90.0 km/h), elevation -4.01 deg, predicted bounce (0.201, 7.026)
+11-01 22:47:36.693 I/Unity   (13388): [CricketVR] Delivery #81 bounced at (0.201, 7.026) after 0.482 s; 0.1 cm from target; rebound starts +7.4 cm along
+11-01 22:47:37.040 I/Unity   (13388): [CricketVR] Result #81 Miss | end PassedStumps, zone None, contact False, bowled False | Carry: - || Balls 10 | contacts 6 | misses 3 | bowled 1 | 6 hit(s) scoring pending
+11-01 22:47:37.194 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.3 m/s, peak angular 16.6 rad/s, contact allowed True
+11-01 22:47:38.540 I/Unity   (13388): [CricketVR] No bat contact #81: closest gap 4.5 cm
+11-01 22:47:39.013 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.9 m/s, peak angular 9.1 rad/s, contact allowed True
+11-01 22:47:39.486 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:47:39.722 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:40.500 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:40.569 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:47:45.055 I/Unity   (13388): [CricketVR] Delivery #82 Medium: Good length: 96 km/h, line +0.27 m, length 5.09 m: v0 26.67 m/s (96.0 km/h), elevation -2.59 deg, predicted bounce (0.267, 5.088)
+11-01 22:47:45.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.86 max, GPU 0.00 ms avg / 0.00 max | draw calls 36 avg / 54 max, SetPass max 13, triangles 24546 avg / 51770 max, texture memory 1103.1 MB
+11-01 22:47:45.596 I/Unity   (13388): [CricketVR] Delivery #82 bounced at (0.267, 5.088) after 0.525 s; 0.0 cm from target; rebound starts +6.0 cm along
+11-01 22:47:45.735 I/Unity   (13388): [CricketVR] Bat contact #82 (Right hand): in 24.6 m/s, bat 6.4 m/s, approach 21.7 m/s, out 18.0 m/s (65 km/h), launch -12 deg, direction 101 deg, e 0.27, sweet 0.93, edge +1.00, at 0.26 m from toe, substeps 10
+11-01 22:47:46.375 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.7 m/s, peak angular 13.7 rad/s, contact allowed True
+11-01 22:47:47.235 I/Unity   (13388): [CricketVR] Result #82 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 2.3 m | exit 18.0 m/s, launch -12 deg, direction 101 deg || Balls 11 | contacts 7 | misses 3 | bowled 1 | 7 hit(s) scoring pending
+11-01 22:47:55.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.91 max, GPU 0.00 ms avg / 0.00 max | draw calls 30 avg / 60 max, SetPass max 14, triangles 17815 avg / 51682 max, texture memory 1103.1 MB
+11-01 22:47:55.250 I/Unity   (13388): [CricketVR] Delivery #83 Medium: Full: 93 km/h, line +0.29 m, length 4.46 m: v0 25.83 m/s (93.0 km/h), elevation -1.62 deg, predicted bounce (0.288, 4.456)
+11-01 22:47:55.831 I/Unity   (13388): [CricketVR] Delivery #83 bounced at (0.288, 4.456) after 0.566 s; 0.3 cm from target; rebound starts +7.9 cm along
+11-01 22:47:55.956 I/Unity   (13388): [CricketVR] Bat contact #83 (Right hand): in 23.9 m/s, bat 7.0 m/s, approach 26.9 m/s, out 23.1 m/s (83 km/h), launch -60 deg, direction 49 deg, e 0.47, sweet 0.99, edge +0.13, at 0.22 m from toe, substeps 10
+11-01 22:47:56.304 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.3 m/s, peak angular 15.6 rad/s, contact allowed True
+11-01 22:47:57.457 I/Unity   (13388): [CricketVR] Result #83 Hit, practice scoring pending | end HitWindowElapsed, zone None, contact True, bowled False | Measured carry 0.3 m | exit 23.1 m/s, launch -60 deg, direction 49 deg || Balls 12 | contacts 8 | misses 3 | bowled 1 | 8 hit(s) scoring pending
+11-01 22:47:58.208 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.9 m/s, peak angular 9.6 rad/s, contact allowed True
+11-01 22:48:00.499 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:48:00.526 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:48:00.749 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:48:00.804 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:48:02.458 I/Unity   (13388): [CricketVR] Session 20261101_224555 ended: Balls 12 | contacts 8 | misses 3 | bowled 1 | 8 hit(s) scoring pending
+11-01 22:48:05.082 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.22 max, GPU 0.00 ms avg / 0.00 max | draw calls 37 avg / 59 max, SetPass max 15, triangles 28553 avg / 51602 max, texture memory 1103.1 MB
+11-01 22:48:08.277 I/Unity   (13388): [CricketVR] Environment: NetMode
+11-01 22:48:15.082 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.84 max, GPU 0.00 ms avg / 0.00 max | draw calls 63 avg / 70 max, SetPass max 15, triangles 37722 avg / 44928 max, texture memory 1103.1 MB
+11-01 22:48:17.097 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_224817.csv
+11-01 22:48:17.098 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:48:17.099 I/Unity   (13388): [CricketVR] Session 20261101_224817: NetPractice, 12 balls, seed 25138577, real bat, automatic balls
+11-01 22:48:18.666 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.3 m/s, peak angular 4.7 rad/s, contact allowed True
+11-01 22:48:25.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.02 max, GPU 0.00 ms avg / 0.00 max | draw calls 52 avg / 73 max, SetPass max 11, triangles 17028 avg / 41746 max, texture memory 1103.1 MB
+11-01 22:48:25.100 I/Unity   (13388): [CricketVR] Delivery #84 Net Practice: Off-spin (flighted), Full: 79 km/h, line +0.14 m, length 3.96 m: v0 21.94 m/s (79.0 km/h), elevation 5.40 deg, predicted bounce (0.349, 3.957), Off-spin swing 0.12 m (curve 0.02 m), drift 0.07 m, dip 4.5 m/s², turn 4.6 deg toward -X, finishes at x +0.145 m at the crease
+11-01 22:48:25.791 I/Unity   (13388): [CricketVR] Delivery #84 bounced at (0.349, 3.956) after 0.690 s; 0.1 cm from target; rebound starts -7.6 cm along
+11-01 22:48:25.999 I/Unity   (13388): [CricketVR] Result #84 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 1 | contacts 0 | misses 0 | bowled 1
+11-01 22:48:25.999 I/Unity   (13388): [CricketVR] Wicket #84: 71 km/h at x +0.058 m, h 0.71 m; Off stump 9 deg (square 0.27); +X bail 1.9 m/s
+11-01 22:48:26.150 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.5 m/s, peak angular 11.3 rad/s, contact allowed True
+11-01 22:48:27.499 I/Unity   (13388): [CricketVR] No bat contact #84: closest gap 2.8 cm
+11-01 22:48:34.017 I/Unity   (13388): [CricketVR] Delivery #85 Net Practice: Off-spin (flighted), Good length: 76 km/h, line +0.13 m, length 5.35 m: v0 21.11 m/s (76.0 km/h), elevation 7.73 deg, predicted bounce (0.457, 5.346), Off-spin swing 0.23 m (curve 0.02 m), drift 0.10 m, dip 8.1 m/s², turn 5.3 deg toward -X, finishes at x +0.135 m at the crease
+11-01 22:48:34.679 I/Unity   (13388): [CricketVR] Delivery #85 bounced at (0.457, 5.345) after 0.654 s; 0.1 cm from target; rebound starts -4.5 cm along
+11-01 22:48:35.077 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.92 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 73 max, SetPass max 10, triangles 16786 avg / 42562 max, texture memory 1103.1 MB
+11-01 22:48:35.188 I/Unity   (13388): [CricketVR] Result #85 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 2 | contacts 0 | misses 1 | bowled 1
+11-01 22:48:35.505 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.8 m/s, peak angular 12.1 rad/s, contact allowed True
+11-01 22:48:36.694 I/Unity   (13388): [CricketVR] No bat contact #85: closest gap 0.3 cm
+11-01 22:48:43.209 I/Unity   (13388): [CricketVR] Delivery #86 Net Practice: Off-spin, Full: 83 km/h, line +0.01 m, length 3.41 m: v0 23.06 m/s (83.0 km/h), elevation 3.69 deg, predicted bounce (0.258, 3.406), Off-spin swing 0.13 m (curve 0.02 m), drift 0.09 m, dip 3.1 m/s², turn 6.4 deg toward -X, finishes at x +0.012 m at the crease
+11-01 22:48:43.901 I/Unity   (13388): [CricketVR] Delivery #86 bounced at (0.258, 3.406) after 0.680 s; 0.0 cm from target; rebound starts +0.4 cm along
+11-01 22:48:44.081 I/Unity   (13388): [CricketVR] Result #86 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 3 | contacts 0 | misses 1 | bowled 2
+11-01 22:48:44.082 I/Unity   (13388): [CricketVR] Wicket #86: 67 km/h at x -0.103 m, h 0.64 m; Leg stump 19 deg (square 0.88); -X bail 3.4 m/s
+11-01 22:48:44.722 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.9 m/s, peak angular 18.9 rad/s, contact allowed True
+11-01 22:48:45.083 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.48 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 72 max, SetPass max 10, triangles 14633 avg / 42482 max, texture memory 1103.1 MB
+11-01 22:48:45.582 I/Unity   (13388): [CricketVR] No bat contact #86: closest gap 8.0 cm
+11-01 22:48:45.764 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.8 m/s, peak angular 9.4 rad/s, contact allowed True
+11-01 22:48:46.139 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:48:46.666 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:48:52.101 I/Unity   (13388): [CricketVR] Delivery #87 Net Practice: Off-spin (flighted), Good length: 71 km/h, line +0.11 m, length 4.06 m: v0 19.72 m/s (71.0 km/h), elevation 5.61 deg, predicted bounce (0.352, 4.056), Off-spin swing 0.13 m (curve 0.02 m), drift 0.10 m, dip 2.0 m/s², turn 5.3 deg toward -X, finishes at x +0.107 m at the crease
+11-01 22:48:52.861 I/Unity   (13388): [CricketVR] Delivery #87 bounced at (0.352, 4.054) after 0.763 s; 0.1 cm from target; rebound starts -12.5 cm along
+11-01 22:48:53.096 I/Unity   (13388): [CricketVR] Result #87 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 4 | contacts 0 | misses 1 | bowled 3
+11-01 22:48:53.096 I/Unity   (13388): [CricketVR] Wicket #87: 64 km/h at x +0.006 m, h 0.69 m; Middle stump 18 deg (square 0.88); +X bail 3.2 m/s; -X bail 3.2 m/s
+11-01 22:48:53.208 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.0 m/s, peak angular 8.1 rad/s, contact allowed True
+11-01 22:48:54.596 I/Unity   (13388): [CricketVR] No bat contact #87: closest gap 0.6 cm
+11-01 22:48:55.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.78 max, GPU 0.00 ms avg / 0.00 max | draw calls 43 avg / 74 max, SetPass max 10, triangles 22714 avg / 42574 max, texture memory 1103.1 MB
+11-01 22:49:01.111 I/Unity   (13388): [CricketVR] Delivery #88 Net Practice: Off-spin, Short: 81 km/h, line -0.05 m, length 6.28 m: v0 22.50 m/s (81.0 km/h), elevation 0.78 deg, predicted bounce (0.376, 6.278), Off-spin swing 0.33 m (curve 0.02 m), drift 0.08 m, dip 3.6 m/s², turn 5.3 deg toward -X, finishes at x -0.049 m at the crease
+11-01 22:49:01.680 I/Unity   (13388): [CricketVR] Delivery #88 bounced at (0.376, 6.277) after 0.568 s; 0.2 cm from target; rebound starts -12.4 cm along
+11-01 22:49:02.138 I/Unity   (13388): [CricketVR] Result #88 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 5 | contacts 0 | misses 2 | bowled 3
+11-01 22:49:03.486 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 14.3 m/s, peak angular 17.9 rad/s, contact allowed True
+11-01 22:49:03.638 I/Unity   (13388): [CricketVR] No bat contact #88: closest gap 10.7 cm
+11-01 22:49:05.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.04 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 67 max, SetPass max 10, triangles 12940 avg / 42082 max, texture memory 1103.1 MB
+11-01 22:49:06.027 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:49:10.154 I/Unity   (13388): [CricketVR] Delivery #89 Net Practice: Off-spin, Good length: 88 km/h, line +0.24 m, length 5.28 m: v0 24.44 m/s (88.0 km/h), elevation -0.48 deg, predicted bounce (0.466, 5.280), Off-spin swing 0.18 m (curve 0.01 m), drift 0.06 m, dip 1.9 m/s², turn 3.9 deg toward -X, finishes at x +0.243 m at the crease
+11-01 22:49:10.722 I/Unity   (13388): [CricketVR] Delivery #89 bounced at (0.466, 5.279) after 0.564 s; 0.1 cm from target; rebound starts -4.1 cm along
+11-01 22:49:10.901 I/Unity   (13388): [CricketVR] Bat contact #89 (Right hand): in 20.0 m/s, bat 6.1 m/s, approach 27.4 m/s, out 20.8 m/s (75 km/h), launch -22 deg, direction 9 deg, e 0.47, sweet 0.81, edge 0.00, at 0.30 m from toe, substeps 8
+11-01 22:49:11.091 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.4 m/s, peak angular 12.3 rad/s, contact allowed True
+11-01 22:49:11.394 I/Unity   (13388): [CricketVR] Result #89 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.4 m | exit 20.8 m/s, launch -22 deg, direction 9 deg || Balls 6 | contacts 1 | misses 2 | bowled 3
+11-01 22:49:11.589 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.8 m/s, peak angular 8.9 rad/s, contact allowed True
+11-01 22:49:14.666 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:49:14.819 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 25.2 m/s, peak angular 2.2 rad/s, contact allowed True
+11-01 22:49:15.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.44 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 74 max, SetPass max 11, triangles 22260 avg / 43328 max, texture memory 1103.1 MB
+11-01 22:49:19.417 I/Unity   (13388): [CricketVR] Delivery #90 Net Practice: Off-spin, Full: 82 km/h, line +0.20 m, length 3.81 m: v0 22.78 m/s (82.0 km/h), elevation 3.67 deg, predicted bounce (0.438, 3.810), Off-spin swing 0.14 m (curve 0.02 m), drift 0.09 m, dip 3.4 m/s², turn 5.8 deg toward -X, finishes at x +0.205 m at the crease
+11-01 22:49:20.096 I/Unity   (13388): [CricketVR] Delivery #90 bounced at (0.438, 3.809) after 0.671 s; 0.1 cm from target; rebound starts -9.5 cm along
+11-01 22:49:20.276 I/Unity   (13388): [CricketVR] Result #90 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 7 | contacts 1 | misses 2 | bowled 4
+11-01 22:49:20.277 I/Unity   (13388): [CricketVR] Wicket #90: 74 km/h at x +0.100 m, h 0.63 m; Off stump 22 deg (square 0.93); +X bail 3.9 m/s
+11-01 22:49:20.383 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 7.8 m/s, peak angular 10.7 rad/s, contact allowed True
+11-01 22:49:21.562 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.0 m/s, peak angular 8.8 rad/s, contact allowed True
+11-01 22:49:21.770 I/Unity   (13388): [CricketVR] No bat contact #90: closest gap 2.8 cm
+11-01 22:49:22.458 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.1 m/s, peak angular 9.1 rad/s, contact allowed True
+11-01 22:49:25.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.03 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 74 max, SetPass max 10, triangles 18444 avg / 42574 max, texture memory 1103.1 MB
+11-01 22:49:28.295 I/Unity   (13388): [CricketVR] Delivery #91 Net Practice: Off-spin (flighted), Good length: 79 km/h, line -0.01 m, length 5.17 m: v0 21.94 m/s (79.0 km/h), elevation 7.70 deg, predicted bounce (0.230, 5.174), Off-spin swing 0.14 m (curve 0.01 m), drift 0.05 m, dip 9.1 m/s², turn 3.1 deg toward -X, finishes at x -0.008 m at the crease
+11-01 22:49:28.930 I/Unity   (13388): [CricketVR] Delivery #91 bounced at (0.230, 5.172) after 0.638 s; 0.2 cm from target; rebound starts -13.7 cm along
+11-01 22:49:29.208 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.9 m/s, peak angular 10.0 rad/s, contact allowed True
+11-01 22:49:29.346 I/Unity   (13388): [CricketVR] Result #91 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 8 | contacts 1 | misses 3 | bowled 4
+11-01 22:49:30.846 I/Unity   (13388): [CricketVR] No bat contact #91: closest gap 1.7 cm
+11-01 22:49:31.486 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.9 m/s, peak angular 7.3 rad/s, contact allowed True
+11-01 22:49:35.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.24 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 71 max, SetPass max 10, triangles 19875 avg / 42794 max, texture memory 1103.1 MB
+11-01 22:49:37.362 I/Unity   (13388): [CricketVR] Delivery #92 Net Practice: Off-spin, Good length: 78 km/h, line 0.00 m, length 5.94 m: v0 21.67 m/s (78.0 km/h), elevation 2.63 deg, predicted bounce (0.369, 5.942), Off-spin swing 0.23 m (curve 0.02 m), drift 0.10 m, dip 4.3 m/s², turn 4.9 deg toward -X, finishes at x +0.005 m at the crease
+11-01 22:49:37.972 I/Unity   (13388): [CricketVR] Delivery #92 bounced at (0.369, 5.942) after 0.605 s; 0.0 cm from target; rebound starts -3.2 cm along
+11-01 22:49:38.305 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.9 m/s, peak angular 5.1 rad/s, contact allowed True
+11-01 22:49:38.494 I/Unity   (13388): [CricketVR] Result #92 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 9 | contacts 1 | misses 4 | bowled 4
+11-01 22:49:39.999 I/Unity   (13388): [CricketVR] No bat contact #92: closest gap 3.8 cm
+11-01 22:49:40.528 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.3 rad/s, contact allowed True
+11-01 22:49:45.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.54 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 69 max, SetPass max 10, triangles 16430 avg / 41478 max, texture memory 1103.1 MB
+11-01 22:49:46.517 I/Unity   (13388): [CricketVR] Delivery #93 Net Practice: Off-spin (flighted), Full: 79 km/h, line -0.06 m, length 3.97 m: v0 21.94 m/s (79.0 km/h), elevation 7.71 deg, predicted bounce (0.113, 3.972), Off-spin swing 0.06 m (curve 0.01 m), drift 0.06 m, dip 6.9 m/s², turn 2.9 deg toward -X, finishes at x -0.060 m at the crease
+11-01 22:49:47.207 I/Unity   (13388): [CricketVR] Delivery #93 bounced at (0.113, 3.970) after 0.693 s; 0.2 cm from target; rebound starts -13.2 cm along
+11-01 22:49:47.332 I/Unity   (13388): [CricketVR] Bat contact #93 (Right hand): in 19.9 m/s, bat 6.0 m/s, approach 24.7 m/s, out 15.2 m/s (55 km/h), launch -27 deg, direction -61 deg, e 0.22, sweet 0.32, edge -1.00, at 0.43 m from toe, substeps 8
+11-01 22:49:47.485 I/Unity   (13388): [CricketVR] Result #93 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.0 m | exit 15.2 m/s, launch -27 deg, direction -61 deg || Balls 10 | contacts 2 | misses 4 | bowled 4
+11-01 22:49:47.611 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.2 m/s, peak angular 17.2 rad/s, contact allowed True
+11-01 22:49:49.139 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.3 m/s, peak angular 9.4 rad/s, contact allowed True
+11-01 22:49:49.819 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 7.4 m/s, peak angular 3.8 rad/s, contact allowed True
+11-01 22:49:50.347 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:49:50.583 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:49:50.653 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:49:55.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.29 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 73 max, SetPass max 10, triangles 12754 avg / 43250 max, texture memory 1103.1 MB
+11-01 22:49:55.500 I/Unity   (13388): [CricketVR] Delivery #94 Net Practice: Off-spin, Good length: 91 km/h, line +0.24 m, length 4.72 m: v0 25.28 m/s (91.0 km/h), elevation -0.82 deg, predicted bounce (0.577, 4.721), Off-spin swing 0.29 m (curve 0.02 m), drift 0.09 m, dip 1.2 m/s², turn 6.8 deg toward -X, finishes at x +0.236 m at the crease
+11-01 22:49:56.069 I/Unity   (13388): [CricketVR] Delivery #94 bounced at (0.577, 4.720) after 0.568 s; 0.2 cm from target; rebound starts -14.1 cm along
+11-01 22:49:56.277 I/Unity   (13388): [CricketVR] Result #94 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 11 | contacts 2 | misses 4 | bowled 5
+11-01 22:49:56.277 I/Unity   (13388): [CricketVR] Wicket #94: 82 km/h at x +0.124 m, h 0.59 m; Off stump 16 deg (square 0.50); +X bail 2.8 m/s
+11-01 22:49:56.694 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 10.2 m/s, peak angular 16.5 rad/s, contact allowed True
+11-01 22:49:57.778 I/Unity   (13388): [CricketVR] No bat contact #94: closest gap 8.9 cm
+11-01 22:49:57.792 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.5 m/s, peak angular 8.7 rad/s, contact allowed True
+11-01 22:49:58.431 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 9.4 m/s, peak angular 3.2 rad/s, contact allowed True
+11-01 22:49:58.820 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:49:58.861 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:49:59.166 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.0 m/s, peak angular 11.1 rad/s, contact allowed True
+11-01 22:49:59.874 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.7 m/s, peak angular 4.6 rad/s, contact allowed True
+11-01 22:50:00.222 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:50:04.293 I/Unity   (13388): [CricketVR] Delivery #95 Net Practice: Off-spin, Good length: 81 km/h, line +0.02 m, length 4.98 m: v0 22.50 m/s (81.0 km/h), elevation 2.61 deg, predicted bounce (0.350, 4.983), Off-spin swing 0.20 m (curve 0.02 m), drift 0.10 m, dip 3.6 m/s², turn 5.4 deg toward -X, finishes at x +0.025 m at the crease
+11-01 22:50:04.930 I/Unity   (13388): [CricketVR] Delivery #95 bounced at (0.350, 4.983) after 0.626 s; 0.0 cm from target; rebound starts -2.6 cm along
+11-01 22:50:05.097 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.76 max, GPU 0.00 ms avg / 0.00 max | draw calls 51 avg / 74 max, SetPass max 10, triangles 20419 avg / 42482 max, texture memory 1103.1 MB
+11-01 22:50:05.110 I/Unity   (13388): [CricketVR] Bat contact #95 (Right hand): in 18.1 m/s, bat 10.0 m/s, approach 4.5 m/s, out 11.8 m/s (43 km/h), launch 11 deg, direction -147 deg, e 0.25, sweet 0.66, edge -1.00, at 0.34 m from toe, substeps 13
+11-01 22:50:05.402 I/Unity   (13388): [CricketVR] Result #95 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 11.8 m/s, launch 11 deg, direction -147 deg || Balls 12 | contacts 3 | misses 4 | bowled 5
+11-01 22:50:05.916 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.0 m/s, peak angular 21.5 rad/s, contact allowed True
+11-01 22:50:10.405 I/Unity   (13388): [CricketVR] Session 20261101_224817 ended: Balls 12 | contacts 3 | misses 4 | bowled 5
+11-01 22:50:12.333 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_225012.csv
+11-01 22:50:12.334 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:50:12.335 I/Unity   (13388): [CricketVR] Session 20261101_225012: NetPractice, 12 balls, seed 25253814, real bat, automatic balls
+11-01 22:50:14.013 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.4 m/s, peak angular 4.9 rad/s, contact allowed True
+11-01 22:50:15.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.83 max, GPU 0.00 ms avg / 0.00 max | draw calls 55 avg / 74 max, SetPass max 11, triangles 27152 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:50:20.335 I/Unity   (13388): [CricketVR] Delivery #96 Net Practice: Off-spin, Good length: 77 km/h, line -0.02 m, length 4.79 m: v0 21.39 m/s (77.0 km/h), elevation 4.91 deg, predicted bounce (0.235, 4.795), Off-spin swing 0.14 m (curve 0.02 m), drift 0.07 m, dip 4.5 m/s², turn 3.9 deg toward -X, finishes at x -0.022 m at the crease
+11-01 22:50:21.013 I/Unity   (13388): [CricketVR] Delivery #96 bounced at (0.235, 4.794) after 0.669 s; 0.1 cm from target; rebound starts -4.7 cm along
+11-01 22:50:21.165 I/Unity   (13388): [CricketVR] Bat contact #96 (Right hand): in 17.0 m/s, bat 13.3 m/s, approach 31.8 m/s, out 34.8 m/s (125 km/h), launch 39 deg, direction -7 deg, e 0.50, sweet 1.00, edge 0.00, at 0.22 m from toe, substeps 13
+11-01 22:50:21.458 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.1 m/s, peak angular 21.4 rad/s, contact allowed True
+11-01 22:50:21.832 I/Unity   (13388): [CricketVR] Result #96 Hit, over a side net | end LeftEnclosure, zone OverSide, contact True, bowled False | Carry: N/A | exit 34.8 m/s, launch 39 deg, direction -7 deg || Balls 1 | contacts 1 | misses 0 | bowled 0
+11-01 22:50:24.346 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.8 m/s, peak angular 6.8 rad/s, contact allowed True
+11-01 22:50:25.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.77 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 72 max, SetPass max 11, triangles 18363 avg / 43238 max, texture memory 1103.1 MB
+11-01 22:50:29.848 I/Unity   (13388): [CricketVR] Delivery #97 Net Practice: Off-spin, Full: 89 km/h, line 0.00 m, length 2.88 m: v0 24.72 m/s (89.0 km/h), elevation 1.73 deg, predicted bounce (0.130, 2.877), Off-spin swing 0.04 m (curve 0.02 m), drift 0.07 m, dip 1.7 m/s², turn 4.1 deg toward -X, finishes at x -0.005 m at the crease
+11-01 22:50:30.513 I/Unity   (13388): [CricketVR] Delivery #97 bounced at (0.130, 2.877) after 0.655 s; 0.1 cm from target; rebound starts -6.6 cm along
+11-01 22:50:30.651 I/Unity   (13388): [CricketVR] Result #97 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 2 | contacts 1 | misses 0 | bowled 1
+11-01 22:50:30.652 I/Unity   (13388): [CricketVR] Wicket #97: 73 km/h at x -0.094 m, h 0.52 m; Leg stump 22 deg (square 0.94); -X bail 3.9 m/s
+11-01 22:50:30.860 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 12.3 m/s, peak angular 16.7 rad/s, contact allowed True
+11-01 22:50:32.083 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.2 m/s, peak angular 8.2 rad/s, contact allowed True
+11-01 22:50:32.151 I/Unity   (13388): [CricketVR] No bat contact #97: closest gap 4.4 cm
+11-01 22:50:32.416 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:50:34.097 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:50:35.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.84 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 71 max, SetPass max 9, triangles 16978 avg / 42462 max, texture memory 1103.1 MB
+11-01 22:50:38.668 I/Unity   (13388): [CricketVR] Delivery #98 Net Practice: Off-spin, Full: 86 km/h, line -0.04 m, length 3.92 m: v0 23.89 m/s (86.0 km/h), elevation 1.80 deg, predicted bounce (0.131, 3.919), Off-spin swing 0.06 m (curve 0.02 m), drift 0.06 m, dip 2.4 m/s², turn 3.0 deg toward -X, finishes at x -0.039 m at the crease
+11-01 22:50:39.305 I/Unity   (13388): [CricketVR] Delivery #98 bounced at (0.131, 3.918) after 0.634 s; 0.1 cm from target; rebound starts -6.0 cm along
+11-01 22:50:39.429 I/Unity   (13388): [CricketVR] Bat contact #98 (Right hand): in 19.5 m/s, bat 3.8 m/s, approach 13.6 m/s, out 14.3 m/s (52 km/h), launch -10 deg, direction -118 deg, e 0.27, sweet 1.00, edge -1.00, at 0.20 m from toe, substeps 8
+11-01 22:50:39.569 I/Unity   (13388): [CricketVR] Result #98 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.9 m | exit 14.3 m/s, launch -10 deg, direction -118 deg || Balls 3 | contacts 2 | misses 0 | bowled 1
+11-01 22:50:39.570 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.1 m/s, peak angular 6.4 rad/s, contact allowed True
+11-01 22:50:41.556 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.4 m/s, peak angular 8.1 rad/s, contact allowed True
+11-01 22:50:45.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.1 fps, 100.0% frames on time (72 Hz) | CPU 13.87 ms avg / 16.42 max, GPU 0.00 ms avg / 0.00 max | draw calls 51 avg / 72 max, SetPass max 10, triangles 18902 avg / 42738 max, texture memory 1103.1 MB
+11-01 22:50:47.167 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 3.9 rad/s, contact allowed True
+11-01 22:50:47.570 I/Unity   (13388): [CricketVR] Delivery #99 Net Practice: Off-spin, Good length: 78 km/h, line +0.04 m, length 4.66 m: v0 21.67 m/s (78.0 km/h), elevation 4.57 deg, predicted bounce (0.270, 4.656), Off-spin swing 0.13 m (curve 0.02 m), drift 0.07 m, dip 4.3 m/s², turn 3.8 deg toward -X, finishes at x +0.036 m at the crease
+11-01 22:50:48.249 I/Unity   (13388): [CricketVR] Delivery #99 bounced at (0.270, 4.656) after 0.666 s; 0.0 cm from target; rebound starts +0.5 cm along
+11-01 22:50:48.415 I/Unity   (13388): [CricketVR] Bat contact #99 (Right hand): in 17.3 m/s, bat 3.5 m/s, approach 20.4 m/s, out 13.4 m/s (48 km/h), launch -39 deg, direction 27 deg, e 0.43, sweet 0.52, edge 0.00, at 0.38 m from toe, substeps 7
+11-01 22:50:48.541 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.5 m/s, peak angular 6.6 rad/s, contact allowed True
+11-01 22:50:48.896 I/Unity   (13388): [CricketVR] Result #99 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.8 m | exit 13.4 m/s, launch -39 deg, direction 27 deg || Balls 4 | contacts 3 | misses 0 | bowled 1
+11-01 22:50:49.854 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.4 m/s, peak angular 11.5 rad/s, contact allowed True
+11-01 22:50:55.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.1 fps, 100.0% frames on time (72 Hz) | CPU 13.87 ms avg / 16.40 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 74 max, SetPass max 11, triangles 18279 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:50:56.889 I/Unity   (13388): [CricketVR] Delivery #100 Net Practice: Off-spin, Good length: 81 km/h, line +0.17 m, length 5.32 m: v0 22.50 m/s (81.0 km/h), elevation 2.15 deg, predicted bounce (0.409, 5.322), Off-spin swing 0.18 m (curve 0.01 m), drift 0.06 m, dip 3.6 m/s², turn 3.8 deg toward -X, finishes at x +0.170 m at the crease
+11-01 22:50:57.499 I/Unity   (13388): [CricketVR] Delivery #100 bounced at (0.409, 5.320) after 0.611 s; 0.2 cm from target; rebound starts -15.2 cm along
+11-01 22:50:57.674 I/Unity   (13388): [CricketVR] Bat contact #100 (Right hand): in 20.4 m/s, bat 3.5 m/s, approach 20.8 m/s, out 15.5 m/s (56 km/h), launch -57 deg, direction 49 deg, e 0.48, sweet 0.85, edge 0.00, at 0.29 m from toe, substeps 8
+11-01 22:50:57.855 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.9 m/s, peak angular 7.9 rad/s, contact allowed True
+11-01 22:50:57.960 I/Unity   (13388): [CricketVR] Result #100 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.4 m | exit 15.5 m/s, launch -57 deg, direction 49 deg || Balls 5 | contacts 4 | misses 0 | bowled 1
+11-01 22:50:59.023 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.0 m/s, peak angular 11.4 rad/s, contact allowed True
+11-01 22:51:00.062 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.5 m/s, peak angular 6.0 rad/s, contact allowed True
+11-01 22:51:00.339 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:51:00.672 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:05.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.1 fps, 100.0% frames on time (72 Hz) | CPU 13.87 ms avg / 16.48 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 71 max, SetPass max 10, triangles 18229 avg / 42470 max, texture memory 1103.1 MB
+11-01 22:51:05.959 I/Unity   (13388): [CricketVR] Delivery #101 Net Practice: Off-spin, Good length: 79 km/h, line +0.23 m, length 4.69 m: v0 21.94 m/s (79.0 km/h), elevation 3.99 deg, predicted bounce (0.508, 4.692), Off-spin swing 0.22 m (curve 0.02 m), drift 0.08 m, dip 4.1 m/s², turn 5.5 deg toward -X, finishes at x +0.231 m at the crease
+11-01 22:51:06.623 I/Unity   (13388): [CricketVR] Delivery #101 bounced at (0.508, 4.691) after 0.656 s; 0.1 cm from target; rebound starts -7.2 cm along
+11-01 22:51:06.776 I/Unity   (13388): [CricketVR] Bat contact #101 (Right hand): in 19.9 m/s, bat 3.9 m/s, approach 21.6 m/s, out 16.8 m/s (60 km/h), launch -61 deg, direction 23 deg, e 0.50, sweet 0.99, edge 0.00, at 0.18 m from toe, substeps 8
+11-01 22:51:06.936 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.5 m/s, peak angular 7.6 rad/s, contact allowed True
+11-01 22:51:07.253 I/Unity   (13388): [CricketVR] Result #101 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.3 m | exit 16.8 m/s, launch -61 deg, direction 23 deg || Balls 6 | contacts 5 | misses 0 | bowled 1
+11-01 22:51:08.117 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.2 m/s, peak angular 8.0 rad/s, contact allowed True
+11-01 22:51:15.103 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 16.67 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 73 max, SetPass max 11, triangles 11005 avg / 43250 max, texture memory 1103.1 MB
+11-01 22:51:15.243 I/Unity   (13388): [CricketVR] Delivery #102 Net Practice: Doosra, Good length: 78 km/h, line -0.08 m, length 4.95 m: v0 21.67 m/s (78.0 km/h), elevation 4.15 deg, predicted bounce (-0.119, 4.947), Doosra swing 0.11 m (curve 0.01 m), drift 0.05 m, dip 4.3 m/s², turn 2.8 deg toward +X, finishes at x -0.075 m at the crease
+11-01 22:51:15.908 I/Unity   (13388): [CricketVR] Delivery #102 bounced at (-0.119, 4.947) after 0.653 s; 0.0 cm from target; rebound starts -0.4 cm along
+11-01 22:51:16.076 I/Unity   (13388): [CricketVR] Bat contact #102 (Right hand): in 17.3 m/s, bat 3.8 m/s, approach 20.9 m/s, out 10.8 m/s (39 km/h), launch -24 deg, direction -24 deg, e 0.31, sweet 0.54, edge -0.65, at 0.37 m from toe, substeps 7
+11-01 22:51:16.158 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.4 m/s, peak angular 11.2 rad/s, contact allowed True
+11-01 22:51:16.617 I/Unity   (13388): [CricketVR] Result #102 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 1.2 m | exit 10.8 m/s, launch -24 deg, direction -24 deg || Balls 7 | contacts 6 | misses 0 | bowled 1
+11-01 22:51:16.936 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.0 m/s, peak angular 9.5 rad/s, contact allowed True
+11-01 22:51:17.867 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.1 m/s, peak angular 8.6 rad/s, contact allowed True
+11-01 22:51:18.020 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:19.145 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:51:19.436 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:51:19.547 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:24.604 I/Unity   (13388): [CricketVR] Delivery #103 Net Practice: Off-spin, Good length: 83 km/h, line +0.18 m, length 5.09 m: v0 23.06 m/s (83.0 km/h), elevation 1.60 deg, predicted bounce (0.420, 5.088), Off-spin swing 0.16 m (curve 0.02 m), drift 0.08 m, dip 3.1 m/s², turn 4.1 deg toward -X, finishes at x +0.184 m at the crease
+11-01 22:51:25.103 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 74 max, SetPass max 10, triangles 16422 avg / 43238 max, texture memory 1103.1 MB
+11-01 22:51:25.214 I/Unity   (13388): [CricketVR] Delivery #103 bounced at (0.420, 5.088) after 0.606 s; 0.1 cm from target; rebound starts -4.9 cm along
+11-01 22:51:25.395 I/Unity   (13388): [CricketVR] Bat contact #103 (Right hand): in 17.7 m/s, bat 2.0 m/s, approach 17.6 m/s, out 12.0 m/s (43 km/h), launch -70 deg, direction -16 deg, e 0.43, sweet 0.53, edge 0.00, at 0.38 m from toe, substeps 7
+11-01 22:51:25.492 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 5.3 rad/s, contact allowed True
+11-01 22:51:26.494 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.5 m/s, peak angular 9.7 rad/s, contact allowed True
+11-01 22:51:27.158 I/Unity   (13388): [CricketVR] Result #103 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.2 m | exit 12.0 m/s, launch -70 deg, direction -16 deg || Balls 8 | contacts 7 | misses 0 | bowled 1
+11-01 22:51:27.547 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.3 m/s, peak angular 10.5 rad/s, contact allowed True
+11-01 22:51:28.395 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 15.7 m/s, peak angular 2.4 rad/s, contact allowed True
+11-01 22:51:28.784 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:51:28.909 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:29.102 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 5.0 m/s, peak angular 4.7 rad/s, contact allowed True
+11-01 22:51:35.103 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.75 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 74 max, SetPass max 11, triangles 13643 avg / 42246 max, texture memory 1103.1 MB
+11-01 22:51:35.146 I/Unity   (13388): [CricketVR] Delivery #104 Net Practice: Off-spin, Good length: 91 km/h, line +0.12 m, length 5.36 m: v0 25.28 m/s (91.0 km/h), elevation -1.51 deg, predicted bounce (0.402, 5.361), Off-spin swing 0.23 m (curve 0.01 m), drift 0.06 m, dip 1.2 m/s², turn 4.4 deg toward -X, finishes at x +0.116 m at the crease
+11-01 22:51:35.699 I/Unity   (13388): [CricketVR] Delivery #104 bounced at (0.402, 5.361) after 0.542 s; 0.0 cm from target; rebound starts -2.7 cm along
+11-01 22:51:35.950 I/Unity   (13388): [CricketVR] Result #104 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 9 | contacts 7 | misses 0 | bowled 2
+11-01 22:51:35.950 I/Unity   (13388): [CricketVR] Wicket #104: 75 km/h at x +0.046 m, h 0.71 m; Off stump 3 deg (square 0.04) Middle stump 6 deg (square 0.15); +X bail 2.0 m/s; -X bail 1.5 m/s
+11-01 22:51:36.158 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.8 m/s, peak angular 11.8 rad/s, contact allowed True
+11-01 22:51:37.450 I/Unity   (13388): [CricketVR] No bat contact #104: closest gap 10.9 cm
+11-01 22:51:37.464 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.4 m/s, peak angular 5.4 rad/s, contact allowed True
+11-01 22:51:39.187 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:41.200 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 1.0 rad/s, contact allowed True
+11-01 22:51:42.242 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 5.0 rad/s, contact allowed True
+11-01 22:51:42.367 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:43.228 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:43.938 I/Unity   (13388): [CricketVR] Delivery #105 Net Practice: Doosra, Short: 80 km/h, line +0.05 m, length 6.25 m: v0 22.22 m/s (80.0 km/h), elevation 1.26 deg, predicted bounce (-0.093, 6.248), Doosra swing 0.19 m (curve 0.02 m), drift 0.09 m, dip 3.8 m/s², turn 4.1 deg toward +X, finishes at x +0.054 m at the crease
+11-01 22:51:44.520 I/Unity   (13388): [CricketVR] Delivery #105 bounced at (-0.093, 6.248) after 0.576 s; 0.0 cm from target; rebound starts -0.9 cm along
+11-01 22:51:45.033 I/Unity   (13388): [CricketVR] Result #105 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 10 | contacts 7 | misses 1 | bowled 2
+11-01 22:51:45.103 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.88 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 74 max, SetPass max 10, triangles 13582 avg / 42634 max, texture memory 1103.1 MB
+11-01 22:51:45.228 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.3 m/s, peak angular 10.4 rad/s, contact allowed True
+11-01 22:51:46.533 I/Unity   (13388): [CricketVR] No bat contact #105: closest gap 0.1 cm
+11-01 22:51:53.021 I/Unity   (13388): [CricketVR] Delivery #106 Net Practice: Off-spin, Full: 91 km/h, line -0.02 m, length 2.75 m: v0 25.28 m/s (91.0 km/h), elevation 1.13 deg, predicted bounce (0.162, 2.746), Off-spin swing 0.05 m (curve 0.03 m), drift 0.10 m, dip 1.2 m/s², turn 6.4 deg toward -X, finishes at x -0.017 m at the crease
+11-01 22:51:53.673 I/Unity   (13388): [CricketVR] Delivery #106 bounced at (0.162, 2.746) after 0.646 s; 0.0 cm from target; rebound starts -0.8 cm along
+11-01 22:51:53.797 I/Unity   (13388): [CricketVR] Result #106 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 11 | contacts 7 | misses 1 | bowled 3
+11-01 22:51:53.797 I/Unity   (13388): [CricketVR] Wicket #106: 75 km/h at x -0.137 m, h 0.46 m; Leg stump 9 deg (square 0.25); -X bail 1.8 m/s
+11-01 22:51:54.066 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 8.0 m/s, peak angular 10.1 rad/s, contact allowed True
+11-01 22:51:55.105 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.98 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 74 max, SetPass max 9, triangles 11509 avg / 42634 max, texture memory 1103.1 MB
+11-01 22:51:55.257 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.7 m/s, peak angular 5.6 rad/s, contact allowed True
+11-01 22:51:55.298 I/Unity   (13388): [CricketVR] No bat contact #106: closest gap 6.2 cm
+11-01 22:51:56.090 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:51:57.965 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.6 m/s, peak angular 4.6 rad/s, contact allowed True
+11-01 22:52:01.785 I/Unity   (13388): [CricketVR] Delivery #107 Net Practice: Off-spin, Short: 76 km/h, line +0.17 m, length 7.11 m: v0 21.11 m/s (76.0 km/h), elevation 1.66 deg, predicted bounce (0.630, 7.113), Off-spin swing 0.46 m (curve 0.02 m), drift 0.10 m, dip 4.8 m/s², turn 6.3 deg toward -X, finishes at x +0.166 m at the crease
+11-01 22:52:02.352 I/Unity   (13388): [CricketVR] Delivery #107 bounced at (0.630, 7.112) after 0.565 s; 0.1 cm from target; rebound starts -6.8 cm along
+11-01 22:52:02.616 I/Unity   (13388): [CricketVR] Bat contact #107 (Right hand): in 19.1 m/s, bat 10.0 m/s, approach 30.6 m/s, out 24.7 m/s (89 km/h), launch 35 deg, direction -14 deg, e 0.33, sweet 0.47, edge -0.48, at 0.39 m from toe, substeps 14
+11-01 22:52:03.047 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 18.2 m/s, peak angular 20.9 rad/s, contact allowed True
+11-01 22:52:03.088 I/Unity   (13388): [CricketVR] Result #107 Hit, over a side net | end LeftEnclosure, zone OverSide, contact True, bowled False | Carry: N/A | exit 24.7 m/s, launch 35 deg, direction -14 deg || Balls 12 | contacts 8 | misses 1 | bowled 3
+11-01 22:52:05.104 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.76 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 67 max, SetPass max 11, triangles 11320 avg / 42838 max, texture memory 1103.1 MB
+11-01 22:52:08.076 I/Unity   (13388): [CricketVR] Session 20261101_225012 ended: Balls 12 | contacts 8 | misses 1 | bowled 3
+11-01 22:52:09.841 I/Unity   (13388): [CricketVR] Ball log: /storage/emulated/0/Android/data/com.cricketvr.prototype/files/cricketvr_20261101_225209.csv
+11-01 22:52:09.842 I/Unity   (13388): [CricketVR] Bat motion reset: Manual; contacts suppressed for 0.10 s
+11-01 22:52:09.842 I/Unity   (13388): [CricketVR] Session 20261101_225209: NetPractice, 12 balls, seed 25371320, real bat, automatic balls
+11-01 22:52:11.867 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 3.1 m/s, peak angular 5.1 rad/s, contact allowed True
+11-01 22:52:15.104 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.84 max, GPU 0.00 ms avg / 0.00 max | draw calls 54 avg / 73 max, SetPass max 11, triangles 25356 avg / 41746 max, texture memory 1103.1 MB
+11-01 22:52:17.841 I/Unity   (13388): [CricketVR] Delivery #108 Net Practice: Off-spin, Good length: 82 km/h, line +0.06 m, length 5.65 m: v0 22.78 m/s (82.0 km/h), elevation 1.27 deg, predicted bounce (0.415, 5.648), Off-spin swing 0.26 m (curve 0.02 m), drift 0.08 m, dip 3.4 m/s², turn 5.2 deg toward -X, finishes at x +0.061 m at the crease
+11-01 22:52:18.436 I/Unity   (13388): [CricketVR] Delivery #108 bounced at (0.415, 5.646) after 0.589 s; 0.2 cm from target; rebound starts -12.8 cm along
+11-01 22:52:18.853 I/Unity   (13388): [CricketVR] Result #108 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 1 | contacts 0 | misses 1 | bowled 0
+11-01 22:52:18.964 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 18.4 m/s, peak angular 22.2 rad/s, contact allowed True
+11-01 22:52:20.353 I/Unity   (13388): [CricketVR] No bat contact #108: closest gap 3.2 cm
+11-01 22:52:25.104 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.69 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 72 max, SetPass max 10, triangles 17123 avg / 43050 max, texture memory 1103.1 MB
+11-01 22:52:26.840 I/Unity   (13388): [CricketVR] Delivery #109 Net Practice: Straighter one, Good length: 88 km/h, line +0.05 m, length 4.24 m: v0 24.44 m/s (88.0 km/h), elevation -0.34 deg, predicted bounce (0.106, 4.243), Straighter one swing 0.04 m (curve 0.01 m), drift 0.03 m, dip 0.5 m/s², turn 0.2 deg toward -X, finishes at x +0.051 m at the crease
+11-01 22:52:27.450 I/Unity   (13388): [CricketVR] Delivery #109 bounced at (0.106, 4.242) after 0.606 s; 0.1 cm from target; rebound starts -6.1 cm along
+11-01 22:52:27.644 I/Unity   (13388): [CricketVR] Result #109 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 2 | contacts 0 | misses 1 | bowled 1
+11-01 22:52:27.644 I/Unity   (13388): [CricketVR] Wicket #109: 79 km/h at x +0.030 m, h 0.53 m; Middle stump 14 deg (square 0.44); +X bail 2.5 m/s; -X bail 2.5 m/s
+11-01 22:52:28.131 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.5 m/s, peak angular 25.8 rad/s, contact allowed True
+11-01 22:52:29.149 I/Unity   (13388): [CricketVR] No bat contact #109: closest gap 6.6 cm
+11-01 22:52:30.028 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:52:35.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 71.9 fps, 99.9% frames on time (72 Hz) | CPU 13.92 ms avg / 30.46 max, GPU 0.00 ms avg / 0.00 max | draw calls 44 avg / 75 max, SetPass max 10, triangles 11366 avg / 43410 max, texture memory 1103.1 MB
+11-01 22:52:35.643 I/Unity   (13388): [CricketVR] Delivery #110 Net Practice: Off-spin (flighted), Good length: 78 km/h, line +0.15 m, length 4.40 m: v0 21.67 m/s (78.0 km/h), elevation 5.69 deg, predicted bounce (0.347, 4.403), Off-spin swing 0.13 m (curve 0.01 m), drift 0.05 m, dip 5.1 m/s², turn 3.8 deg toward -X, finishes at x +0.148 m at the crease
+11-01 22:52:36.319 I/Unity   (13388): [CricketVR] Delivery #110 bounced at (0.347, 4.401) after 0.679 s; 0.2 cm from target; rebound starts -12.6 cm along
+11-01 22:52:36.457 I/Unity   (13388): [CricketVR] Bat contact #110 (Right hand): in 19.7 m/s, bat 11.0 m/s, approach 29.8 m/s, out 19.7 m/s (71 km/h), launch -2 deg, direction 43 deg, e 0.24, sweet 0.61, edge +1.00, at 0.35 m from toe, substeps 14
+11-01 22:52:36.568 I/Unity   (13388): [CricketVR] Result #110 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 19.7 m/s, launch -2 deg, direction 43 deg || Balls 3 | contacts 1 | misses 1 | bowled 1
+11-01 22:52:37.194 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 18.7 m/s, peak angular 22.0 rad/s, contact allowed True
+11-01 22:52:44.570 I/Unity   (13388): [CricketVR] Delivery #111 Net Practice: Off-spin, Short: 90 km/h, line +0.24 m, length 6.71 m: v0 25.00 m/s (90.0 km/h), elevation -2.81 deg, predicted bounce (0.567, 6.714), Off-spin swing 0.31 m (curve 0.02 m), drift 0.08 m, dip 1.5 m/s², turn 4.8 deg toward -X, finishes at x +0.240 m at the crease
+11-01 22:52:45.069 I/Unity   (13388): [CricketVR] Delivery #111 bounced at (0.567, 6.714) after 0.495 s; 0.1 cm from target; rebound starts -5.0 cm along
+11-01 22:52:45.110 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 19.20 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 74 max, SetPass max 11, triangles 13319 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:52:45.304 I/Unity   (13388): [CricketVR] Bat contact #111 (Right hand): in 20.4 m/s, bat 10.7 m/s, approach 31.5 m/s, out 28.4 m/s (102 km/h), launch 31 deg, direction 21 deg, e 0.46, sweet 0.72, edge 0.00, at 0.33 m from toe, substeps 13
+11-01 22:52:45.471 I/Unity   (13388): [CricketVR] Result #111 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 28.4 m/s, launch 31 deg, direction 21 deg || Balls 4 | contacts 2 | misses 1 | bowled 1
+11-01 22:52:46.069 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.2 m/s, peak angular 20.0 rad/s, contact allowed True
+11-01 22:52:53.473 I/Unity   (13388): [CricketVR] Delivery #112 Net Practice: Off-spin, Good length: 81 km/h, line +0.24 m, length 4.14 m: v0 22.50 m/s (81.0 km/h), elevation 3.74 deg, predicted bounce (0.430, 4.138), Off-spin swing 0.14 m (curve 0.01 m), drift 0.06 m, dip 3.6 m/s², turn 4.3 deg toward -X, finishes at x +0.240 m at the crease
+11-01 22:52:54.138 I/Unity   (13388): [CricketVR] Delivery #112 bounced at (0.430, 4.137) after 0.664 s; 0.1 cm from target; rebound starts -10.7 cm along
+11-01 22:52:54.276 I/Unity   (13388): [CricketVR] Bat contact #112 (Right hand): in 20.4 m/s, bat 11.1 m/s, approach 30.4 m/s, out 24.2 m/s (87 km/h), launch -41 deg, direction 41 deg, e 0.34, sweet 0.80, edge -0.62, at 0.30 m from toe, substeps 14
+11-01 22:52:54.444 I/Unity   (13388): [CricketVR] Result #112 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Measured carry 0.5 m | exit 24.2 m/s, launch -41 deg, direction 41 deg || Balls 5 | contacts 3 | misses 1 | bowled 1
+11-01 22:52:55.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 16.44 max, GPU 0.00 ms avg / 0.00 max | draw calls 51 avg / 74 max, SetPass max 11, triangles 15822 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:52:55.166 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 18.2 m/s, peak angular 22.0 rad/s, contact allowed True
+11-01 22:52:57.957 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:52:58.013 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:53:02.431 I/Unity   (13388): [CricketVR] Delivery #113 Net Practice: Off-spin, Full: 85 km/h, line +0.05 m, length 3.54 m: v0 23.61 m/s (85.0 km/h), elevation 2.63 deg, predicted bounce (0.271, 3.544), Off-spin swing 0.10 m (curve 0.02 m), drift 0.10 m, dip 2.6 m/s², turn 5.5 deg toward -X, finishes at x +0.048 m at the crease
+11-01 22:53:03.095 I/Unity   (13388): [CricketVR] Delivery #113 bounced at (0.271, 3.543) after 0.658 s; 0.2 cm from target; rebound starts -12.5 cm along
+11-01 22:53:03.262 I/Unity   (13388): [CricketVR] Result #113 BOWLED | end StumpsHit, zone None, contact False, bowled True | Carry: - || Balls 6 | contacts 3 | misses 1 | bowled 2
+11-01 22:53:03.263 I/Unity   (13388): [CricketVR] Wicket #113: 77 km/h at x -0.063 m, h 0.56 m; Leg stump 12 deg (square 0.38); -X bail 2.3 m/s
+11-01 22:53:03.583 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.8 m/s, peak angular 21.0 rad/s, contact allowed True
+11-01 22:53:04.763 I/Unity   (13388): [CricketVR] No bat contact #113: closest gap 3.7 cm
+11-01 22:53:05.042 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 6.3 m/s, peak angular 10.9 rad/s, contact allowed True
+11-01 22:53:05.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.98 max, GPU 0.00 ms avg / 0.00 max | draw calls 46 avg / 75 max, SetPass max 10, triangles 15402 avg / 42898 max, texture memory 1103.1 MB
+11-01 22:53:05.458 I/Unity   (13388): [CricketVR] Bat motion reset: ImplausibleMotion; contacts suppressed for 0.10 s
+11-01 22:53:05.819 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.4 m/s, peak angular 1.6 rad/s, contact allowed True
+11-01 22:53:05.958 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:53:11.267 I/Unity   (13388): [CricketVR] Delivery #114 Net Practice: Off-spin (flighted), Good length: 72 km/h, line -0.08 m, length 4.33 m: v0 20.00 m/s (72.0 km/h), elevation 6.65 deg, predicted bounce (0.197, 4.333), Off-spin swing 0.15 m (curve 0.02 m), drift 0.08 m, dip 3.7 m/s², turn 4.9 deg toward -X, finishes at x -0.083 m at the crease
+11-01 22:53:12.013 I/Unity   (13388): [CricketVR] Delivery #114 bounced at (0.197, 4.332) after 0.740 s; 0.1 cm from target; rebound starts -8.3 cm along
+11-01 22:53:12.151 I/Unity   (13388): [CricketVR] Bat contact #114 (Right hand): in 18.1 m/s, bat 11.4 m/s, approach 29.3 m/s, out 24.4 m/s (88 km/h), launch 14 deg, direction -52 deg, e 0.26, sweet 0.85, edge -1.00, at 0.29 m from toe, substeps 14
+11-01 22:53:12.249 I/Unity   (13388): [CricketVR] Result #114 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 24.4 m/s, launch 14 deg, direction -52 deg || Balls 7 | contacts 4 | misses 1 | bowled 2
+11-01 22:53:12.527 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.2 m/s, peak angular 21.5 rad/s, contact allowed True
+11-01 22:53:15.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 19.48 max, GPU 0.00 ms avg / 0.00 max | draw calls 54 avg / 74 max, SetPass max 11, triangles 22629 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:53:20.264 I/Unity   (13388): [CricketVR] Delivery #115 Net Practice: Off-spin, Short: 79 km/h, line -0.06 m, length 6.22 m: v0 21.94 m/s (79.0 km/h), elevation 1.73 deg, predicted bounce (0.205, 6.225), Off-spin swing 0.13 m (curve 0.01 m), drift 0.05 m, dip 4.1 m/s², turn 2.6 deg toward -X, finishes at x -0.062 m at the crease
+11-01 22:53:20.860 I/Unity   (13388): [CricketVR] Delivery #115 bounced at (0.205, 6.224) after 0.584 s; 0.0 cm from target; rebound starts -3.4 cm along
+11-01 22:53:21.082 I/Unity   (13388): [CricketVR] Bat contact #115 (Right hand): in 17.6 m/s, bat 8.6 m/s, approach 26.6 m/s, out 24.4 m/s (88 km/h), launch 42 deg, direction -4 deg, e 0.44, sweet 0.61, edge 0.00, at 0.35 m from toe, substeps 11
+11-01 22:53:21.396 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 13.6 m/s, peak angular 14.9 rad/s, contact allowed True
+11-01 22:53:22.285 I/Unity   (13388): [CricketVR] Result #115 Hit, over the front net | end LeftEnclosure, zone OverFront, contact True, bowled False | Carry: N/A | exit 24.4 m/s, launch 42 deg, direction -4 deg || Balls 8 | contacts 5 | misses 1 | bowled 2
+11-01 22:53:25.105 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.88 ms avg / 17.53 max, GPU 0.00 ms avg / 0.00 max | draw calls 50 avg / 71 max, SetPass max 11, triangles 16301 avg / 42838 max, texture memory 1103.1 MB
+11-01 22:53:30.303 I/Unity   (13388): [CricketVR] Delivery #116 Net Practice: Off-spin (flighted), Good length: 72 km/h, line +0.03 m, length 5.25 m: v0 20.00 m/s (72.0 km/h), elevation 8.40 deg, predicted bounce (0.377, 5.248), Off-spin swing 0.23 m (curve 0.02 m), drift 0.09 m, dip 6.7 m/s², turn 5.4 deg toward -X, finishes at x +0.031 m at the crease
+11-01 22:53:31.007 I/Unity   (13388): [CricketVR] Delivery #116 bounced at (0.377, 5.247) after 0.697 s; 0.1 cm from target; rebound starts -5.1 cm along
+11-01 22:53:31.187 I/Unity   (13388): [CricketVR] Bat contact #116 (Right hand): in 18.1 m/s, bat 9.7 m/s, approach 28.6 m/s, out 21.3 m/s (77 km/h), launch 27 deg, direction -40 deg, e 0.22, sweet 0.33, edge -1.00, at 0.43 m from toe, substeps 16
+11-01 22:53:31.340 I/Unity   (13388): [CricketVR] Result #116 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 21.3 m/s, launch 27 deg, direction -40 deg || Balls 9 | contacts 6 | misses 1 | bowled 2
+11-01 22:53:31.938 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 19.8 m/s, peak angular 24.2 rad/s, contact allowed True
+11-01 22:53:35.104 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 18.25 max, GPU 0.00 ms avg / 0.00 max | draw calls 48 avg / 73 max, SetPass max 11, triangles 16930 avg / 43250 max, texture memory 1103.1 MB
+11-01 22:53:39.341 I/Unity   (13388): [CricketVR] Delivery #117 Net Practice: Off-spin, Good length: 84 km/h, line +0.11 m, length 5.19 m: v0 23.33 m/s (84.0 km/h), elevation 1.07 deg, predicted bounce (0.474, 5.192), Off-spin swing 0.29 m (curve 0.02 m), drift 0.09 m, dip 2.9 m/s², turn 6.1 deg toward -X, finishes at x +0.109 m at the crease
+11-01 22:53:39.938 I/Unity   (13388): [CricketVR] Delivery #117 bounced at (0.474, 5.190) after 0.594 s; 0.1 cm from target; rebound starts -10.2 cm along
+11-01 22:53:40.103 I/Unity   (13388): [CricketVR] Bat contact #117 (Right hand): in 21.1 m/s, bat 10.6 m/s, approach 33.9 m/s, out 29.1 m/s (105 km/h), launch -4 deg, direction 24 deg, e 0.46, sweet 0.73, edge 0.00, at 0.32 m from toe, substeps 14
+11-01 22:53:40.242 I/Unity   (13388): [CricketVR] Result #117 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 29.1 m/s, launch -4 deg, direction 24 deg || Balls 10 | contacts 7 | misses 1 | bowled 2
+11-01 22:53:40.785 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 17.7 m/s, peak angular 23.0 rad/s, contact allowed True
+11-01 22:53:45.105 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.02 max, GPU 0.00 ms avg / 0.00 max | draw calls 49 avg / 73 max, SetPass max 11, triangles 16872 avg / 43250 max, texture memory 1103.1 MB
+11-01 22:53:48.245 I/Unity   (13388): [CricketVR] Delivery #118 Net Practice: Off-spin, Good length: 88 km/h, line +0.24 m, length 5.38 m: v0 24.44 m/s (88.0 km/h), elevation -0.60 deg, predicted bounce (0.499, 5.380), Off-spin swing 0.21 m (curve 0.02 m), drift 0.08 m, dip 1.9 m/s², turn 4.6 deg toward -X, finishes at x +0.238 m at the crease
+11-01 22:53:48.812 I/Unity   (13388): [CricketVR] Delivery #118 bounced at (0.499, 5.379) after 0.560 s; 0.1 cm from target; rebound starts -11.2 cm along
+11-01 22:53:48.979 I/Unity   (13388): [CricketVR] Bat contact #118 (Right hand): in 22.1 m/s, bat 10.2 m/s, approach 30.6 m/s, out 25.9 m/s (93 km/h), launch -5 deg, direction 38 deg, e 0.49, sweet 0.92, edge 0.00, at 0.26 m from toe, substeps 9
+11-01 22:53:49.076 I/Unity   (13388): [CricketVR] Result #118 Hit, side net | end NetHit, zone SideNet, contact True, bowled False | Carry: net hit | exit 25.9 m/s, launch -5 deg, direction 38 deg || Balls 11 | contacts 8 | misses 1 | bowled 2
+11-01 22:53:49.674 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 16.4 m/s, peak angular 19.4 rad/s, contact allowed True
+11-01 22:53:55.105 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 17.13 max, GPU 0.00 ms avg / 0.00 max | draw calls 47 avg / 74 max, SetPass max 11, triangles 9424 avg / 43330 max, texture memory 1103.1 MB
+11-01 22:53:57.078 I/Unity   (13388): [CricketVR] Delivery #119 Net Practice: Off-spin, Good length: 76 km/h, line +0.16 m, length 4.98 m: v0 21.11 m/s (76.0 km/h), elevation 5.20 deg, predicted bounce (0.347, 4.978), Off-spin swing 0.11 m (curve 0.01 m), drift 0.06 m, dip 4.8 m/s², turn 3.0 deg toward -X, finishes at x +0.163 m at the crease
+11-01 22:53:57.757 I/Unity   (13388): [CricketVR] Delivery #119 bounced at (0.347, 4.977) after 0.669 s; 0.1 cm from target; rebound starts -5.3 cm along
+11-01 22:53:58.243 I/Unity   (13388): [CricketVR] Result #119 Miss | end NetHit, zone RearNet, contact False, bowled False | Carry: - || Balls 12 | contacts 8 | misses 2 | bowled 2
+11-01 22:53:58.327 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 20.2 m/s, peak angular 25.6 rad/s, contact allowed True
+11-01 22:53:59.743 I/Unity   (13388): [CricketVR] No bat contact #119: closest gap 7.1 cm
+11-01 22:54:00.049 I/Unity   (13388): [CricketVR] Swing (Right hand): peak toe 4.1 m/s, peak angular 6.2 rad/s, contact allowed True
+11-01 22:54:00.567 I/Unity   (13388): [CricketVR] Bat motion reset: OriginChanged; contacts suppressed for 0.10 s
+11-01 22:54:01.013 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:54:03.251 I/Unity   (13388): [CricketVR] Session 20261101_225209 ended: Balls 12 | contacts 8 | misses 2 | bowled 2
+11-01 22:54:05.112 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.90 ms avg / 17.21 max, GPU 0.00 ms avg / 0.00 max | draw calls 39 avg / 74 max, SetPass max 10, triangles 11244 avg / 43330 max, texture memory 1101.1 MB
+11-01 22:54:14.195 I/Unity   (13388): [CricketVR] Bat motion reset: TrackingLost; contacts suppressed for 0.10 s
+11-01 22:54:15.111 I/Unity   (13388): [CricketVR] Perf NetMode | foveation 0.50 | 72.0 fps, 100.0% frames on time (72 Hz) | CPU 13.89 ms avg / 15.73 max, GPU 0.00 ms avg / 0.00 max | draw calls 32 avg / 63 max, SetPass max 10, triangles 5462 avg / 22846 max, texture memory 1103.1 MB
