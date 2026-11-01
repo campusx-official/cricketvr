@@ -80,11 +80,11 @@ namespace CricketVR
             Board("Choose a mode on the panel in front of you.");
         }
 
-        public void ShowBatSetup(string instructions)
+        public void ShowBatSetup(string instructions, string hintText = "Tap A when done", string titleText = "Bat setup")
         {
-            Near(true, "Bat setup", instructions, "Tap A when done");
+            Near(true, titleText, instructions, hintText);
             Groups();
-            Board("Bat setup");
+            Board(titleText);
         }
 
         public void ShowPaused(string text)

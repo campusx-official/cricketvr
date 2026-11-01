@@ -30,6 +30,16 @@ namespace CricketVR
         public GripAlignment rightHandGrip;
         public GripAlignment leftHandGrip;
 
+        [Header("Bat mode (controller strapped to a real bat, plan.md §21)")]
+        [Tooltip("The controller strapped to the bat (owner, 2026-11-01: the right one).")]
+        public BatHand strappedController = BatHand.Right;
+        [Tooltip("Is the controller on the hitting face (true) or the back (owner's bat, 2026-11-01)? The face flip swaps the hitting side in the headset.")]
+        public bool controllerOnFace;
+        [Tooltip("Seconds of rocking for each pivot step of the calibration.")]
+        public float pivotSeconds = 4f;
+        [Tooltip("Seconds the bat lies still for the flat step of the calibration.")]
+        public float flatSeconds = 1.5f;
+
         [Header("In-headset alignment nudges")]
         [Tooltip("Degrees per thumbstick step.")]
         public float alignmentStepDegrees = 5f;

@@ -43,6 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
+| AC-34 | REQ-053..056 | Automated pass (E-071); headset pending (T092) | E-071 | T092 headset run |
 
 ## Evidence entry template
 
@@ -1347,6 +1348,25 @@ Actual result and measured values:
 Outcome: Pass. Bowler choice (device CSV); owner: "yes it flashed red, everything working" (the wicket reaction in both modes, the LED flash in Match Simulation, the reset). The owner did not fill in the checklist item by item.
 Log or artifact path: Docs/evidence/2026-10-30-wicket-gameplay/
 Remaining limitation / follow-up task: real stump sound (owner recording); consider a larger logcat buffer (adb logcat -G 16M) for later sessions
+```
+
+```text
+Check ID / acceptance scenario: E-071 / Bat mode T089-T091 (AC-34 automated) and the T092 headset build
+Requirement IDs: REQ-053, REQ-054, REQ-055, REQ-056
+Date and tester: 2026-11-01 agent (batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-mode.apk sha256 d3c37291c79623c2521bb9aef199cdbe834354e2eb920003b11a2d0f2c70dca3 (normal gameplay build, 970.2 MB, 0 errors, 0 warnings)
+Unity and package versions: as E-001
+Environment: macOS batch mode, Burst compilation disabled for the test runs
+Configuration: GameConfig.bat strappedController Right, controllerOnFace false (controller on the back, owner's photos), pivotSeconds 4, flatSeconds 1.5
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (added BatMountCalibrator and the Bat menu row); -runTests EditMode and PlayMode; QuestBuild.Build
+Expected result: AC-34 automated items; all earlier tests still pass
+Actual result and measured values:
+  - EditMode 171/171 (7 new in BatMountTests: default mount, pivot within 3 mm at 2 mm noise, no rocking rejected, sliding toe rejected, crooked off-centre mount recovered (toe and blade centre < 5 mm, length < 1°, face < 2.5° with a 2° spine tip), wrong length and tilted flat rejected, controller side decides the face).
+  - PlayMode 75/75 (4 new in BatModePlayModeTests: bat and proxy follow the mount on the right controller, SetBatHand ignored, mode remembered, back to the in-hand grip; simulated calibration puts the virtual toe within 5 mm of the real toe and the face within 1.5°; failed and cancelled calibration change nothing; fine-tuning resets to the mount keeping the face swap).
+  - A first PlayMode run failed 1 test: the strapped fine-tuning prefs key had a double dot ("CricketVR.Strap.v1..flipped"), so the tests' cleanup missed it and a face swap leaked into the next test. Fixed the key; the stray Editor prefs were deleted.
+Outcome: Pass (automated). Headset pending (T092).
+Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_bat.log
+Remaining limitation / follow-up task: T092 headset run; the real bat's length is only checked (±12 cm), not used to resize the virtual bat
 ```
 
 ## Re-plan note (2026-10-26)

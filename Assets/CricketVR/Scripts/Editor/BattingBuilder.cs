@@ -76,6 +76,7 @@ namespace CricketVR.Editor
             var batController = GetOrAdd<BatController>(batRoot, created);
             var handedness = GetOrAdd<HandednessSetup>(batRoot, created);
             var controls = GetOrAdd<BatSetupControls>(batRoot, created);
+            var calibrator = GetOrAdd<BatMountCalibrator>(batRoot, created);
 
             var blade = visual.Find("Blade")?.GetComponent<Renderer>();
             batController.Configure(config, leftGrip, rightGrip, visual, blade, body, proxy.GetComponent<BoxCollider>());
@@ -83,8 +84,10 @@ namespace CricketVR.Editor
                 environment.transform.Find("BattingAnchor/StanceMarker_RightHanded"),
                 environment.transform.Find("BattingAnchor/StanceMarker_LeftHanded"),
                 main.transform.Find("UI/LiveScoreboard"));
-            controls.Configure(batController, handedness);
+            controls.Configure(batController, handedness, calibrator);
+            calibrator.Configure(config, batController);
             EditorUtility.SetDirty(batController);
+            EditorUtility.SetDirty(calibrator);
             EditorUtility.SetDirty(handedness);
             EditorUtility.SetDirty(controls);
         }

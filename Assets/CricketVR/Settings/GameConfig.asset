@@ -48,6 +48,10 @@ MonoBehaviour:
       slide: 0
       faceFlipped: 1
       spin: -10
+    strappedController: 0
+    controllerOnFace: 0
+    pivotSeconds: 4
+    flatSeconds: 1.5
     alignmentStepDegrees: 5
     slideStep: 0.01
     showSuppressionTint: 1

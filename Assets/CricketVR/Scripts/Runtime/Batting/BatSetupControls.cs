@@ -7,7 +7,7 @@ namespace CricketVR
     /// <summary>
     /// Temporary in-headset setup controls until the Start panel exists (M7). Works from either controller:
     ///   hold A/X 1 s       toggle handedness (stance side)
-    ///   hold B/Y 1 s       move the bat to the other controller
+    ///   hold B/Y 1 s       move the bat to the other controller; in bat mode, calibrate the strapped bat instead
     ///   thumbstick up/down               tilt (about the blade's width)
     ///   thumbstick left/right            spin the bat clockwise/anticlockwise about its own handle
     ///   hold trigger + left/right        lean sideways (about the face normal)
@@ -21,6 +21,7 @@ namespace CricketVR
     {
         [SerializeField] BatController bat;
         [SerializeField] HandednessSetup handedness;
+        [SerializeField] BatMountCalibrator calibrator;
         [Tooltip("Disabled during a live session (M7).")]
         public bool allowSetupInput = true;
 
@@ -63,6 +64,12 @@ namespace CricketVR
         {
             if (!allowSetupInput || bat == null || handedness == null)
                 return;
+            if (calibrator != null && calibrator.Active)
+            {
+                // The calibration owns A and B until it ends; a hold already in progress must not fire afterwards.
+                _primaryFired = _secondaryFired = true;
+                return;
+            }
 
             if (HoldFired(_primary, ref _primaryHeld, ref _primaryFired))
             {
@@ -72,16 +79,28 @@ namespace CricketVR
 
             if (HoldFired(_secondary, ref _secondaryHeld, ref _secondaryFired))
             {
-                var other = bat.Hand == BatHand.Right ? BatHand.Left : BatHand.Right;
-                if (bat.IsControllerTracked(other))
+                if (bat.Mode == BatMode.Strapped)
                 {
-                    bat.SetBatHand(other);
-                    Buzz(_secondary, 0.5f, 0.15f);
+                    // Bat mode has no other controller to move to: B measures the strapped bat instead.
+                    if (calibrator != null)
+                    {
+                        calibrator.Begin();
+                        Buzz(_secondary, 0.5f, 0.15f);
+                    }
                 }
                 else
                 {
-                    Debug.LogWarning($"[CricketVR] {other} controller isn't tracking; bat stays in the {bat.Hand} hand.");
-                    Buzz(_secondary, 0.2f, 0.4f);
+                    var other = bat.Hand == BatHand.Right ? BatHand.Left : BatHand.Right;
+                    if (bat.IsControllerTracked(other))
+                    {
+                        bat.SetBatHand(other);
+                        Buzz(_secondary, 0.5f, 0.15f);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[CricketVR] {other} controller isn't tracking; bat stays in the {bat.Hand} hand.");
+                        Buzz(_secondary, 0.2f, 0.4f);
+                    }
                 }
             }
 
@@ -152,10 +171,11 @@ namespace CricketVR
                 controller.SendImpulse(amplitude, seconds);
         }
 
-        public void Configure(BatController batController, HandednessSetup handednessSetup)
+        public void Configure(BatController batController, HandednessSetup handednessSetup, BatMountCalibrator mountCalibrator = null)
         {
             bat = batController;
             handedness = handednessSetup;
+            calibrator = mountCalibrator;
         }
     }
 }
