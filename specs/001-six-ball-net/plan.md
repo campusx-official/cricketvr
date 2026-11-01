@@ -592,6 +592,16 @@ Purely cosmetic: detection stays the single `Stumps` box on the `Stumps` layer a
 - **Reset.** `WicketReaction` saves the local poses of stumps and bails at start and restores them exactly (bails kinematic, zero velocity, ball–stumps collision restored): on every `BowlingMachine` launch (guarantee), when the next ball is called after the 1.5 s hold, and immediately on Play again, Menu, pause and mode switch.
 - **Sound and LED.** `StumpHit_N.wav` clips in `Assets/CricketVR/Audio/` if present, else a generated placeholder clatter (logged as a placeholder). LED: an emissive flash on the stump material via a property block; settings in `GameConfig.wicket` (off in Net Practice, on in Match Simulation).
 
+## 21. Bat mode (feature/bat-mode, T089–T092) — owner request 2026-11-01
+
+The owner tapes the right controller to a real bat: on the back of the blade, just below the shoulder, its handle toward the bat's handle and its buttons facing out (photos, 2026-11-01). The back faces the headset in the stance and through most shots, so the controller's LEDs stay in view.
+
+- **One bat, a different grip.** `BatController` keeps a mount: the bat frame's pose in the strapped controller's grip frame (in hand it is `BatFrame.GripRotation`). Bat mode uses it with the owner's fine-tuning on top (`BatFrame.OffsetRotation`, about the bat's grip point, as in the hand). Everything downstream (grip pose, proxy, swept contacts, contact velocity, tracking resets) is unchanged. The mode, mount and fine-tuning are saved in PlayerPrefs (`CricketVR.BatMode`, `CricketVR.Mount.v1*`, `CricketVR.Strap.v1*`). In bat mode `SetBatHand` is ignored: the bat stays on `GameConfig.bat.strappedController` (right).
+- **Default mount** (`BatMount.DefaultPose`): controller +Z down the blade, its grip origin 6 cm below the shoulder and 2.5 cm off the back; the hitting face away from the buttons (`controllerOnFace` false).
+- **Fit** (replaced the three-step pivot calibration on 2026-11-01, E-072). Bat setup in bat mode calls `BatController.BeginFit(display)`: the visual bat is unparented from the controller and frozen upright 0.62 m to the right of the panel, its controller side toward the player, and the `FitGhost` (a primitive Touch Plus in the grip frame, unlit cyan, child of the visual) shows the controller's pose in the bat frame, starting from the current mount (fine-tuning folded in). `FitMove(up, across, outward)` steps it along bat Y (clamped toe to handle top), across the blade as the player sees it and off the controller's side (each within 15 cm), by `slideStep`; `FitTurn`, `FitTilt` and `FitRoll` rotate it in place about bat Z, bat X and its own length (`alignmentStepDegrees`). (A face swap in the fit was dropped with the MOVE/TURN modes, E-073: the owner's controller is on the back, the default.) `EndFit(true)` makes the inverse of the ghost's pose (less the face flip) the mount and saves it; `EndFit(false)` restores everything. The proxy collider is off while fitting. Controls in `BatSetupControls`, two modes: MOVE (B/A up/down the bat, stick across / away-onto) and TURN (B/A roll, stick turn / tilt); a stick-click tap switches mode (`FitModeChanged` refreshes the panel), holding it 1 s saves (`FitConfirmed` closes Bat setup); A, B and the stick repeat while held.
+- **Controls.** Menu row **Bat**: In hand / Real bat / Bat setup. The trigger and grip may be blocked by the tape, so nothing in bat mode needs them; menus are pressed by tapping with the bat.
+- **Not changed.** Bat geometry (the model bat, 86 cm), contact response, motion limits (25 m/s grip, 60 rad/s), haptics (they now buzz through the bat).
+
 ## Requirement traceability
 
 | Requirement | Plan sections | Tasks | Acceptance |
@@ -648,6 +658,11 @@ Purely cosmetic: detection stays the single `Stumps` box on the `Stumps` layer a
 | REQ-050 | §20 | T085, T086 (T059 later) | AC-32 |
 | REQ-051 | §20 | T087, T088 | AC-33 |
 | REQ-052 | §20 | T086, T088 | AC-32 |
+| REQ-053 | §21 | T089, T090, T092 | AC-34 |
+| REQ-054 | §21 | T093, T092 | AC-34 |
+| REQ-055 | §21 | T090, T093, T092 | AC-34 |
+| REQ-056 | §21 | T089, T092 | AC-34 |
+| REQ-057 | §21 | T095, T092 | AC-34 |
 
 ## Open owner decisions
 
@@ -714,3 +729,6 @@ Purely cosmetic: detection stays the single `Stumps` box on the `Stumps` layer a
 | 2026-10-27 | **Flighted off-spin** variation: 25% of off-spin balls are tossed up at 70–80 km/h with a launch angle drawn from 4–10°; the solver finds the dip (0–10 m/s²) that lands the ball on its length and line at that angle, clamped to what that dip range can land (a slow full ball may need more than the asked angle with no dip; a longer one gets as high as 10 m/s² allows). New type fields flightedShare / flightedMin/MaxKmh / flightedMin/MaxLaunch; request fields flighted / launchDegrees; CSV columns flighted, launch_deg | Owner feedback: off-spin is mostly flat; wants loopy, tossed-up balls launched 0–10° upward at a little less speed as a variation (E-063) | REQ-043, REQ-044 |
 | 2026-10-27 | Off-spinner variations: a new type, the **straighter one** (`DeliveryKind.ArmBall`, looks like off-spin; 82–95 km/h, flat, drifts slightly away, turns 0–0.5°, bounce −0.28, grip 0.02), and the Net Practice off-spinner's mix becomes off-spin 10 : doosra 1 : straighter one 1 (only the off-break is flighted) | Owner request: "add 2 more variations to the off-spin, the doosra and the straighter one, at 1 out of 12" (E-065) | REQ-041, REQ-043 |
 | 2026-10-30 | Wicket reaction (REQ-049..052, §20) on `feature/wicket-reaction`, branched from `m7.5-delivery`; played-on in Match Simulation through today's physics detection, the M9 simulated path raising the same event later; stumps by scripted knock-back | Owner request and choice (option 1 for both: m7-session's builder isn't deterministic and has no spin types; no simulated path exists yet). Merge order: m7-session → main, m7.5-delivery, then this branch | REQ-049..052 |
+| 2026-11-01 | Bat mode (REQ-053..056, §21) on `feature/bat-mode`, branched from `feature/wicket-reaction`: the right controller strapped to a real bat on the back of the blade; a three-step calibration (toe pivot, handle-top pivot, flat) instead of fixed offsets, because the taping is never exactly the same; the default mount from the owner's photos until then | Owner request; a strapped controller is crooked and off-centre by a few degrees and centimetres, which a preset can't know | REQ-053..056 |
+| 2026-11-01 | Bat-mode calibration replaced by a manual fit (owner: "not able to calibrate... B for moving the controller up the virtual bat and A for moving it down and then the joystick to move it around 360 degree... then ok to fix") | The pivot steps failed on the device: the toe moved 3.6–9.4 cm (limit 1.5 cm) because a real toe rolls on its width, rocking stayed at 2–21°, and tracking dropped near the floor (E-072) | REQ-054, REQ-055 |
+| 2026-11-01 | Bat mode bowls automatically with an 8 s break (owner's choice over tapping the bat on the ground, or both) | B can't be pressed while holding a real bat | REQ-057 |

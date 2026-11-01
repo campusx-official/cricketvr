@@ -145,6 +145,18 @@ Owner request 2026-10-30. Requirements: REQ-049..052. Acceptance: AC-32, AC-33. 
 - [x] T087 *(done, E-067)* Reset (REQ-051): saved poses restored exactly on every launch, the next ball, Play again, Menu, pause, mode switch; the 1.5 s hold. PlayMode tests (AC-33).
 - [x] T088 *(owner headset pass 2026-10-30, E-070: "yes it flashed red, everything working"; LED fixed after the first run, E-069)* Headset build and owner checklist: AC-32, AC-33 (80/120/140 km/h, spinner, which stump, reset paths, both modes).
 
+## Bat mode (branch `feature/bat-mode`, from `feature/wicket-reaction`)
+
+Owner request 2026-11-01: the right controller strapped to a real bat. Requirements: REQ-053..056. Acceptance: AC-34. Merges after `feature/wicket-reaction`, with the owner's go-ahead.
+
+- [x] T089 *(done, E-071)* Bat mode in `BatController`: In hand / Real bat, the mount on the strapped controller, fine-tuning on top, saved; the bat can't leave the strapped controller. Menu row **Bat** (In hand / Real bat / Bat setup). PlayMode tests (AC-34).
+- [x] T090 *(done, E-071)* `BatMount` (Core, pure): default mount from the owner's photos, pivot solve, calibration from toe, handle top and flat. EditMode tests (AC-34).
+- [x] T091 *(done E-071; removed in T093 after it failed on the device, E-072)* `BatMountCalibrator`: three-step pivot calibration.
+- [x] T093 *(done, E-072)* Manual fit (owner request): frozen bat with a ghost controller; B/A up/down, stick turn/tilt, hold click swaps the face, click saves; `FitGhost` built by the scene builder; the old calibrator component removed from the scene. PlayMode tests (AC-34).
+- [x] T094 *(done, E-073)* Fit in six directions after the owner's screenshots (the ghost couldn't reach a controller off the blade): MOVE (up/down, across, away/onto) and TURN (turn, tilt, roll) modes; hold the stick click to save.
+- [x] T095 *(done, E-074)* Bat mode bowls automatically (8 s after Start and after each result); PlayMode test.
+- [ ] T092 Headset: AC-34 (fit, toe on the floor, hitting face, stance/blocks/drives without tracking drops, contact, back to In hand).
+
 ## M8 — Net Practice with Shot Confidence
 
 Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended), AC-17, AC-18.

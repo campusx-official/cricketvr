@@ -1,0 +1,13 @@
+11-01 15:11:24.660  1538  1650 I ActivityManager: Start proc 29574:com.cricketvr.prototype/u0a148 for next-top-activity {com.cricketvr.prototype/com.unity3d.player.UnityPlayerGameActivity}
+11-01 15:11:35.465 29574 29605 I Unity   : [CricketVR] Bat mode: Strapped (Right controller, default mount: calibrate)
+11-01 15:11:37.196 29574 29605 I Unity   : [CricketVR] Session 20261101_151137: NetPractice, 12 balls, seed 7253656
+11-01 15:12:26.330 29574 29605 I Unity   : [CricketVR] Session paused: The headset lost focus.
+11-01 15:12:32.555 29574 29605 I Unity   : [CricketVR] Session paused: The app was paused.
+11-01 15:12:52.865  1538  1650 I ActivityManager: Start proc 29971:com.cricketvr.prototype/u0a148 for next-top-activity {com.cricketvr.prototype/com.unity3d.player.UnityPlayerGameActivity}
+11-01 15:13:10.347 29971 30001 I Unity   : [CricketVR] Bat calibration started
+11-01 15:13:32.724 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The toe moved 3.6 cm while rocking. Keep it still on one spot.
+11-01 15:13:51.376 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The bat was only rocked 21°. Rock it further (about 30° each way), keeping the toe still.
+11-01 15:14:12.973 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The bat was only rocked 2°. Rock it further (about 30° each way), keeping the toe still.
+11-01 15:14:26.792 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The toe moved 3.9 cm while rocking. Keep it still on one spot.
+11-01 15:14:45.292 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The toe moved 9.4 cm while rocking. Keep it still on one spot.
+11-01 15:15:27.695 29971 30001 W Unity   : [CricketVR] Bat calibration step failed: The bat was only rocked 14°. Rock it further (about 30° each way), keeping the toe still.

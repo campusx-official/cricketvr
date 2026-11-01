@@ -16,6 +16,11 @@ namespace CricketVR
     ///   thumbstick click                 tap: reset alignment; hold 1 s: flip the face 180 degrees
     /// Holding the stick repeats the step. Angles step by GameConfig.bat.alignmentStepDegrees.
     /// Each action gives a short vibration on the controller that triggered it.
+    /// While fitting bat mode (<see cref="BatController.Fitting"/>, the virtual bat frozen with a ghost controller on it),
+    /// in two modes switched with a tap of the stick click (holding the stick or A/B repeats the step):
+    ///   MOVE  B / A: up / down the bat;  stick left/right: across the blade;  stick up/down: away from / onto the blade
+    ///   TURN  B / A: roll about its own length;  stick left/right: turn on the bat's surface;  stick up/down: tilt
+    ///   hold stick click 1 s: OK (save the fit)
     /// </summary>
     public class BatSetupControls : MonoBehaviour
     {
@@ -24,12 +29,19 @@ namespace CricketVR
         [Tooltip("Disabled during a live session (M7).")]
         public bool allowSetupInput = true;
 
+        /// <summary>Raised when the owner confirms the bat-mode fit (the fit is already saved).</summary>
+        public event System.Action FitConfirmed;
+        /// <summary>Raised when the fit switches between moving and turning the ghost controller.</summary>
+        public event System.Action FitModeChanged;
+        /// <summary>While fitting: the stick and A/B turn the ghost controller (else they move it).</summary>
+        public bool FitTurning { get; private set; }
+
         const float HoldSeconds = 1f;
         const float StickThreshold = 0.7f;
         const float StickRepeatSeconds = 0.15f;
 
         InputAction _primary, _secondary, _stick, _stickClick, _trigger, _grip;
-        float _primaryHeld, _secondaryHeld, _clickHeld, _nextStickStep;
+        float _primaryHeld, _secondaryHeld, _clickHeld, _nextStickStep, _nextButtonStep;
         bool _primaryFired, _secondaryFired, _clickFired;
 
         void OnEnable()
@@ -63,6 +75,12 @@ namespace CricketVR
         {
             if (!allowSetupInput || bat == null || handedness == null)
                 return;
+            if (bat.Fitting)
+            {
+                UpdateFit();
+                return;
+            }
+            FitTurning = false; // every fit starts in MOVE
 
             if (HoldFired(_primary, ref _primaryHeld, ref _primaryFired))
             {
@@ -126,6 +144,66 @@ namespace CricketVR
                 else
                 {
                     bat.NudgeAlignment(0, 0, spinSteps: sign);
+                }
+                Buzz(_stick, 0.15f, 0.03f);
+            }
+        }
+
+        void UpdateFit()
+        {
+            // A and B: once on the press, then repeating while held.
+            int buttons = (_secondary.IsPressed() ? 1 : 0) - (_primary.IsPressed() ? 1 : 0);
+            if (_secondary.WasPressedThisFrame() || _primary.WasPressedThisFrame())
+                _nextButtonStep = 0f;
+            if (buttons != 0 && Time.unscaledTime >= _nextButtonStep)
+            {
+                _nextButtonStep = Time.unscaledTime + (_nextButtonStep == 0f ? 0.4f : StickRepeatSeconds);
+                if (FitTurning) bat.FitRoll(buttons);
+                else bat.FitMove(buttons);
+                Buzz(buttons > 0 ? _secondary : _primary, 0.15f, 0.03f);
+            }
+            // Never let a hold started while fitting fire handedness or the hand swap afterwards.
+            _primaryFired = _secondaryFired = true;
+
+            bool clickWasHeld = _clickFired;
+            if (HoldFired(_stickClick, ref _clickHeld, ref _clickFired))
+            {
+                bat.EndFit(true);
+                FitTurning = false;
+                Buzz(_stickClick, 0.6f, 0.25f);
+                FitConfirmed?.Invoke();
+                return;
+            }
+            if (_stickClick.WasReleasedThisFrame() && !clickWasHeld)
+            {
+                FitTurning = !FitTurning;
+                Buzz(_stickClick, 0.4f, 0.08f);
+                FitModeChanged?.Invoke();
+            }
+
+            var stick = _stick.ReadValue<Vector2>();
+            if (Mathf.Abs(stick.x) <= StickThreshold && Mathf.Abs(stick.y) <= StickThreshold)
+            {
+                _nextStickStep = 0f;
+            }
+            else if (Time.unscaledTime >= _nextStickStep)
+            {
+                _nextStickStep = Time.unscaledTime + StickRepeatSeconds;
+                bool vertical = Mathf.Abs(stick.y) >= Mathf.Abs(stick.x);
+                int sign = (int)Mathf.Sign(vertical ? stick.y : stick.x);
+                if (!FitTurning)
+                {
+                    if (vertical) bat.FitMove(0, outward: sign);
+                    else bat.FitMove(0, across: sign);
+                }
+                else if (vertical)
+                {
+                    bat.FitTilt(sign);
+                }
+                else
+                {
+                    // Stick right turns it clockwise as you look at it: the frozen bat shows you the controller's side.
+                    bat.FitTurn(sign * (bat.HitsWithControllerSide ? -1 : 1));
                 }
                 Buzz(_stick, 0.15f, 0.03f);
             }

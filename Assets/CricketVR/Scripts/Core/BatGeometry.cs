@@ -64,8 +64,14 @@ namespace CricketVR
         public static Quaternion GripRotation(BatHand hand, float tiltDegrees, float faceTurnDegrees, float leanDegrees,
             bool faceFlipped = false, float spinDegrees = 0f)
         {
-            return BaseRotation(hand)
-                * Quaternion.AngleAxis(faceTurnDegrees, Vector3.up)
+            return BaseRotation(hand) * OffsetRotation(tiltDegrees, faceTurnDegrees, leanDegrees, faceFlipped, spinDegrees);
+        }
+
+        /// <summary>The owner's offsets alone, in the bat frame (see <see cref="GripRotation"/>); bat mode applies them after the mount.</summary>
+        public static Quaternion OffsetRotation(float tiltDegrees, float faceTurnDegrees, float leanDegrees,
+            bool faceFlipped = false, float spinDegrees = 0f)
+        {
+            return Quaternion.AngleAxis(faceTurnDegrees, Vector3.up)
                 * Quaternion.AngleAxis(tiltDegrees, Vector3.right)
                 * Quaternion.AngleAxis(leanDegrees, Vector3.forward)
                 * Quaternion.AngleAxis(spinDegrees + (faceFlipped ? 180f : 0f), Vector3.up);

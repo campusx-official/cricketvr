@@ -75,6 +75,8 @@ namespace CricketVR
             if (score != null) score.DeliveryFinalized += OnDeliveryFinalized;
             if (resolver != null) resolver.BatContact += OnBatContact;
             if (ui != null) ui.ButtonPressed += OnButton;
+            if (setupControls != null) setupControls.FitConfirmed += ExitBatSetup;
+            if (setupControls != null) setupControls.FitModeChanged += ShowFitPanel;
             _doneTap = new InputAction("BatSetupDone", InputActionType.Button, "<XRController>/{PrimaryButton}");
             _doneTap.Enable();
             // The batter asks for each ball with B (owner decision 2026-10-26: "as a batsman I want that control").
@@ -88,6 +90,8 @@ namespace CricketVR
             if (score != null) score.DeliveryFinalized -= OnDeliveryFinalized;
             if (resolver != null) resolver.BatContact -= OnBatContact;
             if (ui != null) ui.ButtonPressed -= OnButton;
+            if (setupControls != null) setupControls.FitConfirmed -= ExitBatSetup;
+            if (setupControls != null) setupControls.FitModeChanged -= ShowFitPanel;
             _doneTap?.Dispose();
             _readyPress?.Dispose();
         }
@@ -112,7 +116,9 @@ namespace CricketVR
             }
             if (_batSetup)
             {
-                if (Tapped(_doneTap, ref _doneDown))
+                if (bat != null && bat.Fitting)
+                    _doneDown = -1f; // A moves the ghost controller; a stick click confirms the fit
+                else if (Tapped(_doneTap, ref _doneDown))
                     ExitBatSetup();
                 return;
             }
@@ -331,6 +337,8 @@ namespace CricketVR
                     _wicketSide = Mathf.Max(0, System.Array.FindIndex(WicketSide.All, w => w.Button == name)); ShowMenu(); break;
                 case "RightHanded": handedness?.Set(Handedness.Right); ShowMenu(); break;
                 case "LeftHanded": handedness?.Set(Handedness.Left); ShowMenu(); break;
+                case "BatInHand": bat?.SetMode(BatMode.InHand); ShowMenu(); break;
+                case "BatStrapped": bat?.SetMode(BatMode.Strapped); ShowMenu(); break;
                 case "BatSetup": EnterBatSetup(); break;
                 case "Start": StartSession(); break;
                 case "PlayAgain": StartSession(); break;
@@ -353,8 +361,12 @@ namespace CricketVR
             var envMode = _mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode;
             ApplyEnvironment(envMode);
             ui.PlaceNear(xrOrigin);
-            ui.ShowMenu(_mode == SessionMode.NetPractice,
-                "Point with the right controller and pull the trigger, or tap a button with the bat.");
+            bool strapped = bat != null && bat.Mode == BatMode.Strapped;
+            ui.ShowMenu(_mode == SessionMode.NetPractice, strapped
+                ? "Tap a button with the bat."
+                : "Point with the right controller and pull the trigger, or tap a button with the bat.");
+            ui.Select("BatInHand", !strapped);
+            ui.Select("BatStrapped", strapped);
             ui.Select("NetPractice", _mode == SessionMode.NetPractice);
             ui.Select("MatchSim", _mode == SessionMode.MatchSimulation);
             foreach (int o in new[] { 1, 2, 3, 5 }) ui.Select("Overs" + o, _overs == o);
@@ -364,13 +376,16 @@ namespace CricketVR
             bool right = handedness == null || handedness.Current == Handedness.Right;
             ui.Select("RightHanded", right);
             ui.Select("LeftHanded", !right);
-            ui.Board(_mode == SessionMode.NetPractice
+            string board = _mode == SessionMode.NetPractice
                 ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls), {BowlerName}, {WicketSide.All[_wicketSide].Label.ToLowerInvariant()} the wicket\nNo runs: every ball gets a result." +
                   (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "") +
                   (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "") +
                   (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps;\n80, 120, 140 km/h, grazes, spin. Leave them." : "")
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending." +
-                  (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps (LED on)." : ""));
+                  (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps (LED on)." : "");
+            if (strapped)
+                board += bat.MountFitted ? "\nReal bat (fitted)." : "\n<b>Real bat: not fitted yet.</b> Open Bat setup.";
+            ui.Board(board);
             pointer?.SetVisible(true);
         }
 
@@ -380,12 +395,42 @@ namespace CricketVR
             _doneDown = -1f;
             pointer?.SetVisible(false);
             if (setupControls != null) setupControls.allowSetupInput = true;
+            ShowBatSetupPanel();
+        }
+
+        void ShowBatSetupPanel()
+        {
+            if (bat != null && bat.Mode == BatMode.Strapped)
+            {
+                // The frozen bat stands to the right of the panel, upright, its controller side toward the player.
+                var at = (xrOrigin != null ? xrOrigin.position : Vector3.zero) + new Vector3(0.62f, 1.25f, 0.65f);
+                var toPlayer = (xrOrigin != null ? xrOrigin.position : Vector3.zero) - at;
+                toPlayer.y = 0f;
+                var face = Quaternion.LookRotation(bat.HitsWithControllerSide ? toPlayer : -toPlayer, Vector3.up);
+                bat.BeginFit(new Pose(at, face));
+                ShowFitPanel();
+                return;
+            }
             ui.ShowBatSetup("Thumbstick up/down: tilt.  Left/right: spin.\nTrigger + left/right: lean.  Grip + up/down: slide.\nGrip + left/right: face turn.  Stick click: reset (hold: flip face).\nHold B: move the bat to the other controller.");
+        }
+
+        void ShowFitPanel()
+        {
+            bool turning = setupControls != null && setupControls.FitTurning;
+            string move = "<b>B / A</b>: up / down the bat\n<b>Stick left / right</b>: across the blade\n<b>Stick up / down</b>: away from / onto the blade";
+            string turn = "<b>B / A</b>: roll it about its own length\n<b>Stick left / right</b>: turn it on the bat\n<b>Stick up / down</b>: tilt it";
+            ui.ShowBatSetup(
+                "<b>REAL BAT: fit the controller</b>\nThe virtual bat is frozen on your right. Put the cyan controller exactly where yours is taped on your real bat.\n\n" +
+                $"<b>{(turning ? "TURN" : "MOVE")}</b> (tap the stick to switch to {(turning ? "MOVE" : "TURN")})\n" + (turning ? turn : move),
+                "Hold the stick click 1 s: OK (save)", "Bat setup");
         }
 
         void ExitBatSetup()
         {
+            if (!_batSetup)
+                return;
             _batSetup = false;
+            if (bat != null && bat.Fitting) bat.EndFit(false);
             if (setupControls != null) setupControls.allowSetupInput = false;
             // Shown on the first Update: HandednessSetup.Start may move the rig to the saved stance first.
             _menuPending = true;
@@ -398,6 +443,8 @@ namespace CricketVR
                 ? SessionOptions.NetPractice(_overs, seed)
                 : SessionOptions.MatchSimulation(Mathf.Max(1, config.session.matchPlaceholderBalls), seed);
             ApplyEnvironment(_mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode);
+            bool strapped = bat != null && bat.Mode == BatMode.Strapped;
+            _session.Timings = strapped ? config.session.realBatTimings : config.session.timings;
             _rng = new System.Random(seed);
             _types = config.delivery.TypeCatalogue();
             _sessionId = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -411,7 +458,7 @@ namespace CricketVR
             pointer?.SetVisible(false);
             ui.ShowPlaying("");
             if (bat != null) bat.ResetMotion(MotionResetReason.Manual);
-            Debug.Log($"[CricketVR] Session {_sessionId}: {_mode}, {options.BallBudget} balls, seed {seed}" +
+            Debug.Log($"[CricketVR] Session {_sessionId}: {_mode}, {options.BallBudget} balls, seed {seed}{(strapped ? ", real bat, automatic balls" : "")}" +
                       (_mode == SessionMode.MatchSimulation ? $", {_difficulty}" : ""));
         }
 
@@ -492,6 +539,7 @@ namespace CricketVR
         }
 
         public void ConfigureWicket(WicketReaction wicketReaction) => wicket = wicketReaction;
+
 
         public void Configure(GameConfig cfg, BowlingMachine bowlingMachine, BallController ballController, ScoreManager scoreManager,
             BatBallContactResolver contactResolver, BatController batController, HandednessSetup handednessSetup,

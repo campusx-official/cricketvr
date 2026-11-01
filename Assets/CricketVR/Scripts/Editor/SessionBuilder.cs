@@ -154,7 +154,7 @@ namespace CricketVR.Editor
             buttons.Add(MakeButton(tree, menu, "NetPractice", "Net Practice", new Vector2(-200f, 195f), new Vector2(370f, 80f)));
             buttons.Add(MakeButton(tree, menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
 
-            // Rows 65 apart (buttons 60 high): mode, overs/difficulty, bowler, wicket (Net Practice), batting, Start.
+            // Rows 65 apart (buttons 60 high): mode, overs/difficulty, bowler, wicket (Net Practice), batting, bat, Start.
             var net = Group(tree, menu, "NetOptions");
             Label(tree, net, "Overs", new Vector2(-300f, 120f));
             int i = 0;
@@ -180,8 +180,12 @@ namespace CricketVR.Editor
             Label(tree, menu, "Batting", new Vector2(-300f, -75f));
             buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -75f), new Vector2(190f, 60f)));
             buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -75f), new Vector2(190f, 60f)));
-            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -75f), new Vector2(190f, 60f)));
-            buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -170f), new Vector2(420f, 90f), StartColor));
+            // Bat (owner request 2026-11-01): the controller in the hand, or strapped to a real bat (bat mode).
+            Label(tree, menu, "Bat", new Vector2(-300f, -140f));
+            buttons.Add(MakeButton(tree, menu, "BatInHand", "In hand", new Vector2(-120f, -140f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "BatStrapped", "Real bat", new Vector2(85f, -140f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -140f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -222f), new Vector2(420f, 80f), StartColor));
 
             var end = Group(tree, panel.transform, "EndGroup");
             buttons.Add(MakeButton(tree, end, "PlayAgain", "Play again", new Vector2(-260f, -215f), new Vector2(240f, 85f), StartColor));

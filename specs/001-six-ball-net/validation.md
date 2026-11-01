@@ -43,6 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
+| AC-34 | REQ-053..057 | Automated pass (E-073 fit, E-074 automatic balls); owner: the fit "is working" (E-074); headset pending (T092). The first calibration failed on the device (E-072) | E-071–E-074 | T092 headset run: play with the real bat |
 
 ## Evidence entry template
 
@@ -1347,6 +1348,82 @@ Actual result and measured values:
 Outcome: Pass. Bowler choice (device CSV); owner: "yes it flashed red, everything working" (the wicket reaction in both modes, the LED flash in Match Simulation, the reset). The owner did not fill in the checklist item by item.
 Log or artifact path: Docs/evidence/2026-10-30-wicket-gameplay/
 Remaining limitation / follow-up task: real stump sound (owner recording); consider a larger logcat buffer (adb logcat -G 16M) for later sessions
+```
+
+```text
+Check ID / acceptance scenario: E-071 / Bat mode T089-T091 (AC-34 automated) and the T092 headset build
+Requirement IDs: REQ-053, REQ-054, REQ-055, REQ-056
+Date and tester: 2026-11-01 agent (batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-mode.apk sha256 d3c37291c79623c2521bb9aef199cdbe834354e2eb920003b11a2d0f2c70dca3 (normal gameplay build, 970.2 MB, 0 errors, 0 warnings)
+Unity and package versions: as E-001
+Environment: macOS batch mode, Burst compilation disabled for the test runs
+Configuration: GameConfig.bat strappedController Right, controllerOnFace false (controller on the back, owner's photos), pivotSeconds 4, flatSeconds 1.5
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (added BatMountCalibrator and the Bat menu row); -runTests EditMode and PlayMode; QuestBuild.Build
+Expected result: AC-34 automated items; all earlier tests still pass
+Actual result and measured values:
+  - EditMode 171/171 (7 new in BatMountTests: default mount, pivot within 3 mm at 2 mm noise, no rocking rejected, sliding toe rejected, crooked off-centre mount recovered (toe and blade centre < 5 mm, length < 1°, face < 2.5° with a 2° spine tip), wrong length and tilted flat rejected, controller side decides the face).
+  - PlayMode 75/75 (4 new in BatModePlayModeTests: bat and proxy follow the mount on the right controller, SetBatHand ignored, mode remembered, back to the in-hand grip; simulated calibration puts the virtual toe within 5 mm of the real toe and the face within 1.5°; failed and cancelled calibration change nothing; fine-tuning resets to the mount keeping the face swap).
+  - A first PlayMode run failed 1 test: the strapped fine-tuning prefs key had a double dot ("CricketVR.Strap.v1..flipped"), so the tests' cleanup missed it and a face swap leaked into the next test. Fixed the key; the stray Editor prefs were deleted.
+Outcome: Pass (automated). Headset pending (T092).
+Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_bat.log
+Remaining limitation / follow-up task: T092 headset run; the real bat's length is only checked (±12 cm), not used to resize the virtual bat
+```
+
+```text
+Check ID / acceptance scenario: E-072 / Bat-mode calibration on the device (failed) and its replacement, the manual fit (T093, AC-34 automated)
+Requirement IDs: REQ-053, REQ-054, REQ-055, REQ-056
+Date and tester: 2026-11-01 owner (headset, Builds/CricketVR-bat-mode.apk from E-071); agent (log, code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-fit.apk sha256 c793b670184c3b5ed666fef4dff283593dc83f2a2776ab2eb9c65daa60c66cf7 (969.6 MB, 0 errors, 0 warnings)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller taped to the back of the owner's bat; macOS batch mode for tests
+Configuration: logcat buffer 16 MB (set at install; reverts on reboot)
+Steps or exact command: owner tried the calibration; adb logcat (Docs/evidence/2026-11-01-bat-calibration/logcat_calibration.txt); then T093 implemented, MainSceneBuilder.BuildOrRepairBatch, EditMode and PlayMode, QuestBuild.Build
+Expected result: calibration completes (E-071 build); then AC-34 automated items for the fit
+Actual result and measured values:
+  - Device, 15:13-15:15: six toe steps failed: "toe moved" 3.6, 3.9 and 9.4 cm (limit 1.5 cm), "only rocked" 21, 2 and 14 degrees (minimum 25); TrackingLost resets every few seconds while the controller was near the floor. Owner: "not able to calibrate". Cause: a real toe is 11 cm wide and rolls on its corners, so it is not a fixed point; the floor work hides the controller from the headset.
+  - Replaced (owner's request) by the manual fit: the frozen bat with a ghost controller, B/A up/down, stick turn/tilt, hold click swap face, click saves. BatMountCalibrator and the pivot maths removed; the builder removes the component's now-missing script from the scene (0 missing scripts left).
+  - EditMode 167/167 (BatMountTests now 3: default mount, inverse, fit range).
+  - PlayMode 76/76 (BatModePlayModeTests 5: bat on the strapped controller; fit freezes the bat, ignores the controller, disables contacts, B moves 3 cm, turn and tilt in place, saved controller pose equals the ghost within 0.1 mm / 0.05 deg; face swap keeps the ghost; cancel changes nothing; fine-tuning). The first PlayMode run failed one unrelated test, SessionPlayModeTests.NetPracticeBowlsTheChosenSpinner (leg-spin arrival 2.1 cm vs 5.5 cm +/- 3 cm); it seeds from the clock and passed on the rerun: a flaky tolerance, not a bat-mode effect.
+Outcome: calibration Fail on the device (replaced); fit automated Pass. Headset pending (T092).
+Log or artifact path: Docs/evidence/2026-11-01-bat-calibration/
+Remaining limitation / follow-up task: T092 headset run; the flaky spinner session test (seed from the clock) should get a fixed seed or a wider bound
+```
+
+```text
+Check ID / acceptance scenario: E-073 / Bat-mode fit in six directions (T094, AC-34 automated); owner's screenshots of the default mount
+Requirement IDs: REQ-054, REQ-055
+Date and tester: 2026-11-01 owner (headset, still Builds/CricketVR-bat-mode.apk: the E-072 fit build was never installed); agent (log, code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-fit.apk sha256 43270e9d2c5f7f99a67081d20892d60a09d335ff021e3c6838f7a19143fffdf9, installed 19:22:06
+Unity and package versions: as E-001
+Environment: Quest 3 standalone; macOS batch mode for tests
+Configuration: logcat buffer 16 MB
+Steps or exact command: owner's screenshots and log (19:07-19:09: E-071 fine-tuning, tilt -35..10, spin -30..5, then a cancelled calibration); T094; MainSceneBuilder (nothing added); EditMode, PlayMode; QuestBuild.Build; adb install
+Expected result: the ghost can be put anywhere on or near the blade; AC-34 automated items
+Actual result and measured values:
+  - Screenshots: with the default mount the tracked controller model floats off the back of the virtual blade, beside it. The E-071 fine-tuning only turns the bat about its grip point, and the E-072 fit only slid it along the bat and turned it, so neither could move the controller across or onto the blade. Owner: "the controller is in the air wrt to the virtual bat ... not able to move it".
+  - T094: MOVE / TURN modes (up/down, across, away/onto; turn, tilt, roll), hold the stick click to save; the fit's face swap removed.
+  - EditMode 167/167; PlayMode 76/76 (new: across to the player's right, onto the blade, clamped at 15 cm, roll in place about its own length, saved pose equals the ghost; cancel changes nothing).
+Outcome: automated Pass; headset pending (T092)
+Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_fit2.log
+Remaining limitation / follow-up task: T092 headset run with the fit
+```
+
+```text
+Check ID / acceptance scenario: E-074 / Fit used on the device; automatic balls in bat mode (T095, AC-34 automated)
+Requirement IDs: REQ-054, REQ-057
+Date and tester: 2026-11-01 owner (headset, Builds/CricketVR-bat-fit.apk E-073); agent (code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-auto.apk sha256 9015bacce8c28b8190ad20a33f2c1f07523247947e80956e7418727533f54f0b, installed 19:47:11
+Unity and package versions: as E-001
+Environment: Quest 3 standalone; macOS batch mode for tests
+Configuration: GameConfig.session.realBatTimings automatic, firstCountdown 8, betweenBalls 5, countdown 3
+Steps or exact command: owner fitted the controller and saved (hold stick click); T095; EditMode, PlayMode; MainSceneBuilder (wrote realBatTimings to the asset); QuestBuild.Build; adb install
+Expected result: the fit can be saved; real-bat sessions need no B press
+Actual result and measured values:
+  - Owner: the fit "it's working"; then "while holding the bat i can't press B"; chose "automatic mode with a break of 8 secs".
+  - EditMode 167/167; PlayMode 77/77 (new SessionPlayModeTests.RealBatBowlsAutomaticallyWithAnEightSecondBreak: first ball 8 s after Start, next 8 s after the result, each within 0.3 s, with the in-hand timings set to wait for B).
+Outcome: fit saving confirmed by the owner (no measurement yet); automatic balls automated Pass; headset pending (T092)
+Log or artifact path: scratchpad PlayMode.xml / apk_auto.log
+Remaining limitation / follow-up task: T092: play with the real bat (contact, tracking, toe on the floor)
 ```
 
 ## Re-plan note (2026-10-26)

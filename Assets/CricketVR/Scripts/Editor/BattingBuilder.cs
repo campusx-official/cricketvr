@@ -76,6 +76,10 @@ namespace CricketVR.Editor
             var batController = GetOrAdd<BatController>(batRoot, created);
             var handedness = GetOrAdd<HandednessSetup>(batRoot, created);
             var controls = GetOrAdd<BatSetupControls>(batRoot, created);
+            // The three-step calibration (E-071) was replaced by the fit (E-072): drop its component from existing scenes.
+            if (GameObjectUtility.RemoveMonoBehavioursWithMissingScript(batRoot) > 0)
+                created.Add("removed the missing BatMountCalibrator");
+            var ghost = EnsureFitGhost(visual, created);
 
             var blade = visual.Find("Blade")?.GetComponent<Renderer>();
             batController.Configure(config, leftGrip, rightGrip, visual, blade, body, proxy.GetComponent<BoxCollider>());
@@ -84,9 +88,34 @@ namespace CricketVR.Editor
                 environment.transform.Find("BattingAnchor/StanceMarker_LeftHanded"),
                 main.transform.Find("UI/LiveScoreboard"));
             controls.Configure(batController, handedness);
+            batController.ConfigureFit(ghost);
             EditorUtility.SetDirty(batController);
             EditorUtility.SetDirty(handedness);
             EditorUtility.SetDirty(controls);
+        }
+
+        /// <summary>
+        /// The ghost controller for fitting bat mode (plan.md §21): a rough Touch Plus in the controller's grip frame
+        /// (handle along +Z toward the buttons end, buttons facing +Y), bright and unlit, hidden until the fit starts.
+        /// </summary>
+        static Transform EnsureFitGhost(Transform visual, List<string> created)
+        {
+            var ghost = visual.Find("FitGhost");
+            if (ghost != null)
+                return ghost;
+            ghost = new GameObject("FitGhost").transform;
+            ghost.SetParent(visual, false);
+            var body = PracticeNetBuilder.UnlitMat("FitGhost", new Color(0.2f, 0.9f, 1f));
+            var dark = PracticeNetBuilder.UnlitMat("FitGhostButtons", new Color(0.1f, 0.1f, 0.12f));
+            var handle = PracticeNetBuilder.CreateVisual(PrimitiveType.Cylinder, "Handle", ghost, new Vector3(0f, 0f, -0.01f), new Vector3(0.034f, 0.05f, 0.034f), body);
+            handle.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            PracticeNetBuilder.CreateVisual(PrimitiveType.Cylinder, "Head", ghost, new Vector3(0f, 0.012f, 0.06f), new Vector3(0.066f, 0.012f, 0.066f), body);
+            PracticeNetBuilder.CreateVisual(PrimitiveType.Sphere, "Thumbstick", ghost, new Vector3(-0.012f, 0.022f, 0.055f), Vector3.one * 0.016f, dark);
+            PracticeNetBuilder.CreateVisual(PrimitiveType.Sphere, "ButtonA", ghost, new Vector3(0.012f, 0.02f, 0.05f), Vector3.one * 0.01f, dark);
+            PracticeNetBuilder.CreateVisual(PrimitiveType.Sphere, "ButtonB", ghost, new Vector3(0.014f, 0.02f, 0.068f), Vector3.one * 0.01f, dark);
+            ghost.gameObject.SetActive(false);
+            created.Add("FitGhost");
+            return ghost;
         }
 
         static GameConfig EnsureConfig(List<string> created)
