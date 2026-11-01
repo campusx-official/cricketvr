@@ -16,12 +16,40 @@ namespace CricketVR.Editor
     {
         public const string BallLayer = "Ball";
         const string PhysicsFolder = "Assets/CricketVR/Settings/Physics";
+        public const string DeliveryTypesFolder = "Assets/CricketVR/Settings/DeliveryTypes";
         const string TmpEssentials = "Packages/com.unity.ugui/Package Resources/TMP Essential Resources.unitypackage";
+
+        /// <summary>
+        /// M7.5: one DeliveryType asset per type with the plan.md §19 starting values. Existing assets are never
+        /// overwritten (they hold calibration); GameConfig's list is re-applied in DeliveryKind order.
+        /// </summary>
+        static void EnsureDeliveryTypes(GameConfig config, List<string> created)
+        {
+            Directory.CreateDirectory(DeliveryTypesFolder);
+            var defaults = DeliveryTypeData.All;
+            var assets = new DeliveryType[defaults.Length];
+            for (int i = 0; i < defaults.Length; i++)
+            {
+                string path = $"{DeliveryTypesFolder}/{defaults[i].kind}.asset";
+                var asset = AssetDatabase.LoadAssetAtPath<DeliveryType>(path);
+                if (asset == null)
+                {
+                    asset = ScriptableObject.CreateInstance<DeliveryType>();
+                    asset.data = defaults[i];
+                    AssetDatabase.CreateAsset(asset, path);
+                    created.Add(path);
+                }
+                assets[i] = asset;
+            }
+            config.delivery.deliveryTypes = assets;
+            EditorUtility.SetDirty(config);
+        }
 
         public static void Build(GameObject main, GameObject environment, GameConfig config, List<string> created)
         {
             PracticeNetBuilder.EnsureLayers(created, BallLayer, GroundBuilder.OutfieldLayer);
             ConfigureCollisionMatrix();
+            EnsureDeliveryTypes(config, created);
             ApplyPhysicsMaterials(environment, created);
 
             var gameplay = Child(main.transform, "Gameplay", created);
@@ -178,10 +206,11 @@ namespace CricketVR.Editor
             ballGo.layer = LayerMask.NameToLayer(BallLayer);
             t.localScale = Vector3.one * config.delivery.ballRadius * 2f;
 
-            var renderer = ballGo.GetComponent<MeshRenderer>();
-            renderer.sharedMaterial = PracticeNetBuilder.Mat("BallWhite", new Color(0.98f, 0.98f, 0.95f));
-            renderer.shadowCastingMode = ShadowCastingMode.On; // realtime shadow: helps judge the ball's height (plan.md §15)
-            renderer.enabled = false; // parked (hidden) until launched; BallController shows it on launch
+            // M7.5: the physics sphere's own renderer stays off; a child carries the seam and its own rotation (DT-9).
+            var bodyRenderer = ballGo.GetComponent<MeshRenderer>();
+            bodyRenderer.sharedMaterial = PracticeNetBuilder.Mat("BallWhite", new Color(0.98f, 0.98f, 0.95f));
+            bodyRenderer.enabled = false;
+            var renderer = EnsureBallVisual(ballGo, created);
 
             var body = ballGo.GetComponent<Rigidbody>();
             body.mass = config.delivery.ballMass;
@@ -204,7 +233,105 @@ namespace CricketVR.Editor
             var controller = ballGo.GetComponent<BallController>();
             controller.Configure(config, trail, renderer);
             EditorUtility.SetDirty(controller);
+            var flight = GetOrAdd<BallFlight>(ballGo, created);
+            flight.Configure(renderer.transform);
+            EditorUtility.SetDirty(flight);
             return controller;
+        }
+
+        const string BallTextureFolder = "Assets/CricketVR/Generated/Ball";
+
+        /// <summary>Child "BallVisual": the sphere mesh with the seam texture. The seam is the mesh's equator.</summary>
+        static MeshRenderer EnsureBallVisual(GameObject ballGo, List<string> created)
+        {
+            var t = ballGo.transform.Find("BallVisual");
+            if (t == null)
+            {
+                var go = new GameObject("BallVisual");
+                go.transform.SetParent(ballGo.transform, false);
+                go.AddComponent<MeshFilter>();
+                go.AddComponent<MeshRenderer>();
+                created.Add("BallVisual");
+                t = go.transform;
+            }
+            t.gameObject.layer = ballGo.layer;
+            t.localPosition = Vector3.zero;
+            t.localScale = Vector3.one;
+            t.GetComponent<MeshFilter>().sharedMesh = ballGo.GetComponent<MeshFilter>().sharedMesh;
+            var renderer = t.GetComponent<MeshRenderer>();
+            renderer.sharedMaterial = SeamMaterial();
+            renderer.shadowCastingMode = ShadowCastingMode.On; // realtime shadow: helps judge the ball's height (plan.md §15)
+            renderer.enabled = false; // parked (hidden) until launched; BallController shows it on launch
+            return renderer;
+        }
+
+        static Material SeamMaterial()
+        {
+            const string path = "Assets/CricketVR/Materials/BallSeam.mat";
+            var texture = SeamTexture();
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (mat == null)
+            {
+                mat = new Material(Shader.Find("Universal Render Pipeline/Simple Lit"));
+                AssetDatabase.CreateAsset(mat, path);
+            }
+            mat.color = Color.white;
+            mat.SetTexture("_BaseMap", texture);
+            EditorUtility.SetDirty(mat);
+            return mat;
+        }
+
+        /// <summary>
+        /// White leather with a red seam around the equator (v = 0.5 on Unity's sphere) and two rows of stitches.
+        /// The seam is about 4 mm of a 72 mm ball (6 degrees of latitude). Deterministic, so rebuilds are byte-identical.
+        /// </summary>
+        static Texture2D SeamTexture()
+        {
+            const int w = 512, h = 256;
+            var leather = new Color(0.98f, 0.98f, 0.95f);
+            var seam = new Color(0.72f, 0.08f, 0.07f);
+            var stitch = new Color(0.55f, 0.05f, 0.05f);
+            var tex = new Texture2D(w, h, TextureFormat.RGBA32, true);
+            var pixels = new Color[w * h];
+            for (int y = 0; y < h; y++)
+            {
+                float latitude = (y + 0.5f) / h * 180f - 90f;
+                for (int x = 0; x < w; x++)
+                {
+                    var c = leather;
+                    float a = Mathf.Abs(latitude);
+                    if (a < 2.2f) c = seam;
+                    else if (a < 4.2f && (x / 4) % 2 == 0) c = stitch; // stitch rows either side of the seam
+                    pixels[y * w + x] = c;
+                }
+            }
+            tex.SetPixels(pixels);
+            tex.Apply();
+
+            Directory.CreateDirectory(BallTextureFolder);
+            string path = $"{BallTextureFolder}/BallSeam.png";
+            var bytes = tex.EncodeToPNG();
+            Object.DestroyImmediate(tex);
+            if (!File.Exists(path) || !System.Linq.Enumerable.SequenceEqual(File.ReadAllBytes(path), bytes))
+            {
+                File.WriteAllBytes(path, bytes);
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+            }
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.mipmapEnabled = true;
+            importer.filterMode = FilterMode.Trilinear;
+            importer.anisoLevel = 4;
+            importer.wrapMode = TextureWrapMode.Repeat;
+            importer.SetPlatformTextureSettings(new TextureImporterPlatformSettings
+            {
+                name = "Android",
+                overridden = true,
+                maxTextureSize = 512,
+                format = TextureImporterFormat.ASTC_6x6,
+                textureCompression = TextureImporterCompression.Compressed,
+            });
+            importer.SaveAndReimport();
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
         static Material TrailMaterial()

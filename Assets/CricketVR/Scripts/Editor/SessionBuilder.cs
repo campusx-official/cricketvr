@@ -126,82 +126,90 @@ namespace CricketVR.Editor
         static (GameObject, TMP_Text, TMP_Text, TMP_Text, GameObject, GameObject, GameObject, GameObject, GameObject, Button[])
             BuildNearPanel(Transform uiRoot, List<string> created)
         {
-            var old = uiRoot.Find("NearPanel");
-            if (old != null)
-                Object.DestroyImmediate(old.gameObject);
-            var panel = new GameObject("NearPanel", typeof(RectTransform));
-            panel.transform.SetParent(uiRoot, false);
-            created.Add("NearPanel (regenerated)");
+            // Rebuilt in place (stable object IDs): an unchanged layout leaves the scene file unchanged.
+            var tree = new GeneratedTree(uiRoot, "NearPanel", typeof(RectTransform), typeof(Canvas), typeof(TrackedDeviceGraphicRaycaster));
+            var panel = tree.Root;
+            if (tree.CreatedRoot)
+                created.Add("NearPanel");
             var rt = (RectTransform)panel.transform;
             rt.sizeDelta = PanelSize;
             rt.localScale = Vector3.one * CanvasScale;
             rt.position = FieldDimensions.RightHandedStance + new Vector3(0f, 1.2f, 0.75f); // SessionUI re-places it at runtime
             rt.rotation = Quaternion.Euler(20f, 0f, 0f);
-            var canvas = panel.AddComponent<Canvas>();
+            var canvas = panel.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.WorldSpace;
             canvas.worldCamera = Camera.main;
-            panel.AddComponent<TrackedDeviceGraphicRaycaster>();
-            Image(panel.transform, "Background", Vector2.zero, PanelSize, PanelColor);
+            Image(tree, panel.transform, "Background", Vector2.zero, PanelSize, PanelColor);
 
-            var title = Text(panel.transform, "Title", new Vector2(0f, 280f), new Vector2(760f, 70f), 46f, FontStyles.Bold);
-            var body = Text(panel.transform, "Body", new Vector2(0f, 40f), new Vector2(760f, 400f), 30f, FontStyles.Normal);
+            var title = Text(tree, panel.transform, "Title", new Vector2(0f, 280f), new Vector2(760f, 70f), 46f, FontStyles.Bold);
+            var body = Text(tree, panel.transform, "Body", new Vector2(0f, 40f), new Vector2(760f, 400f), 30f, FontStyles.Normal);
             body.enableAutoSizing = true;
             body.fontSizeMin = 14f;
             body.fontSizeMax = 30f;
-            var hint = Text(panel.transform, "Hint", new Vector2(0f, -295f), new Vector2(780f, 50f), 22f, FontStyles.Italic);
+            var hint = Text(tree, panel.transform, "Hint", new Vector2(0f, -295f), new Vector2(780f, 50f), 22f, FontStyles.Italic);
 
             var buttons = new List<Button>();
-            var menu = Group(panel.transform, "MenuGroup");
-            buttons.Add(MakeButton(menu, "NetPractice", "Net Practice", new Vector2(-200f, 195f), new Vector2(370f, 80f)));
-            buttons.Add(MakeButton(menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
+            var menu = Group(tree, panel.transform, "MenuGroup");
+            buttons.Add(MakeButton(tree, menu, "NetPractice", "Net Practice", new Vector2(-200f, 195f), new Vector2(370f, 80f)));
+            buttons.Add(MakeButton(tree, menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
 
-            var net = Group(menu, "NetOptions");
-            Label(net, "Overs", new Vector2(-300f, 95f));
+            // Rows 65 apart (buttons 60 high): mode, overs/difficulty, bowler, wicket (Net Practice), batting, Start.
+            var net = Group(tree, menu, "NetOptions");
+            Label(tree, net, "Overs", new Vector2(-300f, 120f));
             int i = 0;
             foreach (var o in new[] { 1, 2, 3, 5 })
-                buttons.Add(MakeButton(net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 95f), new Vector2(100f, 75f)));
+                buttons.Add(MakeButton(tree, net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 120f), new Vector2(100f, 60f)));
+            // Bowler (owner request 2026-10-27): pace (Stock) or one spin type for the whole session.
+            Label(tree, net, "Bowler", new Vector2(-300f, 55f));
+            i = 0;
+            foreach (var bowler in NetBowler.All)
+                buttons.Add(MakeButton(tree, net, bowler.Button, bowler.Label, new Vector2(-110f + 170f * i++, 55f), new Vector2(155f, 60f)));
+            // Wicket (owner request 2026-10-27): a right-arm bowler's release, over or around the wicket.
+            Label(tree, net, "Wicket", new Vector2(-300f, -10f));
+            i = 0;
+            foreach (var side in WicketSide.All)
+                buttons.Add(MakeButton(tree, net, side.Button, side.Label, new Vector2(-110f + 170f * i++, -10f), new Vector2(155f, 60f)));
 
-            var match = Group(menu, "MatchOptions");
-            Label(match, "Difficulty", new Vector2(-300f, 95f));
+            var match = Group(tree, menu, "MatchOptions");
+            Label(tree, match, "Difficulty", new Vector2(-300f, 120f));
             i = 0;
             foreach (var d in new[] { "Easy", "Medium", "Hard" })
-                buttons.Add(MakeButton(match, d, d, new Vector2(-110f + 170f * i++, 95f), new Vector2(155f, 75f)));
+                buttons.Add(MakeButton(tree, match, d, d, new Vector2(-110f + 170f * i++, 120f), new Vector2(155f, 60f)));
 
-            Label(menu, "Batting", new Vector2(-300f, -10f));
-            buttons.Add(MakeButton(menu, "RightHanded", "Right-handed", new Vector2(-120f, -10f), new Vector2(190f, 75f)));
-            buttons.Add(MakeButton(menu, "LeftHanded", "Left-handed", new Vector2(85f, -10f), new Vector2(190f, 75f)));
-            buttons.Add(MakeButton(menu, "BatSetup", "Bat setup", new Vector2(290f, -10f), new Vector2(190f, 75f)));
-            buttons.Add(MakeButton(menu, "Start", "Start", new Vector2(0f, -150f), new Vector2(420f, 100f), StartColor));
+            Label(tree, menu, "Batting", new Vector2(-300f, -75f));
+            buttons.Add(MakeButton(tree, menu, "RightHanded", "Right-handed", new Vector2(-120f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "LeftHanded", "Left-handed", new Vector2(85f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "BatSetup", "Bat setup", new Vector2(290f, -75f), new Vector2(190f, 60f)));
+            buttons.Add(MakeButton(tree, menu, "Start", "Start", new Vector2(0f, -170f), new Vector2(420f, 90f), StartColor));
 
-            var end = Group(panel.transform, "EndGroup");
-            buttons.Add(MakeButton(end, "PlayAgain", "Play again", new Vector2(-260f, -215f), new Vector2(240f, 85f), StartColor));
-            buttons.Add(MakeButton(end, "Menu", "Menu", new Vector2(0f, -215f), new Vector2(240f, 85f)));
-            buttons.Add(MakeButton(end, "NewScenario", "New scenario", new Vector2(260f, -215f), new Vector2(240f, 85f)));
+            var end = Group(tree, panel.transform, "EndGroup");
+            buttons.Add(MakeButton(tree, end, "PlayAgain", "Play again", new Vector2(-260f, -215f), new Vector2(240f, 85f), StartColor));
+            buttons.Add(MakeButton(tree, end, "Menu", "Menu", new Vector2(0f, -215f), new Vector2(240f, 85f)));
+            buttons.Add(MakeButton(tree, end, "NewScenario", "New scenario", new Vector2(260f, -215f), new Vector2(240f, 85f)));
 
-            var pause = Group(panel.transform, "PauseGroup");
-            buttons.Add(MakeButton(pause, "Resume", "Resume", new Vector2(-140f, -215f), new Vector2(260f, 85f), StartColor));
-            buttons.Add(MakeButton(pause, "Menu", "Menu", new Vector2(140f, -215f), new Vector2(260f, 85f)));
+            var pause = Group(tree, panel.transform, "PauseGroup");
+            buttons.Add(MakeButton(tree, pause, "Resume", "Resume", new Vector2(-140f, -215f), new Vector2(260f, 85f), StartColor));
+            buttons.Add(MakeButton(tree, pause, "Menu", "Menu", new Vector2(140f, -215f), new Vector2(260f, 85f)));
 
             end.gameObject.SetActive(false);
             pause.gameObject.SetActive(false);
             match.gameObject.SetActive(false);
             // Hidden in the saved scene: it stands in the delivery sight line and is shown only while a menu is open.
             panel.SetActive(false);
+            tree.RemoveUnused();
             return (panel, title, body, hint, menu.gameObject, net.gameObject, match.gameObject, end.gameObject, pause.gameObject, buttons.ToArray());
         }
 
-        static Transform Group(Transform parent, string name)
+        static Transform Group(GeneratedTree tree, Transform parent, string name)
         {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
+            var go = tree.Child(parent, name, typeof(RectTransform));
             ((RectTransform)go.transform).sizeDelta = PanelSize;
             return go.transform;
         }
 
-        static Image Image(Transform parent, string name, Vector2 pos, Vector2 size, Color color)
+        static Image Image(GeneratedTree tree, Transform parent, string name, Vector2 pos, Vector2 size, Color color)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            go.transform.SetParent(parent, false);
+            var go = tree.Child(parent, name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             var rt = (RectTransform)go.transform;
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
@@ -210,10 +218,9 @@ namespace CricketVR.Editor
             return img;
         }
 
-        static TextMeshProUGUI Text(Transform parent, string name, Vector2 pos, Vector2 size, float fontSize, FontStyles style)
+        static TextMeshProUGUI Text(GeneratedTree tree, Transform parent, string name, Vector2 pos, Vector2 size, float fontSize, FontStyles style)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            go.transform.SetParent(parent, false);
+            var go = tree.Child(parent, name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             var rt = (RectTransform)go.transform;
             rt.anchoredPosition = pos;
             rt.sizeDelta = size;
@@ -227,23 +234,23 @@ namespace CricketVR.Editor
             return t;
         }
 
-        static void Label(Transform parent, string text, Vector2 pos)
+        static void Label(GeneratedTree tree, Transform parent, string text, Vector2 pos)
         {
-            var t = Text(parent, "Label " + text, pos, new Vector2(150f, 60f), 28f, FontStyles.Normal);
+            var t = Text(tree, parent, "Label " + text, pos, new Vector2(150f, 60f), 28f, FontStyles.Normal);
             t.alignment = TextAlignmentOptions.Left;
             t.text = text;
         }
 
-        static Button MakeButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, Color? color = null)
+        static Button MakeButton(GeneratedTree tree, Transform parent, string name, string label, Vector2 pos, Vector2 size, Color? color = null)
         {
-            var img = Image(parent, name, pos, size, color ?? ButtonColor);
-            var button = img.gameObject.AddComponent<Button>();
+            var img = Image(tree, parent, name, pos, size, color ?? ButtonColor);
+            var button = GetOrAdd<Button>(img.gameObject);
             button.targetGraphic = img;
             var colors = button.colors;
             colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
             colors.pressedColor = new Color(0.75f, 0.75f, 0.75f);
             button.colors = colors;
-            var t = Text(img.transform, "Label", Vector2.zero, size - new Vector2(16f, 8f), 30f, FontStyles.Bold);
+            var t = Text(tree, img.transform, "Label", Vector2.zero, size - new Vector2(16f, 8f), 30f, FontStyles.Bold);
             t.enableAutoSizing = true;
             t.fontSizeMin = 16f;
             t.fontSizeMax = 30f;

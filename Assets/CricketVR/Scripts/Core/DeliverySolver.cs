@@ -52,6 +52,17 @@ namespace CricketVR
         /// <summary>Lowest speed (km/h) that can reach the target, for error messages.</summary>
         public float MinimumSpeedKmh;
         public string Error;
+        /// <summary>Movement the runtime flight applies before the bounce (still for Stock).</summary>
+        public FlightPlan Plan;
+        /// <summary>Simulated swing (m): distance off the release line at the popping crease; 0 without swing.</summary>
+        public float PredictedSwing;
+        /// <summary>Simulated curve (m): largest distance from the release-to-pitch line (diagnostic); 0 without swing.</summary>
+        public float PredictedCurve;
+        /// <summary>Simulated drift (m): distance off the release line at the pitch point; 0 without drift.</summary>
+        public float PredictedDrift;
+        /// <summary>Simulated x at the striker's popping crease, after the turn (m, world); NaN unless the request's line
+        /// is <see cref="LineReference.AtBatter"/>.</summary>
+        public float PredictedArrivalLine;
     }
 
     /// <summary>
@@ -65,12 +76,18 @@ namespace CricketVR
 
         /// <param name="gravity">Downward acceleration magnitude (m/s², positive).</param>
         /// <param name="fixedDeltaTime">Physics step; used to correct for the step-wise integration (0 = skip).</param>
-        /// <param name="ballRadius">The bounce happens when the ball centre is this high above the ground.</param>
+        /// <summary>Height of the ball centre when it meets the pitch: the pitch's top surface plus one radius.</summary>
+        public static float ContactHeight(float ballRadius) => FieldDimensions.PitchSurfaceHeight + ballRadius;
+
+        /// <param name="ballRadius">The bounce happens when the ball centre is this high above the pitch surface
+        /// (<see cref="FieldDimensions.PitchSurfaceHeight"/>).</param>
         public static DeliverySolution Solve(DeliveryConfig config, float gravity, float fixedDeltaTime, float ballRadius)
         {
+            float contact = ContactHeight(ballRadius);
             var result = new DeliverySolution
             {
-                Target = new Vector3(config.line, ballRadius, config.length),
+                Target = new Vector3(config.line, contact, config.length),
+                PredictedArrivalLine = float.NaN,
             };
             float speed = Units.KmhToMs(config.speedKmh);
 
@@ -84,7 +101,7 @@ namespace CricketVR
             float dy = toTarget.y;
             if (d < 1f)
                 return Fail(result, $"bounce point is only {d:F2} m from the release point");
-            if (release.y <= ballRadius)
+            if (release.y <= contact)
                 return Fail(result, "release point is at or below ground level");
 
             // Slowest speed that reaches the target at all (the 45-degree-ish optimum), for the error message.
@@ -104,14 +121,14 @@ namespace CricketVR
             if (fixedDeltaTime > 0f)
             {
                 float lo = theta - 0.2f, hi = theta + 0.2f;
-                float landLo = SimulatedRange(release, speed, lo, gravity, fixedDeltaTime, ballRadius);
-                float landHi = SimulatedRange(release, speed, hi, gravity, fixedDeltaTime, ballRadius);
+                float landLo = SimulatedRange(release, speed, lo, gravity, fixedDeltaTime, contact);
+                float landHi = SimulatedRange(release, speed, hi, gravity, fixedDeltaTime, contact);
                 if (landLo <= d && landHi >= d)
                 {
                     for (int i = 0; i < MaxRefineIterations; i++)
                     {
                         float mid = 0.5f * (lo + hi);
-                        float land = SimulatedRange(release, speed, mid, gravity, fixedDeltaTime, ballRadius);
+                        float land = SimulatedRange(release, speed, mid, gravity, fixedDeltaTime, contact);
                         if (land < d) lo = mid; else hi = mid;
                         theta = mid;
                         if (Mathf.Abs(land - d) < RefineTolerance) break;
@@ -123,10 +140,10 @@ namespace CricketVR
             result.Velocity = dir * (speed * Mathf.Cos(theta)) + Vector3.up * (speed * Mathf.Sin(theta));
             result.ElevationDegrees = theta * Mathf.Rad2Deg;
             float landed = fixedDeltaTime > 0f
-                ? SimulatedRange(release, speed, theta, gravity, fixedDeltaTime, ballRadius)
+                ? SimulatedRange(release, speed, theta, gravity, fixedDeltaTime, contact)
                 : d;
             var predicted = release + dir * landed;
-            result.PredictedBounce = new Vector3(predicted.x, ballRadius, predicted.z);
+            result.PredictedBounce = new Vector3(predicted.x, contact, predicted.z);
             result.Reachable = true;
             return result;
         }
@@ -155,6 +172,325 @@ namespace CricketVR
                 y = ny;
             }
             return float.PositiveInfinity;
+        }
+
+        // ---------- Movement-aware solve (M7.5, plan.md §19) ----------
+
+        const int MaxMovingIterations = 20;
+        const float MovingTolerance = 0.001f; // metres: lands within 1 mm in simulation
+        const float MaxYaw = 0.5f;            // radians off the straight line to the bounce point
+
+        /// <summary>
+        /// Solves a world-frame request (after <see cref="DeliveryRequest.ForBatter"/>). A ball without movement uses
+        /// <see cref="Solve(DeliveryConfig,float,float,float)"/> unchanged; a moving ball uses the shooting solve
+        /// below, with its natural variation (and the swing cap) already in <paramref name="movement"/>.
+        /// </summary>
+        public static DeliverySolution Solve(in DeliveryRequest worldRequest, in DeliveryMovement movement, float gravity, float fixedDeltaTime, float ballRadius)
+        {
+            var config = worldRequest.ToConfig();
+            if (!movement.IsStill && movement.SeamDegrees != 0f)
+                return Fail(new DeliverySolution { Target = new Vector3(config.line, ContactHeight(ballRadius), config.length) },
+                    "seam movement is not available (D-2: 0 in v1)");
+            return worldRequest.lineReference == LineReference.AtBatter
+                ? SolveAtBatter(config, movement, gravity, fixedDeltaTime, ballRadius)
+                : SolveAtBounce(config, movement, gravity, fixedDeltaTime, ballRadius);
+        }
+
+        /// <summary>The line is where the ball pitches: Stock's unchanged solve, or the movement-aware one.</summary>
+        static DeliverySolution SolveAtBounce(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float ballRadius) =>
+            movement.IsStill ? Solve(config, gravity, dt, ballRadius)
+            : float.IsNaN(movement.LaunchDegrees) ? SolveMoving(config, movement, gravity, dt, ballRadius)
+            : SolveFlighted(config, movement, gravity, dt, ballRadius);
+
+        const float MaxFlightDip = 10f;          // m/s²: the most top-spin dip a flighted ball may be given (about 1 g)
+        const float LaunchTolerance = 0.05f;     // degrees
+
+        /// <summary>
+        /// A flighted ball (owner request 2026-10-27): launched <see cref="DeliveryMovement.LaunchDegrees"/> above the
+        /// horizontal at its speed. More dip needs a higher launch to reach the same length, so the solver finds the dip
+        /// by secant steps on the moving solve's launch elevation. A slow, full ball may need more than the asked angle
+        /// with no dip at all (gravity alone): it is launched at that angle with no dip. A ball pitched longer may need
+        /// more than <see cref="MaxFlightDip"/> to come down from the asked angle: it is launched as high as that dip
+        /// allows. So the launch is the asked angle clamped to what 0..MaxFlightDip can land on the length.
+        /// </summary>
+        static DeliverySolution SolveFlighted(DeliveryConfig config, DeliveryMovement movement, float gravity, float dt, float ballRadius)
+        {
+            float want = movement.LaunchDegrees;
+            DeliverySolution Try(float dip)
+            {
+                var m = movement;
+                m.Dip = dip;
+                m.LaunchDegrees = float.NaN;
+                return SolveMoving(config, m, gravity, dt, ballRadius);
+            }
+            var noDip = Try(0f);
+            if (noDip.Reachable && noDip.ElevationDegrees >= want - LaunchTolerance)
+                return noDip; // already launched at least this high with gravity alone
+            var mostDip = Try(MaxFlightDip);
+            if (mostDip.Reachable && mostDip.ElevationDegrees <= want + LaunchTolerance)
+                return mostDip; // as high as the dip limit allows for this length
+            float d0 = Mathf.Clamp(movement.Dip, 0f, MaxFlightDip), d1 = Mathf.Min(d0 + 2f, MaxFlightDip);
+            var s0 = Try(d0);
+            var s1 = Try(d1);
+            for (int i = 0; i < MaxMovingIterations; i++)
+            {
+                if (!s1.Reachable)
+                    return s1;
+                if (Mathf.Abs(s1.ElevationDegrees - want) < LaunchTolerance)
+                    return s1;
+                if (!s0.Reachable || Mathf.Abs(s1.ElevationDegrees - s0.ElevationDegrees) < 1e-4f)
+                    break;
+                float next = d1 + (want - s1.ElevationDegrees) * (d1 - d0) / (s1.ElevationDegrees - s0.ElevationDegrees);
+                next = Mathf.Clamp(next, 0f, MaxFlightDip);
+                if (Mathf.Abs(next - d1) < 1e-5f)
+                    break; // pinned at a limit
+                d0 = d1; s0 = s1;
+                d1 = next; s1 = Try(d1);
+            }
+            return Fail(s1, $"no dip up to {MaxFlightDip:F0} m/s² launches {config} at {want:F1} degrees (got {s1.ElevationDegrees:F1})");
+        }
+
+        const float ArrivalTolerance = 0.001f; // metres at the crease, in simulation
+
+        /// <summary>
+        /// Arrival-line request (D-1, T079): <c>config.line</c> is the x where the ball should reach the striker's
+        /// popping crease. Solves the pitch line by secant steps: each pass solves an ordinary pitch-point request
+        /// (same length, trial line) and simulates on to the crease along the arrival heading turned by the plan's turn
+        /// (PhysX's bounce keeps the heading; the turn pivots at the pitch point, so the runtime's rebound offset
+        /// adds up to about 2 cm, plan.md §19).
+        /// </summary>
+        static DeliverySolution SolveAtBatter(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float ballRadius)
+        {
+            float want = config.line;
+            if (!(dt > 0f))
+                return Fail(new DeliverySolution { Target = new Vector3(want, ContactHeight(ballRadius), config.length) },
+                    "an arrival-line request needs the physics step");
+            float pitchX = want, lastPitch = float.NaN, lastArrival = float.NaN;
+            DeliverySolution s = default;
+            for (int i = 0; i < MaxMovingIterations; i++)
+            {
+                var trial = config;
+                trial.line = pitchX;
+                s = SolveAtBounce(trial, movement, gravity, dt, ballRadius);
+                if (!s.Reachable)
+                    return s;
+                var flight = Simulate(trial.releasePosition, s.Velocity, s.Plan, gravity, dt, s.Target.y, s.Target);
+                if (!flight.Landed || float.IsNaN(flight.CreaseX))
+                    return Fail(s, $"{config.speedKmh:F0} km/h at length {config.length:F2} m never reaches the crease");
+                s.PredictedArrivalLine = flight.CreaseX;
+                float miss = want - flight.CreaseX;
+                if (Mathf.Abs(miss) < ArrivalTolerance)
+                    return s;
+                // Secant on crease x(pitch x); the first step assumes the crease moves one-for-one with the pitch.
+                float slope = 1f;
+                if (!float.IsNaN(lastPitch) && Mathf.Abs(pitchX - lastPitch) > 1e-6f)
+                    slope = (flight.CreaseX - lastArrival) / (pitchX - lastPitch);
+                if (!(slope > 0.1f))
+                    slope = 1f;
+                lastPitch = pitchX;
+                lastArrival = flight.CreaseX;
+                pitchX += miss / slope;
+                if (Mathf.Abs(pitchX - want) > MaxArrivalOffset)
+                    return Fail(s, $"too much movement to finish on line {want:+0.00;-0.00} m (would pitch {pitchX:+0.00;-0.00} m)");
+            }
+            return Fail(s, $"no pitch line finishes on {want:+0.00;-0.00} m within {ArrivalTolerance * 1000f:F0} mm");
+        }
+
+        const float MaxArrivalOffset = 2f; // metres between the pitch line and the arrival line
+
+        /// <summary>
+        /// Shooting solve on (yaw, elevation) at the requested speed. Integrates gravity plus
+        /// <see cref="DeliveryFlightModel.Acceleration"/> exactly as PhysX steps the ball (velocity, then position)
+        /// down to the pitch point. An inner Newton loop corrects yaw and elevation until it lands within 0.1 mm; an
+        /// outer loop then updates the planned flight time T and rescales the swing and drift accelerations so the
+        /// simulated swing (distance off the release line at the popping crease) and drift (at the pitch point) equal
+        /// the requested ones (the closed forms are small-angle results). Dip needs no rescale: the aim absorbs it.
+        /// Converges in a few outer passes.
+        /// </summary>
+        static DeliverySolution SolveMoving(DeliveryConfig config, in DeliveryMovement movement, float gravity, float dt, float radius)
+        {
+            var still = Solve(config, gravity, dt, radius);
+            float contact = still.Target.y;
+            if (!still.Reachable || !(dt > 0f))
+                return still.Reachable ? Fail(still, "a moving delivery needs the physics step") : still;
+
+            var result = still;
+            var release = config.releasePosition;
+            var target = still.Target;
+            var toTarget = new Vector3(target.x - release.x, 0f, target.z - release.z);
+            var forward = toTarget.normalized;
+            var side = new Vector3(-forward.z, 0f, forward.x); // the yaw axis's positive turn
+            float speed = Units.KmhToMs(config.speedKmh);
+
+            float yaw = 0f, elevation = still.ElevationDegrees * Mathf.Deg2Rad;
+            var start = Simulate(release, Launch(forward, side, speed, yaw, elevation), default, gravity, dt, contact, target);
+            float swing = movement.Swing, scale = 1f;
+            float drift = movement.Drift, driftScale = 1f;
+            // Time from the pitch point to the popping crease, for the closed-form first guess (negative for a yorker).
+            float pitchToCrease = (config.length - FieldDimensions.PoppingCreaseOffset) /
+                                  (speed * Mathf.Cos(elevation));
+            var plan = new FlightPlan
+            {
+                SwingDirection = movement.SwingDirection,
+                SwingLateness = movement.SwingLateness,
+                PlannedTime = start.Time,
+                DriftDirection = drift > 0f ? -movement.TurnDirection : 0,
+                Dip = movement.Dip,
+                // Applied after PhysX's bounce (Option A): no effect on the flight to the pitch point.
+                TurnDirection = movement.TurnDegrees > 0f ? movement.TurnDirection : 0,
+                TurnDegrees = movement.TurnDegrees,
+                BounceFactor = movement.BounceFactor,
+                Grip = movement.Grip,
+            };
+
+            // Outer loop: swing strength and planned time from a flight that lands on target. Inner loop: aim.
+            for (int outer = 0; outer < MaxMovingIterations; outer++)
+            {
+                plan.SwingAcceleration = scale * DeliveryFlightModel.SwingAccelerationFor(swing, plan.PlannedTime, plan.SwingLateness, pitchToCrease);
+                plan.DriftAcceleration = driftScale * DeliveryFlightModel.DriftAccelerationFor(drift, plan.PlannedTime);
+                SimulatedFlight flight = default;
+                bool aimed = false;
+                for (int inner = 0; inner < MaxMovingIterations && !aimed; inner++)
+                {
+                    flight = Simulate(release, Launch(forward, side, speed, yaw, elevation), plan, gravity, dt, contact, target);
+                    if (!flight.Landed)
+                        return Fail(result, $"{config.speedKmh:F0} km/h with this movement never comes down");
+                    var miss = new Vector3(target.x - flight.Bounce.x, 0f, target.z - flight.Bounce.z);
+                    if (miss.magnitude < MovingTolerance * 0.1f)
+                    {
+                        aimed = true;
+                        break;
+                    }
+
+                    // Newton step on (yaw, elevation) from finite differences of the landing point (side, forward).
+                    const float h = 1e-4f;
+                    var dYaw = Simulate(release, Launch(forward, side, speed, yaw + h, elevation), plan, gravity, dt, contact, target);
+                    var dEl = Simulate(release, Launch(forward, side, speed, yaw, elevation + h), plan, gravity, dt, contact, target);
+                    if (!dYaw.Landed || !dEl.Landed)
+                        return Fail(result, $"{config.speedKmh:F0} km/h with this movement never comes down");
+                    var basePoint = flight.Bounce;
+                    float a11 = Vector3.Dot(dYaw.Bounce - basePoint, side) / h, a12 = Vector3.Dot(dEl.Bounce - basePoint, side) / h;
+                    float a21 = Vector3.Dot(dYaw.Bounce - basePoint, forward) / h, a22 = Vector3.Dot(dEl.Bounce - basePoint, forward) / h;
+                    float b1 = Vector3.Dot(miss, side), b2 = Vector3.Dot(miss, forward);
+                    float det = a11 * a22 - a12 * a21;
+                    if (Mathf.Abs(det) < 1e-9f)
+                        return Fail(result, "the aim cannot be corrected for this movement");
+                    yaw += Mathf.Clamp((b1 * a22 - a12 * b2) / det, -0.1f, 0.1f);
+                    elevation += Mathf.Clamp((a11 * b2 - a21 * b1) / det, -0.1f, 0.1f);
+                    if (Mathf.Abs(yaw) > MaxYaw)
+                        return Fail(result, $"too much movement to reach line {config.line:+0.00;-0.00} m (aim {yaw * Mathf.Rad2Deg:F0} degrees off)");
+                }
+                if (!aimed)
+                    return Fail(result, $"no aim lands {config} with this movement within {MovingTolerance * 1000f:F0} mm");
+
+                bool timed = Mathf.Abs(flight.Time - plan.PlannedTime) < 1e-4f;
+                float swung = Mathf.Abs(flight.Swing);
+                float drifted = Mathf.Abs(flight.Drift);
+                bool sized = (swing <= 0f || Mathf.Abs(swung - swing) < MovingTolerance * 0.5f) &&
+                             (drift <= 0f || Mathf.Abs(drifted - drift) < MovingTolerance * 0.5f);
+                if (timed && sized)
+                {
+                    result.Velocity = Launch(forward, side, speed, yaw, elevation);
+                    result.ElevationDegrees = elevation * Mathf.Rad2Deg;
+                    result.PredictedBounce = flight.Bounce;
+                    result.PredictedSwing = swung;
+                    result.PredictedCurve = flight.Curve;
+                    result.PredictedDrift = drifted;
+                    result.Plan = plan;
+                    return result;
+                }
+                plan.PlannedTime = flight.Time;
+                if (swing > 0f && swung > 1e-4f)
+                    scale *= swing / swung;
+                if (drift > 0f && drifted > 1e-4f)
+                    driftScale *= drift / drifted;
+            }
+            return Fail(result, $"the movement for {config} did not settle within {MaxMovingIterations} passes");
+        }
+
+        static Vector3 Launch(Vector3 forward, Vector3 side, float speed, float yaw, float elevation)
+        {
+            var heading = forward * Mathf.Cos(yaw) + side * Mathf.Sin(yaw);
+            return heading * (speed * Mathf.Cos(elevation)) + Vector3.up * (speed * Mathf.Sin(elevation));
+        }
+
+        public struct SimulatedFlight
+        {
+            public bool Landed;
+            /// <summary>Ball centre where it reaches contact height (the pitch point).</summary>
+            public Vector3 Bounce;
+            /// <summary>Time from release to the pitch point (s).</summary>
+            public float Time;
+            /// <summary>Largest horizontal distance from the straight line release → chord end, before the pitch point (m).</summary>
+            public float Curve;
+            /// <summary>Velocity on arrival at the pitch point.</summary>
+            public Vector3 ArrivalVelocity;
+            /// <summary>
+            /// Signed swing (m): ball x at the popping crease minus where the release line (the launch velocity's
+            /// horizontal direction from the release point) reaches it. After the pitch point the ball is taken to keep
+            /// its heading (PhysX's bounce of a ball with no sideways spin doesn't change it; measured in PlayMode).
+            /// </summary>
+            public float Swing;
+            /// <summary>Signed drift (m): ball x at the pitch point minus where the release line reaches that z.</summary>
+            public float Drift;
+            /// <summary>Ball x at the popping crease (m, world): from the flight if it gets there before pitching,
+            /// otherwise along the arrival heading turned by the plan's turn at the pitch point.</summary>
+            public float CreaseX;
+        }
+
+        /// <summary>
+        /// Steps the ball as PhysX does (v += (g + a)·dt, then x += v·dt; a from the velocity at the step's start)
+        /// until its centre crosses <paramref name="contactHeight"/>, interpolating within the crossing step. The curve
+        /// is measured against the line from the release to <paramref name="chordEnd"/> (the requested pitch point,
+        /// which the converged flight reaches); the swing at the line z = <paramref name="creaseZ"/>.
+        /// </summary>
+        public static SimulatedFlight Simulate(Vector3 release, Vector3 velocity, in FlightPlan plan, float gravity, float dt,
+            float contactHeight, Vector3 chordEnd, float creaseZ = FieldDimensions.PoppingCreaseOffset)
+        {
+            var result = new SimulatedFlight();
+            var chord = new Vector2(chordEnd.x - release.x, chordEnd.z - release.z);
+            var normal = chord.sqrMagnitude > 1e-12f ? new Vector2(-chord.y, chord.x).normalized : Vector2.zero;
+            var p = release;
+            var v = velocity;
+            var g = new Vector3(0f, -gravity, 0f);
+            float releaseLineX = Mathf.Abs(velocity.z) > 1e-6f ? release.x + velocity.x * (creaseZ - release.z) / velocity.z : release.x;
+            float creaseX = float.NaN;
+            int maxSteps = Mathf.CeilToInt(10f / dt);
+            for (int step = 0; step < maxSteps; step++)
+            {
+                var a = DeliveryFlightModel.Acceleration(step * dt, v, plan);
+                v += (g + a) * dt;
+                var next = p + v * dt;
+                if (next.y <= contactHeight)
+                {
+                    float f = (p.y - contactHeight) / (p.y - next.y);
+                    result.Landed = true;
+                    result.Bounce = Vector3.LerpUnclamped(p, next, f);
+                    result.Time = (step + f) * dt;
+                    result.ArrivalVelocity = v;
+                    // Not at the crease yet: the ball carries on along its arrival heading (the same straight segment
+                    // when the crease falls inside this step), turned at the pitch point for a spinning ball.
+                    if (float.IsNaN(creaseX))
+                    {
+                        var heading = v;
+                        if (plan.TurnDirection != 0 && plan.TurnDegrees > 0f)
+                            heading = Quaternion.AngleAxis(DeliveryFlightModel.TurnAngle(v, plan), Vector3.up) * v;
+                        if (Mathf.Abs(heading.z) > 1e-6f)
+                            creaseX = result.Bounce.x + heading.x * (creaseZ - result.Bounce.z) / heading.z;
+                    }
+                    result.CreaseX = creaseX;
+                    result.Swing = creaseX - releaseLineX;
+                    result.Drift = result.Bounce.x - (Mathf.Abs(velocity.z) > 1e-6f
+                        ? release.x + velocity.x * (result.Bounce.z - release.z) / velocity.z
+                        : release.x);
+                    return result;
+                }
+                if (float.IsNaN(creaseX) && p.z > creaseZ && next.z <= creaseZ)
+                    creaseX = Mathf.Lerp(p.x, next.x, (p.z - creaseZ) / (p.z - next.z));
+                p = next;
+                result.Curve = Mathf.Max(result.Curve, Mathf.Abs(Vector2.Dot(new Vector2(p.x - release.x, p.z - release.z), normal)));
+            }
+            return result;
         }
 
         static DeliverySolution Fail(DeliverySolution r, string error)

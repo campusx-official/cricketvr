@@ -14,6 +14,9 @@ namespace CricketVR
         public const float PitchWidth = 3.05f;
         public const float PitchStartZ = -1.5f;            // pitch surface extends a little past each set of stumps
         public const float PitchEndZ = 21.5f;
+        /// <summary>Top of the pitch collider. It sits 2 mm above the outfield (y = 0) so the pitch decides every bounce
+        /// on the strip; the delivery solver aims the ball centre at this height plus one radius (E-052).</summary>
+        public const float PitchSurfaceHeight = 0.002f;
 
         // Crease markings.
         public const float PoppingCreaseOffset = 1.22f;     // in front of each set of stumps
@@ -40,6 +43,16 @@ namespace CricketVR
 
         /// <summary>Default release point: bowler's popping crease, 2 m high (plan.md §5).</summary>
         public static readonly Vector3 DefaultReleasePoint = new Vector3(0f, 2.0f, PitchLength - PoppingCreaseOffset);
+
+        // A right-arm bowler's release (owner request 2026-10-27: "over the wicket and around the wicket, like a
+        // bowler"). Facing the batter (−Z) the bowler's left is +X. Over the wicket the bowling arm passes beside the
+        // stumps with the body on the bowler's left, so the hand is just to +X of middle stump; around the wicket the
+        // body is on the bowler's right and the hand is wider, to −X. World positions: they don't mirror with the
+        // batter's handedness (a right-arm bowler stays one for a left-hander).
+        public const float OverTheWicketReleaseX = 0.35f;
+        public const float AroundTheWicketReleaseX = -0.8f;
+        public static Vector3 OverTheWicketRelease => new Vector3(OverTheWicketReleaseX, DefaultReleasePoint.y, DefaultReleasePoint.z);
+        public static Vector3 AroundTheWicketRelease => new Vector3(AroundTheWicketReleaseX, DefaultReleasePoint.y, DefaultReleasePoint.z);
 
         /// <summary>
         /// Where the player stands (floor point under the head). A right-hander stands on the leg side (-X)

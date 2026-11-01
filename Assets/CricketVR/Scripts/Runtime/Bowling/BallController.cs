@@ -31,15 +31,34 @@ namespace CricketVR
         float _launchTime, _slowSince, _parkAt;
         bool _bounced, _dead;
 
+        // Pitch measurement (T070): descending samples up to the step where the ball turns upward.
+        const int DescentHistory = 4;
+        const int MaxStepsWithoutRebound = 4;
+        readonly Vector3[] _descent = new Vector3[DescentHistory];
+        readonly float[] _descentTimes = new float[DescentHistory];
+        int _descentCount, _stepsSinceGround;
+        float _groundY;
+        bool _pitched;
+
         public int ActiveDeliveryId { get; private set; }
+        /// <summary>The bat has struck the active delivery.</summary>
+        public bool HasBeenHit { get; private set; }
+        /// <summary>The active delivery has touched the pitch or outfield.</summary>
+        public bool TouchedGround => _bounced;
         public bool InFlight { get; private set; }
         /// <summary>In flight and its result not yet decided: it can still be hit and still score.</summary>
         public bool IsLive => InFlight && !_dead;
         public Rigidbody Body => _body;
         public float Radius => config.delivery.ballRadius;
 
-        /// <summary>First contact with the ground (pitch or outfield) for this delivery: (id, contact point, time since release).</summary>
+        /// <summary>First contact with the ground (pitch or outfield) for this delivery: (id, contact point, time since release).
+        /// The contact point lies under the ball's sunk position at the end of the contact step, 6–10 cm past where it
+        /// came down; use <see cref="Pitched"/> for where the ball bounced.</summary>
         public event Action<int, Vector3, float> FirstBounce;
+        /// <summary>Where the delivery pitched: (id, pitch point and rebound start, time since release at the pitch
+        /// point). Raised a step or two after <see cref="FirstBounce"/>, once the ball turns upward. Not raised for a
+        /// ball hit before it pitched (a full toss): its landing is a shot, not the delivery's bounce.</summary>
+        public event Action<int, PitchMeasurement, float> Pitched;
         /// <summary>Any collision during flight: (id, collision). Used by later milestones for stumps, nets and the bat.</summary>
         public event Action<int, Collision> Collided;
         public event Action<int, BallEndReason> DeliveryEnded;
@@ -92,6 +111,9 @@ namespace CricketVR
             InFlight = true;
             _bounced = false;
             _dead = false;
+            _pitched = false;
+            _descentCount = 0;
+            HasBeenHit = false;
             _launchTime = Time.time;
             _slowSince = -1f;
         }
@@ -108,6 +130,10 @@ namespace CricketVR
             _body.linearVelocity = velocity;
             _body.angularVelocity = Vector3.zero;
             _slowSince = -1f;
+            HasBeenHit = true;
+            _descentCount = 0; // the ball was moved: earlier samples are not part of its path any more
+            if (!_bounced)
+                _pitched = true; // hit before pitching: there is no delivery bounce to measure
             return true;
         }
 
@@ -152,6 +178,7 @@ namespace CricketVR
         {
             if (!InFlight)
                 return;
+            TrackPitch();
             if (_dead)
             {
                 if (Time.time >= _parkAt) End(BallEndReason.Finalized);
@@ -177,17 +204,82 @@ namespace CricketVR
             }
         }
 
+        /// <summary>
+        /// Runs before each physics step, so the body holds the state after the previous step. Collects descending
+        /// samples; after the first ground contact, the step where the ball turns upward (or a few steps of rolling)
+        /// gives the pitch point via <see cref="BounceMeasurement"/>. Measurement only: nothing here moves the ball.
+        /// </summary>
+        void TrackPitch()
+        {
+            if (_pitched)
+                return;
+            var position = _body.position;
+            bool descending = _body.linearVelocity.y < 0f;
+            if (_bounced)
+                _stepsSinceGround++;
+
+            if (descending && !(_bounced && _stepsSinceGround > MaxStepsWithoutRebound))
+            {
+                if (_descentCount == DescentHistory)
+                {
+                    Array.Copy(_descent, 1, _descent, 0, DescentHistory - 1);
+                    Array.Copy(_descentTimes, 1, _descentTimes, 0, DescentHistory - 1);
+                    _descentCount--;
+                }
+                _descent[_descentCount] = position;
+                _descentTimes[_descentCount] = Time.time;
+                _descentCount++;
+                return;
+            }
+            if (!_bounced)
+            {
+                _descentCount = 0; // still rising (after release or a bat hit)
+                return;
+            }
+            if (_descentCount == 0)
+                return;
+
+            _pitched = true;
+            var pitch = BounceMeasurement.Measure(_descent, _descentCount, _groundY + Radius);
+            float time = _descentTimes[_descentCount - 1] - pitch.StepsBeforeLowest * Time.fixedDeltaTime;
+            Pitched?.Invoke(ActiveDeliveryId, pitch, time - _launchTime);
+        }
+
         void OnCollisionEnter(Collision collision)
         {
             if (!InFlight)
                 return;
             int id = ActiveDeliveryId;
-            if (!_bounced && (_groundMask & (1 << collision.gameObject.layer)) != 0)
+            bool ground = (_groundMask & (1 << collision.gameObject.layer)) != 0;
+            if (ground && !_pitched)
+            {
+                // Pitch and outfield can both report in the contact step (the outfield top is 2 mm lower);
+                // the ball touches the higher surface.
+                float surface = GroundTopUnder(_body.position, collision.GetContact(0).point.y);
+                _groundY = _bounced ? Mathf.Max(_groundY, surface) : surface;
+            }
+            if (!_bounced && ground)
             {
                 _bounced = true;
+                _stepsSinceGround = 0;
                 FirstBounce?.Invoke(id, collision.GetContact(0).point, Time.time - _launchTime);
             }
             Collided?.Invoke(id, collision);
+        }
+
+        /// <summary>
+        /// Top of the ground directly under the ball. Not the contact point: when PhysX turns the ball before it
+        /// touches (speculative contact), the reported point can be on the ball's underside, a few mm above the pitch,
+        /// which made the pitch point read 1.4 cm long at 140 km/h in the Main scene (E-051). The ray starts above the
+        /// ball so it also finds the surface when the ball has sunk in.
+        /// </summary>
+        float GroundTopUnder(Vector3 position, float fallback)
+        {
+            const float above = 0.5f;
+            return Physics.Raycast(position + Vector3.up * above, Vector3.down, out var hit, above + 1f, _groundMask,
+                QueryTriggerInteraction.Ignore)
+                ? hit.point.y
+                : fallback;
         }
 
         void End(BallEndReason reason)

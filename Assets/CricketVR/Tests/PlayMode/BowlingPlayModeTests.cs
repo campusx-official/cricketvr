@@ -19,13 +19,24 @@ namespace CricketVR.Tests
         PhysicsMaterial _pitchMaterial;
         float _timeScale;
 
+        /// <summary>Where each ball pitched (T070 measurement).</summary>
         readonly List<(int id, Vector3 point)> _bounces = new List<(int, Vector3)>();
+        readonly List<(int id, PitchMeasurement pitch)> _pitches = new List<(int, PitchMeasurement)>();
+        /// <summary>The PhysX first-contact report (the measurement before T070), kept for comparison.</summary>
+        readonly List<(int id, Vector3 point)> _contacts = new List<(int, Vector3)>();
+
+        /// <summary>Stock accuracy of the pitch point (where the incoming flight reaches the pitch): 10 cm before T070,
+        /// tightened to 1 cm once every preset and 60 planned deliveries passed it (E-040). PhysX's rebound start
+        /// scatters by up to one step of travel around this point; see PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep.</summary>
+        public const float StockTolerance = 0.01f;
         readonly List<(int id, BallEndReason reason)> _ends = new List<(int, BallEndReason)>();
 
         [SetUp]
         public void SetUp()
         {
             _bounces.Clear(); // NUnit reuses the fixture instance across tests
+            _contacts.Clear();
+            _pitches.Clear();
             _ends.Clear();
             _timeScale = Time.timeScale;
             Time.timeScale = 5f;
@@ -43,7 +54,7 @@ namespace CricketVR.Tests
             ground.layer = LayerMask.NameToLayer("Pitch");
             ground.transform.SetParent(_root.transform);
             ground.transform.localScale = new Vector3(10f, 1f, 40f);
-            ground.transform.position = new Vector3(0f, -0.5f, 10f);
+            ground.transform.position = new Vector3(0f, FieldDimensions.PitchSurfaceHeight - 0.5f, 10f); // top at the real pitch height
             ground.GetComponent<Collider>().sharedMaterial = _pitchMaterial;
 
             var ballGo = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -64,7 +75,8 @@ namespace CricketVR.Tests
 
             ballGo.SetActive(true);
             machineGo.SetActive(true);
-            _ball.FirstBounce += (id, p, t) => _bounces.Add((id, p));
+            _ball.Pitched += (id, p, t) => { _bounces.Add((id, p.Point)); _pitches.Add((id, p)); };
+            _ball.FirstBounce += (id, p, t) => _contacts.Add((id, p));
             _ball.DeliveryEnded += (id, r) => _ends.Add((id, r));
         }
 
@@ -106,7 +118,7 @@ namespace CricketVR.Tests
             }
             Debug.Log($"[CricketVR] AC-04 PlayMode: 10 deliveries {delivery}; max spread from first {maxSpread * 100f:F2} cm, max error from target {maxError * 100f:F2} cm");
             Assert.LessOrEqual(maxSpread, 0.25f, "AC-04: within 0.25 m of the first bounce");
-            Assert.LessOrEqual(maxError, 0.10f, "bounce should land near the requested point");
+            Assert.LessOrEqual(maxError, StockTolerance, "bounce should land near the requested point");
         }
 
         [UnityTest]
@@ -120,9 +132,107 @@ namespace CricketVR.Tests
             for (int i = 0; i < _bounces.Count; i++)
                 Debug.Log($"[CricketVR] Length/line test bounce {i}: ({_bounces[i].point.x:F3}, {_bounces[i].point.y:F3}, {_bounces[i].point.z:F3})");
             for (int i = 0; i < lengths.Length; i++)
-                Assert.AreEqual(lengths[i], _bounces[i].point.z, 0.10f, $"length {lengths[i]}");
-            Assert.AreEqual(0.25f, _bounces[3].point.x, 0.05f, "line");
+                Assert.AreEqual(lengths[i], _bounces[i].point.z, StockTolerance, $"length {lengths[i]}");
+            Assert.AreEqual(0.25f, _bounces[3].point.x, Mathf.Min(0.05f, StockTolerance), "line");
         }
+
+        /// <summary>
+        /// T070 Stock calibration: every reachable debug preset, where it pitched vs the requested point, logged next
+        /// to the old measurement (the PhysX contact report) for validation.md.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator StockPresetsPitchOnTheRequestedPoint()
+        {
+            float worst = 0f;
+            foreach (var delivery in _config.delivery.debugPresets)
+            {
+                if (delivery.speedKmh < 40f) continue; // the deliberately unreachable preset
+                yield return BowlAndWaitForBounce(delivery);
+                int id = _bounces[_bounces.Count - 1].id;
+                var pitched = _bounces[_bounces.Count - 1].point;
+                var contact = _contacts.Find(c => c.id == id).point;
+                var pitch = _pitches.Find(c => c.id == id).pitch;
+                float error = Error(pitched, delivery), oldError = Error(contact, delivery);
+                worst = Mathf.Max(worst, error);
+                Debug.Log($"[CricketVR] T070 {delivery}: pitched ({pitched.x:F4}, {pitched.y:F4}, {pitched.z:F4}) error {error * 100f:F2} cm; " +
+                          $"contact report ({contact.x:F4}, {contact.z:F4}) error {oldError * 100f:F2} cm; " +
+                          $"rebound starts {pitch.ReboundOffset * 100f:+0.00;-0.00} cm along");
+                Assert.LessOrEqual(error, StockTolerance, delivery.label);
+                Assert.Less(error, oldError, $"{delivery.label}: the pitch point should be nearer the request than the contact report");
+            }
+            Debug.Log($"[CricketVR] T070 worst Stock pitch error {worst * 100f:F2} cm");
+        }
+
+        /// <summary>
+        /// T070 over planned deliveries (random speed, line and length, so every physics-step phase occurs): the pitch
+        /// point is within the Stock tolerance, and PhysX's rebound starts within one step of travel of it, before it
+        /// (speculative contact above the pitch) or after it (the ball sank in for a step). Logs the spread.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep()
+        {
+            var rng = new System.Random(70);
+            float worst = 0f, minOffset = float.MaxValue, maxOffset = float.MinValue;
+            int early = 0, late = 0, n = 0;
+            foreach (var plan in new[] { DeliveryPlanSettings.NetPractice, DeliveryPlanSettings.Hard })
+            {
+                for (int i = 0; i < 30; i++)
+                {
+                    var delivery = DeliveryPlanner.Draw(plan, rng, i % 2 == 1, null, out _);
+                    yield return BowlAndWaitForBounce(delivery);
+                    var pitch = _pitches[_pitches.Count - 1].pitch;
+                    float error = Error(pitch.Point, delivery);
+                    float step = Units.KmhToMs(delivery.speedKmh) * Time.fixedDeltaTime;
+                    worst = Mathf.Max(worst, error);
+                    minOffset = Mathf.Min(minOffset, pitch.ReboundOffset);
+                    maxOffset = Mathf.Max(maxOffset, pitch.ReboundOffset);
+                    if (pitch.ReboundOffset < 0f) early++; else late++;
+                    n++;
+                    Assert.LessOrEqual(error, StockTolerance, $"{delivery} pitch point");
+                    Assert.LessOrEqual(Mathf.Abs(pitch.ReboundOffset), step, $"{delivery}: rebound {pitch.ReboundOffset * 100f:F1} cm from the pitch point, one step is {step * 100f:F1} cm");
+                }
+            }
+            Debug.Log($"[CricketVR] T070 planned deliveries: {n} balls, worst pitch error {worst * 100f:F2} cm; rebound start " +
+                      $"{minOffset * 100f:+0.0;-0.0} to {maxOffset * 100f:+0.0;-0.0} cm from the pitch point ({early} before it, {late} after it)");
+        }
+
+        /// <summary>
+        /// AC-29 (M7.5 T075): AC-04 re-run at pace speeds. Ten identical deliveries per speed stay within AC-04's
+        /// 0.25 m of the first and within the Stock tolerance of the request; full, good and short lengths at each speed.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PaceSpeedsTo140KmhBounceConsistently()
+        {
+            foreach (var kmh in new[] { 100f, 120f, 140f })
+            {
+                var delivery = DeliveryConfig.Create($"{kmh:F0} km/h good length", kmh, 0.1f, 6f);
+                int first = _bounces.Count;
+                for (int i = 0; i < 10; i++)
+                    yield return BowlAndWaitForBounce(delivery);
+                var p0 = _bounces[first].point;
+                float spread = 0f, error = 0f;
+                for (int i = first; i < _bounces.Count; i++)
+                {
+                    var p = _bounces[i].point;
+                    spread = Mathf.Max(spread, Vector2.Distance(new Vector2(p.x, p.z), new Vector2(p0.x, p0.z)));
+                    error = Mathf.Max(error, Error(p, delivery));
+                }
+                float rebound = _pitches[_pitches.Count - 1].pitch.ReboundOffset;
+                Debug.Log($"[CricketVR] AC-29 AC-04 re-run {delivery}: 10 deliveries, spread {spread * 100f:F2} cm, worst error {error * 100f:F2} cm, rebound {rebound * 100f:+0.0;-0.0} cm");
+                Assert.LessOrEqual(spread, 0.25f, $"{kmh} km/h: AC-04 spread");
+                Assert.LessOrEqual(error, StockTolerance, $"{kmh} km/h: pitch point");
+
+                foreach (var length in new[] { 3f, 9f })
+                {
+                    var d = DeliveryConfig.Create($"{kmh:F0} km/h {length} m", kmh, 0f, length);
+                    yield return BowlAndWaitForBounce(d);
+                    Assert.LessOrEqual(Error(_bounces[_bounces.Count - 1].point, d), StockTolerance, d.ToString());
+                }
+            }
+        }
+
+        static float Error(Vector3 p, DeliveryConfig d) =>
+            Vector2.Distance(new Vector2(p.x, p.z), new Vector2(d.line, d.length));
 
         [UnityTest]
         public IEnumerator ReleaseSpeedMatchesRequestedKmh()

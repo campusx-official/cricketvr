@@ -1,6 +1,6 @@
 # Feature 001: VR cricket batting — Net Practice and Match Simulation
 
-Status: M1–M6 implemented and validated; M6.5 (cricket ground) in validation; two-mode structure accepted 2026-10-26 (`proposals/two-modes-replan.md`). The feature folder keeps its original name `001-six-ball-net`.
+Status: M1–M6 implemented and validated; M6.5 (cricket ground) in validation; two-mode structure accepted 2026-10-26 (`proposals/two-modes-replan.md`); delivery types (M7.5) accepted 2026-10-27 (`proposals/delivery-types.md`). The feature folder keeps its original name `001-six-ball-net`.
 Source: Owner's agreed MVP and milestones from the conversation.
 
 ## Goal and player story
@@ -17,7 +17,9 @@ Development machine: M4 MacBook Air, 16 GB RAM. Target: standalone Quest 3, cont
 
 Two modes chosen from a start menu, in one scene with two permanent environment roots: the practice net (Net Practice) and the cricket ground (Match Simulation). One tracked bat, one active ball, a configurable launcher with per-mode delivery plans, Shot Confidence (Net Practice), a deterministic virtual-field scorer with static fielders (Match Simulation), scoreboard and end screens, a per-ball record with a calibration CSV log (development builds), both handedness settings and interruption recovery.
 
-Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simulation (the player faces every ball), animated bowlers, spin/swing/seam, physical bat requirements, multiplayer, cloud services, coaching claims, and AI models. *(Static simulated fielders, simulated catches and a stadium are now in scope by owner instruction: M6.5 and the two-mode re-plan.)*
+Delivery types: Stock, inswinger, outswinger, off-spin, leg-spin, doosra and googly, from one reusable module used by both modes; arcade-believable movement, not an aerodynamics simulation *(owner instruction 2026-10-27, M7.5)*.
+
+Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simulation (the player faces every ball), animated bowlers, physical bat requirements, multiplayer, cloud services, coaching claims, and AI models. *(Static simulated fielders, simulated catches and a stadium are now in scope by owner instruction: M6.5 and the two-mode re-plan. Swing and spin are in scope from M7.5 by owner instruction 2026-10-27; seam movement after the bounce for pace stays at 0° in v1, and incoming spin does not affect the shot in v1.)*
 
 ## Requirements
 
@@ -50,18 +52,27 @@ Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simula
 | REQ-025 | A world-space start menu offers Net Practice (overs 1/2/3/5, default 2) and Match Simulation (scenario preset or random; difficulty Easy/Medium/Hard). It is operated by the right controller's XRI ray, with a fallback of tapping a button with the bat blade. *(Amended 2026-10-26 during M7: panels with buttons appear about 0.75 m in front of the stance so the bat can reach them, and the bat stays visible there; the ray is shown only while such a panel is open. Live ball information stays on the far scoreboard.)* | M7 |
 | REQ-026 | A shared session framework drives both modes: menu → countdown → ball-by-ball (deliver, finalize, per-ball panel, interval) → end screen → play again / menu (/ new scenario), with pause (REQ-014). | M7 |
 | REQ-027 | One per-ball record type holds the delivery parameters (and seed), contact data, `ShotLaunch`, the physical result, the swing timing offset Δt, the Shot Confidence components (when computed) and the virtual-field outcome (Match Simulation). In development builds each record is appended to a per-session CSV on the device for calibration. | M7 |
-| REQ-028 | Each mode has a delivery plan: Net Practice mixes lines and lengths; Match Simulation uses a difficulty preset (speed range; how often yorkers and short balls come). Every planned delivery passes the solver before use; an unreachable one is redrawn and logged, never silently altered. | M7 |
-| REQ-029 | Net Practice rates every contacted ball with Shot Confidence 0–100 from four components (Middle, Timing, Control, Power) with tunable weights and thresholds (plan.md §17). The ball's confidence and breakdown are shown briefly after it. | M8 |
+| REQ-028 | Each mode has a delivery plan: Net Practice mixes lines and lengths; Match Simulation uses a difficulty preset (speed range; how often yorkers and short balls come). Every planned delivery passes the solver before use; an unreachable one is redrawn and logged, never silently altered. *(Amended 2026-10-27, M7.5: plans first draw a delivery type from a **type mix**, then speed from the type's range, length and line. The existing plans are Stock-only until M8 and M10 switch their mixes on.)* | M7, M7.5 |
+| REQ-029 | Net Practice rates every contacted ball with Shot Confidence 0–100 from four components (Middle, Timing, Control, Power) with tunable weights and thresholds (plan.md §17). The ball's confidence and breakdown are shown briefly after it. *(Amended 2026-10-27: the Net Practice menu also offers a delivery mix (All, Pace, Spin, one type, Variations) and shows the type after each ball, optionally before.)* *(Owner request 2026-10-27, built early in M7.5: a **Bowler** row in the Net Practice menu, Pace / Off-spin / Leg-spin, bowls Stock or that one spin type for the whole session; the rest of the delivery-mix menu stays M8.)* | M8 |
 | REQ-030 | Unhit balls are classified: Bowled (0, counted), Played and missed (0, counted), Well left (shown separately, excluded from the average). Played and missed = closest bat–ball gap under a gap threshold (default 0.20 m) or bat speed toward the ball over a speed threshold (default 3 m/s) near the ball passing; both are settings. | M8 |
-| REQ-031 | The Net Practice end screen shows: average confidence and the average of each component; best and worst ball; counts of middled, off-centre, edged, played-and-missed, well-left and bowled balls; and a per-over trend of average confidence. | M8 |
+| REQ-031 | The Net Practice end screen shows: average confidence and the average of each component; best and worst ball; counts of middled, off-centre, edged, played-and-missed, well-left and bowled balls; and a per-over trend of average confidence. *(Amended 2026-10-27: plus Shot Confidence by delivery type.)* | M8 |
 | REQ-032 | At bat contact a `ShotLaunch` (position, exit velocity, contact quality) is captured, and a deterministic pure-C# simulation (≈200 Hz, no PhysX) produces the ball's path: flight with gravity and quadratic drag, bounces, roll, the first landing (simulated carry) and the shot angle. Rolling resistance is the single GroundDefinition value (starting 0.25 g). | M9 |
 | REQ-033 | Boundaries come from GroundDefinition: carry over the rope = 6; crossing the rope after bouncing, with no earlier intercept = 4. | M9 |
 | REQ-034 | Fielders from FieldConfig can catch (airborne ball 0.2–2.5 m high, reached with ≥ 0.3 s to spare = caught; less = "chance, dropped") and field on the ground (runs 0–3 from the time the ball gets back to the stumps). A ball that stops unfielded uses the nearest fielder's time. A hit path that reaches the stumps within 1.5 s is bowled (played on), tested against the same stumps box the physics uses, so "bowled" means the same thing in both modes. | M9 |
 | REQ-035 | The scorer is fully EditMode-testable and calibrated by replaying the owner's logged headset contacts (CSV), with the calibration results recorded. | M9 |
-| REQ-036 | Match Simulation scenarios come from presets or a seeded random generator, bounded to a required rate of 6–15 per over, 6–36 balls and 1–5 wickets. The same seed gives the same scenario. The player faces every ball (no strike rotation); a wicket only reduces wickets in hand and that ball is a dot. | M10 |
-| REQ-037 | The Match Simulation scoreboard updates after every ball: runs needed, balls left, wickets left and required rate (shown only while balls are left). Win, loss by balls and loss by wickets are each detected exactly once. Shot Confidence is shown per ball as a secondary line, not part of the result. | M10 |
+| REQ-036 | Match Simulation scenarios come from presets or a seeded random generator, bounded to a required rate of 6–15 per over, 6–36 balls and 1–5 wickets. The same seed gives the same scenario. The player faces every ball (no strike rotation); a wicket only reduces wickets in hand and that ball is a dot. *(Amended 2026-10-27: difficulty presets define delivery mixes; a scenario may set a bowler style (pace or spin) for an over.)* | M10 |
+| REQ-037 | The Match Simulation scoreboard updates after every ball: runs needed, balls left, wickets left and required rate (shown only while balls are left). Win, loss by balls and loss by wickets are each detected exactly once. Shot Confidence is shown per ball as a secondary line, not part of the result. *(Amended 2026-10-27: the delivery type is revealed only after the ball.)* | M10 |
 | REQ-038 | In Match Simulation the ball's post-contact motion is the scorer's simulated path, played back so what the player sees is what is scored. The handover is seamless: playback starts from the exact contact position and exit velocity, with no visible jump or speed change. The existing bat-impact sounds stay; simple sounds play when the ball lands, is fielded or caught, or crosses the rope. | M10 |
 | REQ-039 | Both modes hold the 72 Hz target on Quest 3 during normal play, with measured CPU/GPU frame time and draw calls, foveation on and off. | M11 |
+| REQ-040 | Every ball is requested with one `DeliveryRequest` (type, speed, length, line, line reference, movement 0–1, batter handedness, seed). Delivery plans, difficulty presets, tests and tools use only this. Stock with movement 0 behaves exactly as before M7.5. | M7.5 |
+| REQ-041 | Seven delivery types are defined as `DeliveryType` assets (display name, description, pace or spin, speed range, and movement settings). Every movement value is a setting with documented allowed ranges. *(Amended 2026-10-27, owner: an eighth type, the off-spinner's **straighter one** (arm ball), looks like off-spin, quicker and flatter, barely turns; the Net Practice off-spinner bowls 10 off-breaks, 1 doosra and 1 straighter one in 12.)* | M7.5 |
+| REQ-042 | Swing (inswinger toward −X, outswinger toward +X for a right-hander) is a deterministic sideways acceleration before the bounce, optionally growing during the flight (late swing), giving 0.1–0.5 m of **swing** at 115–140 km/h. *Swing* is the ball's sideways distance, where it reaches the striker's popping crease (z = 1.22 m), from the straight line it was released along (the release line: the launch velocity's horizontal direction from the release point, extended). No ball swings more than 0.5 m, after natural variation; a larger, "exaggerated" swing would need a separate owner setting, which does not exist. Difficulty presets: Easy and Medium about 0.15–0.3 m, Hard up to 0.5 m. If 140 km/h fails AC-29, pace stays capped at 120 km/h and the swing targets are scaled down instead of weakening the tests. *(Amended 2026-10-27, owner decision: was a 0.2–0.6 m "curve" from the release-to-bounce line, which measured as up to 1.4 m off the release line.)* | M7.5 A |
+| REQ-043 | Spin adds deterministic air drift (opposite to the turn) and dip (extra downward acceleration; the googly has the most), plus a defined turn applied at the bounce: a sideways velocity rotation (off-spin 3–6° toward −X; leg-spin 4–9° toward +X; doosra like leg-spin but 2.5–5°; googly like off-spin but 3.5–7.5°) and a bounce-height factor. It is applied in the step after the ball physically bounces, never through PhysX friction. The pitch material is unchanged. | M7.5 B |
+| REQ-044 | The solver includes every movement force (with the ball's own variation applied before solving). A reachable request lands within 1 cm of its bounce point in simulation. In PlayMode physics, its pitch point (T070) lands within the Stock tolerance for every type: 1 cm, which Stock achieves (worst 0.51 cm over 60 planned balls, E-042). PhysX's rebound start is recorded separately (rebound offset). With an arrival-line request it reaches the crease line within about 3 cm. Unreachable requests are rejected, never altered. | M7.5 |
+| REQ-045 | The per-ball record and CSV add: delivery type, requested movement, predicted and measured swing (REQ-042) and curve, measured turn angle, the arrival line at the crease, the ball's height at the crease (`crease_height_m`, also on the result panel; owner 2026-10-27), and the measured bounce point and its error. Nothing outside the module depends on a specific type. | M7.5 |
+| REQ-046 | The ball shows a seam and rotation matching the delivery, at a readable rate (≤ 5 rev/s visual, no strobing at 72 Hz). Variations look like their stock ball until the bounce unless the honest-seam option is on. The machine shows no difference before release. | M7.5 B |
+| REQ-047 | Left-handed batting mirrors every line and movement exactly through the request's handedness (unverified on device while the left controller is faulty). | M7.5 |
+| REQ-048 | Natural variation: each ball's swing amount, drift and turn angle vary by a seeded random factor within ±v (setting, default 15%). The applied factors are in the per-ball record. The same request seed gives the same ball. Variation 0 gives exactly the nominal movement. | M7.5 |
 
 ## Proposed defaults and precise rules
 
@@ -115,6 +126,22 @@ Decision record: `proposals/two-modes-replan.md` (conflicts C-1..C-22, decisions
 - **Difficulty presets** (starting values, calibrated): Easy 70–85 km/h, yorkers 5%, short balls 10%; Medium 80–100 km/h, 10% / 15%; Hard 95–120 km/h, 20% / 20%. Hard stays capped at 120 km/h until AC-04 is re-run for 100–120 km/h. Yorker = bounce 0.8–1.5 m from the striker's stumps.
 - **Net Practice delivery mix:** lengths 3.5–9 m, lines −0.1 to +0.4 m (off side for a right-hander), 70–90 km/h.
 - **Simulated ball after contact (Match Simulation):** follows the scorer's path from the exact contact position and exit velocity; sounds for landing, fielded, caught and crossing the rope.
+
+### Delivery types (M7.5, accepted 2026-10-27)
+
+Decision record: `proposals/delivery-types.md` (conflicts DT-1..DT-15, decisions D-1..D-5, owner changes 1–6). Directions are for a right-handed batter (off side = +X, deliveries travel −Z); everything mirrors x → −x for a left-hander.
+
+- **Stock stays identical.** Stock with movement 0 uses today's solver path and launch; existing calibration and contact tests run unchanged.
+- **Bounce measurement (DT-3, done in T070, E-040/E-042):** the reported bounce is the **pitch point**, where the incoming flight reaches contact height (ball centre one radius above the pitch), interpolated or extrapolated within the physics step, taken once the vertical velocity turns upward. It is not the PhysX contact report. PhysX turns the ball up to one step of travel either side of the pitch point, depending on the step phase: before it (speculative contact while the ball is still up to ~1.6 cm above the pitch) or after it (the ball sinks 1–2.5 cm in for a step). Measured: −9.8 to +11.9 cm over 60 planned balls; recorded per ball as the rebound offset. Measurement change only: physics, pitch material and launches are unchanged. The Stock tolerance on the pitch point is tightened from 10 cm to 1 cm (worst 0.51 cm). *Owner decision 2026-10-27 (Option A):* PhysX keeps the pitch bounce for every ball; spin turn, bounce factor and grip are applied in the step after the physical rebound (REQ-043), so Stock and swing balls are unchanged. The rebound-start scatter moves the turn's pivot along the travel, costing at most about 2 cm of line at the crease (offset × sin θ).
+- **D-1 Line:** both references are supported. Default `AtBounce`: line = x where the ball pitches (exact). `AtBatter`: line = x at the popping crease (z = 1.22 m), about ±3 cm.
+- **D-2 Seam movement for pace:** not in v1 (field exists, default 0°).
+- **D-3 Deception:** by default a variation (doosra, googly) shows its stock ball's rotation until the bounce; Net Practice offers "Learning: show the true seam".
+- **D-4 Visual spin rate:** spinners 4 rev/s, pace 3 rev/s backspin, cap 5 rev/s (≤ 25° per frame at 72 Hz).
+- **D-5 Incoming spin on the shot:** none in v1 (documented simplification); a bounded tangential term is a v2 candidate after M8 calibration.
+- **Swing size (owner decision 2026-10-27):** swing is measured at the batter, as the distance at the popping crease from the line the ball was released along, not as the curve before the bounce. Range 0.1–0.5 m (movement 0–1); Easy and Medium plans about 0.15–0.3 m, Hard 0.2–0.5 m; a hard cap of 0.5 m after natural variation. Going beyond 0.5 m would need an owner-approved "exaggerated" setting later.
+- **Natural variation:** seeded per ball, default ±15%, on swing amount, drift and turn angle; recorded per ball. Tests use 0 unless a test is about variation.
+- **Speed cap:** pace types clamp their range at 120 km/h until AC-29 passes at 140 km/h. If it fails, the cap stays at 120 km/h and the swing targets are scaled down; the tests are not weakened, and the owner is told. *(T075, E-047: AC-29's pace checks passed at 140 km/h, so the pace-type cap is 140 km/h. The Hard difficulty's own 95–120 km/h range is unchanged until T065.)*
+- **Drag:** still none before contact. Swing, drift and dip are explicit accelerations.
 
 ## Proposed changes pending owner approval
 
@@ -181,7 +208,7 @@ Given GroundMode, when the owner stands at the crease, then:
 ### AC-12 — Ground physics (REQ-019, REQ-020)
 
 Given GroundMode:
-- **Bowling:** the ten-launch bounce check still lands within the AC-04 limits, and adding the outfield moves the delivery bounce by less than 1 cm (as built, plan.md §15: the absolute error to the target was already 2.6–10.1 cm before M6.5).
+- **Bowling:** the ten-launch bounce check still lands within the AC-04 limits, and adding the outfield moves the delivery bounce by less than 1 cm (as built, plan.md §15: the absolute error to the target was already 2.6–10.1 cm before M6.5; since T070 the bounce is measured where the ball pitched and each preset is within 1 cm of its target, E-040).
 - **Outfield:** a ball driven along the ground slows to a stop on the outfield, and a ball dropped or hit at up to 45 m/s never falls through it.
 - **Leaving the ground:** a ball lofted over the rope raises `BallLeftGround` exactly once, then disappears 1.5 s later.
 
@@ -243,6 +270,56 @@ The same seed gives the same scenario; 1,000 random scenarios all fall within th
 ### AC-24 — Performance in both modes (REQ-039)
 
 Recorded numbers for both modes with foveation on and off, as in AC-14.
+
+### AC-25 — One request path, Stock unchanged (REQ-040, REQ-041, REQ-045)
+
+**Automated:**
+- every existing calibration and contact test passes unchanged with Stock requests;
+- every `DeliveryType` asset value is within its allowed range;
+- the CSV carries the new columns;
+- no code outside the module branches on a delivery type (a test enumerates the type-specific code).
+
+### AC-26 — Swing (REQ-042, REQ-044, REQ-047)
+
+- **Automated:**
+  - deterministic paths;
+  - in- and outswing move toward −X / +X for a right-hander and mirror exactly for a left-hander;
+  - over 10 PlayMode runs per type at 115, 125 and 140 km/h (140 only once the cap is raised): the measured swing (REQ-042) is within the type's range and matches the solver's, and the bounce is within the Stock tolerance of the request;
+  - an inswinger pitched on off stump, at its largest movement, finishes no more than about 0.5 m from its release line at the crease (simulation and PhysX, both hands, 115–140 km/h, with natural variation).
+- **Headset:** the owner sees each swing type's movement and its direction.
+
+### AC-27 — Spin (REQ-043, REQ-044, REQ-047)
+
+- **Automated:**
+  - turn and drift directions per type, both hands;
+  - measured turn within range over 10 runs per type;
+  - the googly dips and bounces higher than leg-spin at the same speed and length;
+  - every spin speed in 75–95 km/h reaches lengths 3–9 m.
+- **Headset:** the owner tells off-spin from leg-spin by its movement.
+
+### AC-28 — Deception and visuals (REQ-046)
+
+- **Headset:** the doosra and googly look like their stock balls until they turn (deceptive mode); the seam reads correctly with no strobing.
+- **Automated:** the visual rate is ≤ 25° per frame at 72 Hz.
+
+### AC-29 — Speeds and contact (REQ-042, REQ-044; re-runs AC-04/AC-05)
+
+- AC-04 bounce consistency at 100, 120 and 140 km/h.
+- The AC-05 contact matrix with balls up to 39 m/s, including swinging and spinning balls: exactly one contact each, no tunnelling.
+- The 140 km/h cap is raised only after this passes.
+
+### AC-30 — Performance with types (REQ-039)
+
+72 Hz holds with the ball visual and flight component active (VrApi `App=` GPU and `CPU&GPU=` recorded).
+
+### AC-31 — Natural variation (REQ-048)
+
+**Automated:**
+- the same seed gives an identical path and identical recorded factors;
+- over 1,000 seeds the factors stay within ±v and are spread across the range;
+- variation 0 gives exactly the nominal movement.
+
+All other type tests run with variation 0.
 
 ## Completion rule
 

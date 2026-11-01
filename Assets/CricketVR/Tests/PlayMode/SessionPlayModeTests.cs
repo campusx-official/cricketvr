@@ -41,7 +41,7 @@ namespace CricketVR.Tests
             pitch = Object.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<PhysicsMaterial>("Assets/CricketVR/Settings/Physics/PitchSurface.physicMaterial"));
 #endif
             _owned.Add(pitch);
-            Box("Ground", "Pitch", new Vector3(0f, -0.5f, 10f), new Vector3(20f, 1f, 40f)).GetComponent<Collider>().sharedMaterial = pitch;
+            Box("Ground", "Pitch", new Vector3(0f, FD.PitchSurfaceHeight - 0.5f, 10f), new Vector3(20f, 1f, 40f)).GetComponent<Collider>().sharedMaterial = pitch;
             var rear = Box("RearWall", "Boundary", new Vector3(0f, 2f, FD.NetRearZ - 0.05f), new Vector3(3.6f, 4f, 0.1f));
             rear.AddComponent<NetWall>().side = WallSide.Rear;
 
@@ -54,6 +54,7 @@ namespace CricketVR.Tests
             ballGo.AddComponent<Rigidbody>().isKinematic = true;
             _ball = ballGo.AddComponent<BallController>();
             _ball.Configure(_config, null, ballGo.GetComponent<Renderer>());
+            ballGo.AddComponent<BallFlight>(); // as in the Main scene: measures the arrival line and crease height
 
             var gameplay = new GameObject("Gameplay");
             gameplay.SetActive(false);
@@ -99,6 +100,44 @@ namespace CricketVR.Tests
                 yield return null;
         }
 
+        /// <summary>Owner request 2026-10-27: Net Practice can bowl off-spin or leg-spin for the whole session.</summary>
+        [UnityTest]
+        public IEnumerator NetPracticeBowlsTheChosenSpinner()
+        {
+            foreach (var (button, type, turn, side) in new[] { ("BowlerOffSpin", "Off-spin", -1, 0), ("BowlerLegSpin", "Leg-spin", +1, 1) })
+            {
+                yield return null;
+                if (_session.Phase != SessionPhase.Menu) _session.Press("Menu");
+                yield return null;
+                _session.Press("NetPractice");
+                _session.Press(button);
+                _session.Press(WicketSide.All[side].Button);
+                _session.Press("Overs1");
+                _session.Press("Start");
+                yield return WaitFor(() => _session.Phase == SessionPhase.SessionEnd, 90f);
+                Assert.AreEqual(SessionPhase.SessionEnd, _session.Phase, $"{type}: stuck in {_session.Phase}");
+                Assert.AreEqual(6, _session.Session.Records.Count);
+                foreach (var r in _session.Session.Records)
+                {
+                    // The off-spinner mixes in a doosra (turns the other way) and the straighter one (barely turns).
+                    if (r.DeliveryType == "Doosra")
+                        Assert.AreEqual(-turn, (int)Mathf.Sign(r.TurnDegrees), $"doosra turns the other way ({r.TurnDegrees:F1} deg)");
+                    else if (r.DeliveryType == "Straighter one")
+                        Assert.Less(Mathf.Abs(r.TurnDegrees), 0.7f, $"the straighter one barely turns ({r.TurnDegrees:F1} deg)");
+                    else
+                    {
+                        Assert.AreEqual(type, r.DeliveryType);
+                        Assert.AreEqual(turn, (int)Mathf.Sign(r.TurnDegrees), $"{type} turns toward {turn} for a right-hander ({r.TurnDegrees:F1} deg)");
+                    }
+                    Assert.That(r.CreaseHeight, Is.InRange(0.1f, 1.5f), $"{type}: crease height");
+                    Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, $"{type}: pitched on its length");
+                    Assert.AreEqual(WicketSide.All[side].Release.x, r.Delivery.releasePosition.x, 1e-5f, $"{type}: released {WicketSide.All[side].Label} the wicket");
+                    Assert.AreEqual(LineReference.AtBatter, r.LineRef);
+                    Assert.AreEqual(r.Delivery.line, r.ArrivalLine, 0.03f, $"{type}: reached the crease on its finish line");
+                }
+            }
+        }
+
         [UnityTest]
         public IEnumerator OneOverBowlsExactlySixBallsThenShowsTheEnd()
         {
@@ -119,6 +158,12 @@ namespace CricketVR.Tests
                 Assert.AreEqual(DeliveryOutcome.Miss, r.Result.Outcome, "nobody batting: every ball is a miss");
                 Assert.AreEqual(SessionMode.NetPractice, r.Mode);
                 Assert.IsFalse(string.IsNullOrEmpty(r.Delivery.label));
+                // T072: the delivery-type columns are filled from the request and the measured bounce.
+                Assert.AreEqual("Stock", r.DeliveryType);
+                Assert.AreEqual(0f, r.Movement);
+                Assert.AreEqual(r.Delivery.length, r.Bounce.z, BowlingPlayModeTests.StockTolerance, "measured bounce recorded");
+                Assert.That(r.CreaseHeight, Is.InRange(0.1f, 2f), "crease height recorded for an unhit ball");
+                Assert.LessOrEqual(r.BounceError, BowlingPlayModeTests.StockTolerance, $"{r.Delivery} pitched within the Stock tolerance");
             }
         }
 

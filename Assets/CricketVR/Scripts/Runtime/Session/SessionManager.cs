@@ -33,6 +33,7 @@ namespace CricketVR
 
         SessionStateMachine _session;
         System.Random _rng;
+        DeliveryTypeData[] _types;
         string _sessionId = "";
         float _sessionStart;
         float _untrackedFor;
@@ -43,6 +44,8 @@ namespace CricketVR
         SessionMode _mode = SessionMode.NetPractice;
         int _overs;
         string _difficulty = "Medium";
+        int _netBowler; // index into NetBowler.All; 0 = pace
+        int _wicketSide; // index into WicketSide.All; 0 = over the wicket
 
         readonly Dictionary<int, BatContactReport> _contacts = new Dictionary<int, BatContactReport>();
         string _lastResultLine = "";
@@ -144,16 +147,42 @@ namespace CricketVR
 
         void Launch(int ballIndex)
         {
-            var plan = _mode == SessionMode.NetPractice ? DeliveryPlanSettings.NetPractice
+            var plan = _mode == SessionMode.NetPractice ? NetBowler.All[_netBowler].Plan(WicketSide.All[_wicketSide].Release)
                 : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
                 : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
-            bool left = handedness != null && handedness.Current == Handedness.Left;
-            var delivery = DeliveryPlanner.Draw(plan, _rng, left,
-                DeliveryPlanner.SolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out int redraws);
+            var hand = handedness != null ? handedness.Current : Handedness.Right;
+            int redraws = 0;
+            var delivery = SpinCheck ? DeliveryPlanner.SpinCheckRequest(ballIndex, hand, _types)
+                : SwingCheck ? DeliveryPlanner.SwingCheckRequest(ballIndex, hand, _types)
+                : DeliveryPlanner.DrawRequest(plan, _rng, hand, _types,
+                    DeliveryPlanner.RequestSolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out redraws);
             if (redraws > 0)
                 Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
             int id = machine.Bowl(delivery);
             _session.BallLaunched(id);
+        }
+
+        string BowlerName => NetBowler.All[_netBowler].Label.ToLowerInvariant();
+
+        /// <summary>T076 (AC-26) build: Net Practice bowls the fixed swing-check sequence.</summary>
+        bool SwingCheck => _mode == SessionMode.NetPractice && config.delivery.swingCheck;
+        /// <summary>T082 (AC-27, AC-28) build: Net Practice bowls the fixed spin-check sequence.</summary>
+        bool SpinCheck => _mode == SessionMode.NetPractice && config.delivery.spinCheck;
+
+        /// <summary>The delivery type and its measured swing, shown after a moving ball (nothing for Stock).</summary>
+        static string MovementLine(BallRecord r)
+        {
+            string line = "";
+            if (r.PredictedSwing > 0f)
+            {
+                string measured = float.IsNaN(r.MeasuredSwing) ? "not measured (hit before the crease)" : $"{r.MeasuredSwing:F2} m";
+                line += $"\n{r.DeliveryType}: swing {measured}, planned {r.PredictedSwing:F2} m";
+            }
+            if (!float.IsNaN(r.TurnDegrees))
+                line += $"\n{r.DeliveryType}{(r.Flighted ? " (flighted)" : "")}: launched {r.LaunchDegrees:+0;-0}°, turned {Mathf.Abs(r.TurnDegrees):F1}°";
+            if (!float.IsNaN(r.CreaseHeight))
+                line += $"\nHeight at the crease: {r.CreaseHeight:F2} m";
+            return line;
         }
 
         void OnBatContact(BatContactReport report) => _contacts[report.DeliveryId] = report;
@@ -167,7 +196,7 @@ namespace CricketVR
                 return;
             log?.Append(record);
             _lastResultLine = $"Ball {record.Over - 1}.{record.BallInOver}: {result.Summary}" +
-                              (result.BatContact ? $"\n{result.CarryLabel}" : "");
+                              (result.BatContact ? $"\n{result.CarryLabel}" : "") + MovementLine(record);
             _contacts.Remove(result.DeliveryId);
         }
 
@@ -181,6 +210,26 @@ namespace CricketVR
                 Time = Time.time - _sessionStart,
                 Delivery = machine.LastConfig,
                 Seed = _session.Options.Seed,
+                DeliveryType = machine.LastRequest.type.displayName ?? "",
+                Movement = machine.LastRequest.movement,
+                Hand = machine.LastRequest.handedness,
+                LineRef = machine.LastRequest.lineReference,
+                BallSeed = machine.LastRequest.seed,
+                VarSwing = machine.LastMovement.VarSwing,
+                VarDrift = machine.LastMovement.VarDrift,
+                VarTurn = machine.LastMovement.VarTurn,
+                PredictedSwing = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedSwing,
+                MeasuredSwing = machine.LastMeasuredSwing,
+                PredictedCurve = machine.LastMovement.IsStill ? float.NaN : machine.LastSolution.PredictedCurve,
+                MeasuredCurve = machine.LastMeasuredCurve,
+                ArrivalLine = machine.LastArrivalLine,
+                CreaseHeight = machine.LastCreaseHeight,
+                Flighted = machine.LastRequest.flighted,
+                LaunchDegrees = machine.LastSolution.Reachable ? machine.LastSolution.ElevationDegrees : float.NaN,
+                TurnDegrees = machine.LastTurn,
+                Bounce = machine.LastBounce ?? BallRecord.NaN3,
+                BounceError = machine.LastBounceError,
+                ReboundOffset = machine.LastReboundOffset,
                 Result = result,
                 ClosestGap = resolver != null ? resolver.ClosestGapFor(result.DeliveryId) : float.NaN,
             };
@@ -267,6 +316,10 @@ namespace CricketVR
                 case "Overs3": _overs = 3; ShowMenu(); break;
                 case "Overs5": _overs = 5; ShowMenu(); break;
                 case "Easy": case "Medium": case "Hard": _difficulty = name; ShowMenu(); break;
+                case "BowlerPace": case "BowlerOffSpin": case "BowlerLegSpin":
+                    _netBowler = Mathf.Max(0, System.Array.FindIndex(NetBowler.All, b => b.Button == name)); ShowMenu(); break;
+                case "WicketOver": case "WicketAround":
+                    _wicketSide = Mathf.Max(0, System.Array.FindIndex(WicketSide.All, w => w.Button == name)); ShowMenu(); break;
                 case "RightHanded": handedness?.Set(Handedness.Right); ShowMenu(); break;
                 case "LeftHanded": handedness?.Set(Handedness.Left); ShowMenu(); break;
                 case "BatSetup": EnterBatSetup(); break;
@@ -297,11 +350,15 @@ namespace CricketVR
             ui.Select("MatchSim", _mode == SessionMode.MatchSimulation);
             foreach (int o in new[] { 1, 2, 3, 5 }) ui.Select("Overs" + o, _overs == o);
             foreach (var d in new[] { "Easy", "Medium", "Hard" }) ui.Select(d, _difficulty == d);
+            for (int b = 0; b < NetBowler.All.Length; b++) ui.Select(NetBowler.All[b].Button, _netBowler == b);
+            for (int w = 0; w < WicketSide.All.Length; w++) ui.Select(WicketSide.All[w].Button, _wicketSide == w);
             bool right = handedness == null || handedness.Current == Handedness.Right;
             ui.Select("RightHanded", right);
             ui.Select("LeftHanded", !right);
             ui.Board(_mode == SessionMode.NetPractice
-                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls)\nNo runs: every ball gets a result."
+                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls), {BowlerName}, {WicketSide.All[_wicketSide].Label.ToLowerInvariant()} the wicket\nNo runs: every ball gets a result." +
+                  (SwingCheck ? "\n<b>SWING CHECK BUILD (T076)</b>: in/out at 0.15, 0.30, 0.50 m;\nover 1 at 120 km/h, over 2 at 140 km/h." : "") +
+                  (SpinCheck ? "\n<b>SPIN CHECK BUILD (T082)</b>: off-spin, doosra, leg-spin, googly;\nballs 1-4 good length, 5-8 full, 9-12 short; 85 km/h." : "")
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");
             pointer?.SetVisible(true);
         }
@@ -331,6 +388,7 @@ namespace CricketVR
                 : SessionOptions.MatchSimulation(Mathf.Max(1, config.session.matchPlaceholderBalls), seed);
             ApplyEnvironment(_mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode);
             _rng = new System.Random(seed);
+            _types = config.delivery.TypeCatalogue();
             _sessionId = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
             _sessionStart = Time.time;
             _lastResultLine = "";

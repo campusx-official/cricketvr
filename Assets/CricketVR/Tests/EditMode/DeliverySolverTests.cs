@@ -33,9 +33,9 @@ namespace CricketVR.Tests
         public void ContinuousSolutionLandsOnTarget()
         {
             var s = Solve(80f, 0f, 6f, dt: 0f);
-            // Integrate the exact projectile to y = R.
+            // Integrate the exact projectile down to contact height (pitch top plus R).
             var p0 = FieldDimensions.DefaultReleasePoint;
-            float vy = s.Velocity.y, a = -0.5f * G, b = vy, c = p0.y - R;
+            float vy = s.Velocity.y, a = -0.5f * G, b = vy, c = p0.y - DeliverySolver.ContactHeight(R);
             float t = (-b - Mathf.Sqrt(b * b - 4f * a * c)) / (2f * a);
             var land = p0 + s.Velocity * t;
             Assert.AreEqual(6f, land.z, 0.005f);
@@ -91,6 +91,48 @@ namespace CricketVR.Tests
             Assert.IsFalse(Solve(0f, 0f, 6f).Reachable);
             Assert.IsFalse(Solve(float.NaN, 0f, 6f).Reachable);
             Assert.IsFalse(Solve(80f, 0f, FieldDimensions.DefaultReleasePoint.z).Reachable, "bounce under the release point");
+        }
+
+        // ---------- T070: where the ball pitched ----------
+
+        [Test]
+        public void PitchIsWhereTheIncomingFlightReachesContactHeightWhenTheBallSinksIn()
+        {
+            // Samples from the 80 km/h good-length PlayMode probe: the last one has sunk 1.6 cm into the pitch.
+            var samples = new[] { new Vector3(0f, 0.1057f, 6.2489f), new Vector3(0f, 0.0629f, 6.0946f), new Vector3(0f, 0.0197f, 5.9403f) };
+            var m = BounceMeasurement.Measure(samples, 3, R);
+            Assert.AreEqual(R, m.Point.y, 1e-5f);
+            Assert.AreEqual(5.9985f, m.Point.z, 5e-4f, "crossing of contact height, not the sunk sample (5.940)");
+            Assert.AreEqual(1f - 0.6227f, m.StepsBeforeLowest, 1e-3f);
+            Assert.AreEqual(samples[2], m.ReboundStart);
+            Assert.AreEqual(0.0582f, m.ReboundOffset, 5e-4f, "the rebound starts 5.8 cm past the pitch point");
+        }
+
+        [Test]
+        public void PitchIsExtrapolatedWhenTheBallTurnedAboveThePitch()
+        {
+            // Session PlayMode case: speculative contact turned the ball with its centre 1.6 cm above contact height.
+            var samples = new[] { new Vector3(0.2f, 0.0951f, 4.3942f), new Vector3(0.2f, 0.0517f, 4.2477f) };
+            var m = BounceMeasurement.Measure(samples, 2, R);
+            float f = (0.0951f - R) / (0.0951f - 0.0517f);
+            Assert.AreEqual(R, m.Point.y, 1e-5f);
+            Assert.AreEqual(4.3942f - f * (4.3942f - 4.2477f), m.Point.z, 1e-4f);
+            Assert.Less(m.StepsBeforeLowest, 0f, "the pitch point is after the lowest sample");
+            Assert.Less(m.ReboundOffset, -0.04f, "the rebound starts before the pitch point");
+            Assert.AreEqual(samples[1], m.ReboundStart);
+        }
+
+        [Test]
+        public void PitchFindsTheCrossingWhenSunkForSeveralSteps()
+        {
+            var samples = new[] { new Vector3(0f, 0.05f, 6.3f), new Vector3(0f, 0.03f, 6.1f), new Vector3(0f, 0.01f, 5.9f) };
+            var m = BounceMeasurement.Measure(samples, 3, R);
+            Assert.AreEqual(6.3f - 0.2f * (0.014f / 0.02f), m.Point.z, 1e-4f);
+            Assert.AreEqual(2f - 0.7f, m.StepsBeforeLowest, 1e-4f);
+            m = BounceMeasurement.Measure(new[] { new Vector3(0f, 0.02f, 6f), new Vector3(0f, 0.01f, 5.8f) }, 2, R);
+            Assert.AreEqual(6f, m.Point.z, "all below contact height: oldest sample");
+            m = BounceMeasurement.Measure(new[] { new Vector3(0f, 0.05f, 6f) }, 1, R);
+            Assert.AreEqual(6f, m.Point.z, "a single sample above the pitch is all there is");
         }
     }
 }

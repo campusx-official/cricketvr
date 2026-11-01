@@ -13,7 +13,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-01 | REQ-001 | Partial: 4/5 owner checks pass; left controller not working (cause not isolated) | APK sha256 2076861…a47fe; E-001–E-004 | Owner: test left controller in Quest Home, then in CricketVR |
 | AC-02 | REQ-002, REQ-015 | **Pass** | APK sha256 f35ebef…f8192; E-005, E-006 | Re-check if the stance, net or scoreboard moves (M3/M7) |
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
-| AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
+| AC-04 | REQ-004, REQ-005 | **Pass on Quest**; automated tolerance tightened to 1 cm with the T070 pitch measurement (E-040); solver aims at the real pitch top, real-scene worst 1.02 → 0.02 cm (E-052) | APK sha256 b8f7d8d…9ace3; E-015–E-019, E-040, E-052 | Re-check if physics rate or pitch material changes; re-run at 100/120/140 km/h in T075 |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
 | AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
 | AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
@@ -34,6 +34,13 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-22 | REQ-036 | Not run | None | M10 scenarios |
 | AC-23 | REQ-037, REQ-038 | Not run | None | M10 chase + simulated path |
 | AC-24 | REQ-039 | Not run | None | M11 performance, both modes |
+| AC-25 | REQ-040, REQ-041, REQ-045 | Not run | None | M7.5 T071/T072 |
+| AC-26 | REQ-042, REQ-044, REQ-047 | **Pass** (automated E-045–E-048; headset, owner, right-handed, E-051); left-handed pending hardware | E-045–E-052 | Pitch-surface offset fixed (E-052) |
+| AC-27 | REQ-043, REQ-044, REQ-047 | Drift, dip (E-053), turn at the bounce (E-054), arrival line (E-055) and spin bounce height (E-056) automated pass; headset not run | E-053–E-056 | M7.5 T082 |
+| AC-28 | REQ-046 | Rate limit automated pass (E-046); spin visual and headset pending | E-046 | M7.5 T080, T082 |
+| AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
+| AC-30 | REQ-039 | Not run | None | M7.5 T081 |
+| AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 
 ## Evidence entry template
 
@@ -687,6 +694,218 @@ Remaining limitation / follow-up task: the rest of the M7 re-check (AC-07, AC-08
 ```
 
 ```text
+Check ID / acceptance scenario: E-040 / T070 bounce measured where the ball pitched (AC-04 Stock calibration re-run; REQ-044 tolerance)
+Requirement IDs: REQ-004, REQ-005, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T070: ..."); no APK (measurement change only)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner (EditMode, PlayMode, real PhysX at 144 Hz with the shipped PitchSurface material)
+Configuration: GameConfig debug presets (80 km/h good/full/short/outside off, 100 km/h quick, 60 km/h slow); default release point; ball radius 0.036 m; contact offset 0.01 m (ball and ground, Unity default)
+Steps or exact command: a throwaway probe test logged the ball's position and velocity after every physics step around the bounce (deleted after use); then -runTests EditMode and PlayMode with the new measurement
+Expected result: physics, pitch material and launches unchanged; new error per preset recorded next to the old; tolerance tightened to about 1 cm only if every preset passes
+Actual result and measured values:
+  - Probe (80 km/h, good length): the centre crosses contact height (y = 0.036) between steps 82 and 83 at z = 5.9985 (target 6.000; solver predicted 5.9984). Step 83 ends at y = 0.0197, 1.6 cm inside the pitch, still descending (v_y -6.22). The rebound velocity (v_y +4.53) appears in step 84. OnCollisionEnter reports z = 5.9403, the position of the sunk step. Other presets sink 0.8-2.5 cm.
+  - Reason the old figure changed: the old measurement was the contact report, which sits under the ball's sunk position after a contact PhysX resolves one step late, so it read 2.2-10.1 cm PAST the touch (more at higher speed: one step = 11-19 cm of travel). The proposal's explanation (0.01 m contact offset making the report early) was wrong, and the sampled lowest point is the sunk sample, so "lowest point" alone would not have changed the error. New measurement: where the incoming flight reaches contact height, interpolated within the step, taken once v_y turns upward.
+  - Per preset, old (contact report) -> new (pitch point) error to the requested bounce:
+      Full 80 km/h 3.5 m: 2.64 -> 0.09 cm
+      Good length 80 km/h 6 m: 5.97 -> 0.16 cm
+      Outside off 80 km/h +0.25 m, 6 m: 5.73 -> 0.16 cm
+      Quick 100 km/h 6.5 m: 10.07 -> 0.21 cm
+      Short 80 km/h 9 m: 8.35 -> 0.21 cm
+      Slow 60 km/h 5 m: 2.20 -> 0.00 cm
+    The remaining 0.1-0.2 cm is the solver's 5 mm bisection tolerance.
+  - AC-04 ten identical deliveries: spread 0.00 cm, max error 0.16 cm. Length/line test: 3.499 / 5.998 / 8.998 m, line 0.250 m.
+  - Ground rig (outfield 2 mm below the pitch): first run showed a 0.71-0.72 cm shift with the outfield on 3 presets, because the outfield pair sometimes reported first and set the surface 2 mm low (2 mm / tan 15.6 deg = 0.72 cm). Fixed by using the highest ground surface touched in the bounce; then shift 0.00 cm and error 0.0-0.2 cm on all 6 presets.
+  - Tolerance: every preset passes 1 cm, so the Stock tolerance was tightened from 10 cm to 1 cm (AC-04 max error, length/line, new StockPresetsPitchOnTheRequestedPoint, ground calibration absolute error). Line tolerance 5 cm -> 1 cm.
+  - Tests: EditMode 111/111 (3 new: interpolation on the probe's real samples, no-sink case, multi-step sink). PlayMode 45/45 (1 new: StockPresetsPitchOnTheRequestedPoint; each preset also asserts the new error is below the old). All earlier tests unchanged except the tolerances above.
+Outcome: Pass (automated). Physics, pitch material and launch velocities unchanged (no change to DeliverySolver, materials or the ball's Rigidbody setup).
+Log or artifact path: scratchpad play.log / play.xml (not committed)
+Remaining limitation / follow-up task: (1) PhysX still lets the ball sink 0.8-2.5 cm into the pitch for one step and starts the rebound from there, up to one step past the touch; T078 (turn at the bounce) and T079 (arrival line) must model the rebound as PhysX produces it. (2) Device check not needed for a measurement change; the next AC-04 headset re-check (T075) uses the new readout.
+CORRECTION (2026-10-27, same day, found during T072; see E-042): the six presets all happened to fall in the "ball sinks in" step phase. Random planned deliveries also show the opposite phase, where PhysX's speculative contact turns the ball while its centre is still up to ~1.6 cm above contact height, BEFORE the pitch point; the T070 code then fell back to the lowest sample (4-5 cm early). So the statements above that the physical path is fine and that the old figure was only a measurement error are too strong: the old contact-report error was partly a real displacement of the rebound. The measurement was corrected (E-042), and the rebound displacement is now recorded separately.
+```
+
+```text
+Check ID / acceptance scenario: E-041 / T071 delivery types, DeliveryRequest and plan type mix (AC-25 partial)
+Requirement IDs: REQ-028, REQ-040, REQ-041, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T071: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; MainSceneBuilder.BuildOrRepairBatch (creates the type assets)
+Configuration: seven DeliveryType assets under Assets/CricketVR/Settings/DeliveryTypes/ with the plan.md §19 starting values; GameConfig.delivery.deliveryTypes; plans Stock-only (empty typeMix); pace cap 120 km/h
+Steps or exact command: BuildOrRepairBatch; -runTests EditMode and PlayMode
+Expected result: Stock and every M7 plan unchanged; type values in range; exact left-hand mirror; no type-specific branching outside the module
+Actual result and measured values: EditMode 120/120 (9 new DeliveryTypeTests: seven starting types valid and in kind order; shipped assets = 7 distinct kinds, all in range, referenced by GameConfig; validation catches out-of-range values; Stock request <-> DeliveryConfig round trip with the same solver launch; left-hand ForBatter mirrors line, swing and turn exactly for all 7 types and is idempotent; Stock-only DrawRequest reproduces the pre-M7.5 draw (verbatim copy of the M7 algorithm) for 1,000 draws x 4 plans x both hands; an equal 7-type mix gives each type 1000 +/- 100 of 7,000 with pace capped at 120 km/h and spin in its own range; Stock plans reachable; source scan finds no DeliveryKind branching outside the module files). PlayMode 45/45 unchanged. The machine accepts DeliveryRequest; non-Stock requests are rejected with a reason until T073/T074 (none are drawn: plans are Stock-only).
+Outcome: Pass (automated)
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: the scene builder regenerates Ground and NearPanel on every run (large scene diff with no functional change); the scene file was left as committed
+```
+
+```text
+Check ID / acceptance scenario: E-042 / T070 correction: pitch point in both PhysX step phases; rebound start recorded (AC-04 Stock calibration re-run)
+Requirement IDs: REQ-004, REQ-005, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072: ..."); no APK (measurement change only)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner, real PhysX at 144 Hz, shipped PitchSurface material
+Configuration: debug presets; 60 planned deliveries (30 Net Practice + 30 Hard, seed 70, alternating hands); session one-over test with random Net Practice draws
+Steps or exact command: the T072 session test's new bounce assertion failed (5.076 m vs 5.036 m requested); instrumented the session test temporarily; -runTests EditMode and PlayMode after the fix
+Expected result: the reported pitch point within 1 cm of the request for every delivery, not only the presets; the PhysX rebound behaviour measured, not hidden
+Actual result and measured values:
+  - Instrumented session (6 balls): 3 balls sank in (rebound past the pitch point); 3 were turned by speculative contact with the centre 0.5-1.6 cm above contact height (lowest sample y = 0.0517 / 0.0407 / 0.0502 vs 0.036), 1.8-5.3 cm before the pitch point. The T070 code reported the lowest sample in that case: 5.6 cm error.
+  - Fix (measurement only): the pitch point is always the incoming flight's crossing of contact height: interpolated when the ball sank in, extrapolated along the last step's straight line (a fraction of a step) when it turned above the pitch. The rebound start (lowest sample) and its signed offset along the travel are reported separately (PitchMeasurement; CSV rebound_offset_m).
+  - Presets: pitch error unchanged at 0.00-0.21 cm; rebound starts +2.20 / +2.56 / +5.57 / +5.81 / +8.14 / +10.29 cm past the pitch point (all sank in).
+  - 60 planned deliveries: worst pitch error 0.51 cm (the solver's 5 mm tolerance); rebound start -9.8 to +11.9 cm from the pitch point (25 before, 35 after), each within one physics step of travel (asserted).
+  - What this means: the incoming flight lands where requested to within 0.5 cm. PhysX then turns the ball up to one step (11-19 cm of travel at 80-100 km/h) away from that point, either side, depending on the step phase. The bounce looks right (the offset is under one rendered frame of motion), but the post-bounce path is displaced by that amount. That is a property of the unchanged physics, not of the measurement.
+  - Tests: EditMode 121/121 (pitch tests now cover the sink, turned-above and multi-step cases on recorded samples). PlayMode 46/46 (new PlannedDeliveriesPitchOnTargetAndReboundWithinOneStep).
+Outcome: Pass (automated) for the pitch-point measurement and the 1 cm Stock tolerance on the pitch point. The rebound scatter is recorded as a known physics limitation, not a pass.
+Log or artifact path: scratchpad play.log (not committed)
+Remaining limitation / follow-up task: owner decision before Phase B (T078 turn at the bounce, T079 arrival line): keep PhysX's bounce (turn and arrival-line solver must model a rebound that starts up to one step either side of the pitch point; arrival-line accuracy then about ±3-5 cm) or resolve the pitch bounce in code at the pitch point (exact and deterministic, but changes the post-bounce path of every ball, Stock included, by up to ~12 cm, so it needs an AC-04 headset re-check). Not needed for Phase A (swing acts before the bounce).
+```
+
+```text
+Check ID / acceptance scenario: E-043 / T072 per-ball record and CSV columns for delivery types (AC-25 partial, AC-16)
+Requirement IDs: REQ-027, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner
+Configuration: defaults
+Steps or exact command: -runTests EditMode and PlayMode
+Expected result: new columns round-trip through the CSV; session records carry the type and the measured bounce
+Actual result and measured values: new columns type, movement, hand, line_ref, ball_seed, var_swing, var_drift, var_turn, pred_curve_m, curve_m, turn_deg, arrival_line_m, bounce_x/y/z, bounce_error_m, rebound_offset_m. EditMode: CSV round trip of every new field; Stock record leaves the movement measurements empty (NaN cells). PlayMode: the one-over session records Stock, movement 0, a measured bounce within 1 cm of the requested length and bounce error <= 1 cm for all 6 random balls. A ball hit before it pitched (full toss) no longer reports the hit ball's landing as the delivery's bounce. var_*, curve, turn and arrival line stay empty until T072a/T074/T078 fill them.
+Outcome: Pass (automated)
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: device CSV with the new columns comes with the next APK
+```
+
+```text
+Check ID / acceptance scenario: E-044 / T072a natural variation (AC-31)
+Requirement IDs: REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T072a: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner
+Configuration: variation 0.15 on every moving type (Stock 0)
+Steps or exact command: -runTests EditMode and PlayMode
+Expected result: same seed = same factors and movement; factors within +/-v and spread over the range; v = 0 gives exactly the nominal movement
+Actual result and measured values: DeliveryMovement.For resolves a world-frame request: swing curve, drift and turn = Lerp(min, max, movement) x the ball's factors; dip, bounce factor, grip and seam are not varied. Factors drawn swing, drift, turn from System.Random(request seed). EditMode 125/125 (4 new: same seed identical factors and movement for all 7 types, a different seed differs; 1,000 seeds: every factor within [0.85, 1.15] and each quarter of the range holds > 180 of 1,000 for all three factors; v = 0 gives factors 1 and the exact nominal curve, drift and turn at movement 0/0.25/0.5/0.75/1; variation leaves dip and bounce unchanged, is the same ball for either hand and keeps the mirrored direction). The machine records the factors per ball (var_swing / var_drift / var_turn). PlayMode 46/46 unchanged.
+Outcome: Pass (automated) for the factors. "Same seed, same path" is checked once there is a path (T073 solver, T074 runtime).
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: the solver applies the factors before solving in T073
+```
+
+```text
+Check ID / acceptance scenario: E-045 / T073 swing flight model and movement-aware solver (AC-26 automated, simulation only)
+Requirement IDs: REQ-042, REQ-044, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T073: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner (EditMode; pure C# simulation stepped exactly as PhysX at 1/144 s)
+Configuration: Inswinger / Outswinger starting values (curve 0.2-0.6 m, lateness 1.5), variation 0 except the variation test
+Steps or exact command: -runTests EditMode
+Expected result: deterministic; in/out swing toward -X/+X for a right-hander, mirrored for a left-hander; simulated pitch point within 1 mm; unreachable requests rejected, never altered; Stock path unchanged
+Actual result and measured values:
+  - EditMode 133/133 (8 new SwingSolverTests).
+  - 576 solves (2 types x 2 hands x 115/120/125/140 km/h x movement 0/0.5/1 x lengths 2/4/6/8 m x lines -0.1/0/0.3 m): all reachable at the requested speed (to 1e-3 m/s); worst landing miss 0.099 mm; worst curve error 0.49 mm; the plan's T equals the flight's own time. Solve time about 0.2 ms each.
+  - Direction: sideways velocity gained between release and pitch point is toward -X for an inswinger and +X for an outswinger (right-hander), reversed for a left-hander; the ball is aimed wide first and curves in.
+  - Left-hand solution is the exact mirror (velocity x, pitch point x negated; curve equal, to 1e-4).
+  - Natural variation 0.15 applied before solving: curve = nominal x var_swing (1 mm) and the ball still pitches where requested (1 mm), 20 seeds.
+  - Rejections: 30 km/h ("needs at least ..."), an 8 m curve (no aim). Stock requests return the unchanged Stock solve (identical velocity).
+  - Closed-form swing acceleration checked against a direct integration for lateness 0, 1, 1.5, 2 (2 mm).
+  - Size of the movement (for the open decision): at lateness 1.5, curve 0.2 / 0.4 / 0.6 m gives a heading change of 7.2-7.3 / 14.3-14.6 / 21.3-21.7 deg, a distance from the launch line of 0.46 / 0.92 / 1.38 m, and peak sideways acceleration 25-36 / 49-72 / 73-108 m/s^2 (115-140 km/h). Largest over the 576 solves: 150 m/s^2 (15 g), 26 deg.
+  - Correction to the plan: the proposal's A = D(p+1)(p+2)/T^2 sets the distance from the launch line, not the curve; implemented the curve as DT-13 defines it.
+Outcome: Pass (automated, simulation). Not yet run in PhysX (T074) or seen in the headset (T076).
+Log or artifact path: scratchpad edit.log
+Remaining limitation / follow-up task: owner decision on the swing size definition (plan.md open decision 4) before T076; the machine still rejects moving types until T074
+```
+
+```text
+Check ID / acceptance scenario: E-046 / T074 swing in PhysX with BallFlight; seam-up visual (AC-26 PlayMode; AC-28 rate limit; AC-31 path determinism)
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-046, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T074: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz; shipped DeliveryType assets (variation set to 0 on the copy) and PitchSurface material; MainSceneBuilder.BuildOrRepairBatch
+Configuration: Inswinger / Outswinger starting values (curve 0.2-0.6 m, lateness 1.5); 115 and 125 km/h (140 km/h waits for T075); seeded lines -0.1..0.3 m, lengths 3-8 m, movement 0-1, alternating hands
+Steps or exact command: BuildOrRepairBatch (adds BallFlight and the BallVisual child with the generated seam texture); -runTests EditMode and PlayMode
+Expected result: each ball pitches within the Stock tolerance (1 cm); measured curve within the type's range and equal to the solver's; swing toward -X/+X for a right-hander, mirrored for a left-hander; Stock unchanged with BallFlight present; same request = same ball, with or without variation; visual rate <= 25 deg per frame
+Actual result and measured values:
+  - PlayMode 50/50 (4 new SwingPlayModeTests). 40 swinging balls (2 types x 2 speeds x 10): worst pitch error 0.14 cm; measured curve vs solver at most 0.5 mm; curves 0.203-0.593 m; every ball swung the expected way for its hand.
+  - Same request twice (variation 0 and 0.15, seed 4242): identical pitch point and curve (1e-5 m) and the same recorded factor; the varied factor differs from 1.
+  - Stock presets with BallFlight on the ball: pitch within 1 cm, measured curve < 1 mm (no force applied).
+  - Arrival line: an inswinger at 120 km/h, movement 0.5, pitched on +0.20 m (outside off), reaches the popping crease at -0.61 m (down leg): the heading it gained in the air keeps carrying it after pitching (see the open swing-size decision).
+  - EditMode 135/135 (2 new: visual rate <= 25 deg per frame at 72 Hz for all 7 types, 5 rev/s exactly at the cap, long frames capped; pace seam upright with backspin, straight for Stock, leaning toward fine leg for inswing and slip for outswing).
+  - Records: predicted curve, measured curve and arrival line are now filled per ball (NaN predicted curve for still balls).
+  - Scene: Ball gains BallFlight and a BallVisual child (sphere mesh, BallSeam material with a generated 512 x 256 texture: white leather, a red equatorial seam with stitch rows; ASTC 6x6 on Android). The physics sphere's own renderer stays off.
+Outcome: Pass (automated). Not seen in the headset.
+Log or artifact path: scratchpad play.log; Assets/CricketVR/Generated/Ball/BallSeam.png
+Remaining limitation / follow-up task: T075 (140 km/h, AC-04 re-run, AC-05 extension, cap decision); T076 headset; owner decision on swing size; spin balls use the pace visual until T080
+```
+
+```text
+Check ID / acceptance scenario: E-047 / T075 AC-29 pace part: AC-04 re-run to 140 km/h, contact matrix to 39 m/s with swinging balls, cap decision
+Requirement IDs: REQ-042, REQ-044, REQ-004, REQ-005, REQ-006, REQ-007
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5 T075: ..."); no APK
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz; contact matrix at 72 Hz frames with the scripted controller (as AC-05, E-020)
+Configuration: shipped PitchSurface and DeliveryType assets; contact cases from AC-05 with ball speeds 33.3 and 38.9 m/s; swinging balls with the largest solved swing acceleration (150 m/s^2, E-045) held constant to the bat
+Steps or exact command: -runTests PlayMode (54 tests, 177 s) and EditMode
+Expected result: AC-04 consistency at 100/120/140 km/h; exactly one contact per run, no tunnelling, at up to 39 m/s, straight and swinging; raise the cap only if all pass
+Actual result and measured values:
+  - AC-04 re-run, 10 identical deliveries each (line +0.10 m, length 6 m): 100 km/h spread 0.00 cm, worst pitch error 0.21 cm; 120 km/h 0.00 / 0.19 cm; 140 km/h 0.00 / 0.12 cm. Lengths 3 m and 9 m at each speed within 1 cm.
+  - Contact matrix, straight balls: 120 and 140 km/h x (stationary block, 14 m/s drive, 25 rad/s rotation-dominated swing) x 10 runs = 60 runs, every one exactly one contact; blocks go back toward the bowler; drive exit 45.0 m/s mean (the response's exit-speed bound).
+  - Contact matrix, swinging balls at 140 km/h: inswing and outswing x (drive, rotation) x 10 = 40 runs, every one exactly one contact; the ball was moving sideways at 4.2 m/s at contact.
+  - Swing matrix at 140 km/h (in/out x 10, seeded lines/lengths/movement, both hands): worst pitch error 0.19 cm; measured curve within 0.9 mm of the solver's; curves 0.203-0.591 m.
+  - All earlier tests unchanged and passing: PlayMode 54/54 (4 new), EditMode 135/135.
+  - Decision (DT-5, owner change 4): every pace check passed, so DeliveryPlanSettings.DefaultPaceCapKmh is raised from 120 to 140 km/h: swing types now use their full 115-140 km/h range. The Hard difficulty's own 95-120 km/h range is a separate M10 setting (T065) and is unchanged.
+Outcome: Pass (automated) for the pace part of AC-29. Spinning balls in the contact matrix come in T081. Whether 140 km/h is playable is the owner's call in the headset (T076).
+Log or artifact path: scratchpad play.log
+Remaining limitation / follow-up task: T076 headset; T081 spinning balls
+```
+
+```text
+Check ID / acceptance scenario: E-048 / owner decision on swing size (plan.md open decision 4): swing redefined and re-tested (AC-26 automated)
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery (commit "M7.5: swing measured off the release line at the crease, 0.1-0.5 m ..."); no APK (the T076 build is E-049)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; real PhysX at 144 Hz
+Configuration: Inswinger / Outswinger 0.1-0.5 m swing (assets and code defaults), lateness 1.5; cap DeliveryTypeData.MaxSwing = 0.5 m after variation; plans Easy/Medium 0.15-0.30 m, Hard 0.20-0.50 m (mixes still Stock-only)
+Steps or exact command: -runTests EditMode (139 tests) and PlayMode (55 tests)
+Expected result: swing (distance at the popping crease from the release line) as requested and as solved; never over about 0.5 m; Stock unchanged
+Actual result and measured values:
+  - Definition change: the solver now rescales the swing acceleration until the simulated swing at the crease equals the request (it was the curve). Closed form A = S(p+1) / (T (T/(p+2) + tau)). Swing and curve are both in the record (new CSV columns pred_swing_m, swing_m).
+  - Solver, 576 solves (as E-045, now 0.1/0.3/0.5 m): worst landing miss 0.094 mm, worst swing error 0.46 mm. Largest swing acceleration 19.9 m/s^2 (2.0 g; was 150 m/s^2), heading change at most 5.2 deg, curve at most 0.19 m (pitch 2 m from the stumps).
+  - Size at lateness 1.5, 115-140 km/h, good length: swing 0.1 / 0.3 / 0.5 m = heading change 0.7 / 2.0 / 3.4 deg, curve 0.019 / 0.056 / 0.094 m, sideways acceleration 2.3-3.4 / 6.9-10.1 / 11.6-16.9 m/s^2.
+  - Owner's test: an inswinger pitched on off stump (+0.097 m), movement 1, both hands, 115-140 km/h, lengths 2-8 m, variation 0 / 0.15 / 0.5 over 10 seeds: largest swing 0.5002 m in simulation (the solver's 0.5 mm tolerance); in PhysX (variation 0.15, 115/140 km/h, lengths 3/6/8 m, both hands) largest measured 0.496 m.
+  - PhysX matrix, 60 swinging balls (in/out x 115/125/140 km/h x 10, both hands): worst pitch error 0.08 / 0.10 cm (was 0.14 / 0.19 cm); measured swing equals the solver's within 0.1 mm; swings 0.103-0.494 m.
+  - Bug found and fixed (from T074): BallFlight kept applying swing until PhysX reported ground contact, often one step after the pitch point the solver integrated to, adding up to 1.4 cm of swing at the crease (first run: 0.364 m measured vs 0.350 m solved; the off-stump test failed at 0.513 m). The force now stops on the solver's own step count (step x dt <= T). Stock is unaffected (no force).
+  - Arrival line: the E-046 inswinger (120 km/h, middle movement, pitched +0.20 m) now reaches the crease at +0.155 m (0.30 m swing); it was -0.61 m under the curve definition.
+  - Plans: 500 draws each with an in/out mix: Easy and Medium nominal swing 0.15-0.30 m, Hard 0.20-0.50 m, every varied ball <= 0.5 m. Stock-only plans draw exactly as before (no movement drawn).
+  - Unchanged: T070 Stock pitch errors (worst 0.21 cm presets, 0.51 cm planned), AC-04 re-run, the contact matrix (E-047 used 150 m/s^2 of held swing, now a far harsher case than any real ball).
+Outcome: Pass (automated). E-045/E-046 size figures (curve 0.2-0.6 m) are historical.
+Log or artifact path: scratchpad edit.log, play.log
+Remaining limitation / follow-up task: T076 headset (E-049 build)
+```
+
+```text
+Check ID / acceptance scenario: E-049 / T076 swing-check build prepared (AC-26 headset pending)
+Requirement IDs: REQ-042, REQ-046
+Date and tester: 2026-10-27, agent (build only; no headset result)
+Git commit or build identifier: branch m7.5-delivery 26d25b6; Builds/CricketVR-T076-swingcheck.apk sha256 6f3d4befa0b5a7ca64f0a023fc8bbd9be63aee87cf4f74dea55ba6bacd430f3e (91.9 MB). The M7 re-check APK is kept unchanged as Builds/CricketVR-M7-recheck.apk (sha256 c71f726...30f0, E-038)
+Unity and package versions: as E-001
+Environment: Mac batch build (development, NetMode)
+Configuration: -cricketvrSwingCheck: Net Practice bowls DeliveryPlanner.SwingCheckRequest: per over inswinger/outswinger at 0.15, 0.30, 0.50 m swing, good length 6 m on off stump, no variation; over 1 at 120 km/h, over 2 at 140 km/h, repeating. Match Simulation unchanged (Stock). GameConfig restored to swingCheck 0 after the build.
+Steps or exact command: Unity -batchmode -projectPath . -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrSwingCheck
+Expected result: owner sees each ball's swing and direction (AC-26 headset)
+Actual result and measured values: build succeeded, 0 errors, 0 warnings, 199 s. Headset result pending.
+Outcome: Pending (owner)
+Log or artifact path: scratchpad apk.log
+Remaining limitation / follow-up task: owner headset check T076; left-handed swing not checkable on device (left controller)
+```
+
+```text
 Check ID / acceptance scenario: E-050 / M7 headset re-check: AC-07 complete session, E-037 B-press control, E-038 ground-mode timing; AC-16 device CSV
 Requirement IDs: REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-026, REQ-027
 Date and tester: 2026-10-27 09:52-09:55, owner (headset); agent (install over adb, CSV pull and analysis)
@@ -705,6 +924,181 @@ Actual result and measured values:
 Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part Pass (owner amended AC-16 on 2026-10-27: the Δt / swing-peak / reset-age columns may be empty until T053, M8); AC-08 and AC-09 pending the owner's confirmation that they were exercised
 Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
 Remaining limitation / follow-up task: owner to confirm AC-08/AC-09 (AC-16 Δt decided: amended); then merge m7-session into main only on the owner's go-ahead
+```
+
+```text
+Check ID / acceptance scenario: E-051 / T076 headset: AC-26 swing seen, both directions; device CSV; pitch measurement fix in the real scene
+Requirement IDs: REQ-042, REQ-044, REQ-045, REQ-046
+Date and tester: 2026-10-27 09:56-10:03, owner (headset); agent (install over adb, CSV pull and analysis, fix)
+Git commit or build identifier: branch m7.5-delivery; Builds/CricketVR-T076-swingcheck.apk sha256 6f3d4befa0b5a7ca64f0a023fc8bbd9be63aee87cf4f74dea55ba6bacd430f3e (E-049), installed 09:56:03
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, NetMode; then Mac batch PlayMode with the Main scene loaded
+Configuration: swing-check sequence (in/out at 0.15/0.30/0.50 m; 120 then 140 km/h; good length on off stump; no variation)
+Steps or exact command: adb install -r; owner played Net Practice; adb pull; new PlayMode test MainScenePitchTests (loads Main.unity and bowls the same 12 balls)
+Expected result: AC-26 headset: each swing type's movement and direction seen; measured swing = planned; pitch point within the Stock tolerance (1 cm)
+Actual result and measured values:
+  - Owner: "i played normally and watched the balls. all fine". No per-item notes (size, lateness, seam, 140 km/h) beyond that.
+  - Device CSVs (Docs/evidence/2026-10-27-t076-swing/): 11 complete 12-ball sessions, 132 balls, sequence as designed; 42 Hit, 88 Miss, 2 Bowled (contacts 24/66 at 120 km/h, 18/66 at 140 km/h).
+  - Swing on device: 113 balls reached the crease unhit; measured = planned within 0.6 um; largest 0.4999 m. Arrival at the crease (right-hander, pitched on off stump +0.097 m): inswing 0.15/0.30/0.50 m -> +0.07/+0.01/-0.07 m; outswing -> +0.19/+0.25/+0.33 m (same at 120 and 140 km/h).
+  - Pitch point on device: 120 km/h 0.22-0.23 cm; 140 km/h 1.39-1.54 cm, every 140 km/h ball with "rebound +0.0 cm". Reproduced exactly in the Editor with Main.unity loaded (not device-specific).
+  - Cause 1 (measurement bug from T070): the ground height came from the PhysX contact point. When PhysX turns the ball before it touches (speculative contact, here 2.7 mm above), that point is on the ball's underside, so contact height equalled the lowest sample and the 1.4 cm extrapolation was skipped. The PlayMode rig's ground reported the point on its surface, so the tests missed it. Fix: BallController takes the ground top from a downward ray onto the ground layers. Rig results unchanged (T070 worst 0.21 cm presets / 0.51 cm planned; swing 0.08 / 0.10 cm).
+  - Cause 2 (calibration offset, owner decision): in Main the NetMode pitch box's top is at y = 0.002 (PracticeNetBuilder) while the solver aims at contact height above y = 0, so with the measurement fixed, balls meet the pitch 0.75 cm (120 km/h) to 1.02 cm (140 km/h) before the requested point. This applies to every ball, Stock included, and predates M7.5 (AC-04 was passed on Quest with the old 10 cm tolerance). MainScenePitchTests asserts 1 cm and is [Ignore]d with this reason until the owner decides.
+  - Suites: PlayMode 55/55 run + 1 ignored; EditMode 139/139.
+Outcome: AC-26 headset Pass (owner observation, right-handed). Pitch-point tolerance in the real scene: open (owner decision on the 2 mm offset).
+Log or artifact path: Docs/evidence/2026-10-27-t076-swing/; adb logcat lines "Delivery #129-#132 ... rebound starts +0.0 cm"
+Remaining limitation / follow-up task: owner decision on the pitch-surface offset (decided and fixed, E-052); left-handed swing pending hardware
+```
+
+```text
+Check ID / acceptance scenario: E-052 / Solver aims at the real pitch top (owner decision 1(a), 2026-10-27); AC-04 Stock calibration, swing calibration and the real-scene pitch test re-run
+Requirement IDs: REQ-004, REQ-005, REQ-042, REQ-044
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch); Main.unity loaded for MainScenePitchTests
+Configuration: new FieldDimensions.PitchSurfaceHeight = 0.002 m, used by PracticeNetBuilder (pitch box top), GroundBuilder (strip and crease marks), DeliverySolver.ContactHeight (= PitchSurfaceHeight + ball radius) and the PlayMode rigs (ground top moved from 0 to 0.002, outfield to 0 as built). Pitch top value unchanged, so Main.unity is unchanged
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: every Stock and swing calibration test within its tolerance; MainScenePitchTests (un-ignored) within the 1 cm Stock tolerance; new MainSceneLayoutTests.PitchColliderTopIsTheHeightTheSolverAimsAt passes
+Actual result and measured values (pitch-point error, worst; before = E-051 / last run before the change, after = this run):
+  - Real scene, swing-check balls, 120 km/h: 0.75 cm -> 0.00 cm; 140 km/h: 1.02 cm -> 0.02 cm (0.0002 m).
+  - Rig (ground moved to the same height, so the solver-vs-ground relation is the same as before; results are expected and found unchanged): AC-04 ten identical 80 km/h: spread 0.00 cm, max error 0.16 -> 0.16 cm. AC-04 re-run (AC-29) 100/120/140 km/h: 0.21/0.19/0.12 -> 0.21/0.19/0.12 cm. M6.5 ground calibration presets: 0.0-0.2 cm, outfield shift 0.00 cm. T074 swing matrix: pitch 0.08 / 0.10 cm, measured-vs-solved swing 0.0 mm; off-stump cap 0.496 m.
+  - Launch change: elevation +0.01 deg (e.g. 80 km/h good length -1.29 -> -1.28 deg, 100 km/h -3.93 -> -3.92 deg); speed and line unchanged.
+  - Suites: EditMode 140/140, PlayMode 56/56 (none ignored).
+Outcome: Pass. The pitch point in the real scene is now within 0.02 cm of the request.
+Log or artifact path: batch test results (play.xml/edit.xml, scratchpad)
+Remaining limitation / follow-up task: no headset re-check (owner: not needed unless something visibly changes; a 0.01 deg launch change is not visible)
+```
+
+```text
+Check ID / acceptance scenario: E-053 / T077 drift and dip in the flight model and solver (AC-27 automated, before the bounce)
+Requirement IDs: REQ-043, REQ-044, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: shipped spin types; turn, bounce factor and grip zeroed in the tests (the turn at the bounce is T078, and the solver still rejects a turn); variation 0; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: spin speeds 75-95 km/h reach lengths 3-9 m on target; drift opposite to the turn for both hands; googly dips most; PhysX drift = solved
+Actual result and measured values:
+  - EditMode SpinSpeedsSeventyFiveToNinetyFiveReachLengthsThreeToNine: 1200 solves (4 types x 2 hands x 75/80/85/90/95 km/h x movement 0/1 x 5 lengths 3-9 m x 3 lines), all reachable; worst landing miss 0.033 mm; worst drift error 0.32 mm; largest drift acceleration 1.65 m/s^2.
+  - Drift direction: opposite to the type's turn for every type and both hands (left-hander mirrored).
+  - Dip at 85 km/h, 6 m (arrival angle below horizontal / launch elevation): Stock 14.85 / -2.12 deg; Off-spin and Doosra 15.22 / -1.72; Leg-spin 15.34 / -1.59; Googly 15.58 / -1.32. Googly arrives steepest and is launched highest.
+  - PlayMode SpinningBallsDriftAndDipAsSolved: 48 balls (4 types x 2 hands x 75/95 km/h x 3/6/9 m), worst pitch error 0.04 cm, measured drift = solved within 0.0 mm (rounded; tolerance 5 mm).
+  - Swing and Stock unchanged: T074 swing matrix 0.08 / 0.10 cm, swing 0.0 mm; AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; real scene 0.02 cm.
+  - Suites: EditMode 146/146, PlayMode 57/57.
+Outcome: Pass (automated, simulation and PhysX; before the bounce only)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: T078 turn at the bounce (lifts the solver's turn rejection); spin types are not bowled in play until then; headset AC-27 in T082
+```
+
+```text
+Check ID / acceptance scenario: E-054 / T078 turn at the physical bounce (AC-27 automated; Option A)
+Requirement IDs: REQ-043, REQ-044, REQ-047, REQ-048
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: shipped spin types with natural variation 0.15 (turn test) or 0 (bounce-height test); speeds from each type's range; lengths 4-8 m; lines -0.1..+0.3 m; movement 0-1; seed 78; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: 10 runs x 4 spin types x both hands: turn in range, direction correct, bounce point unchanged by the turn; googly bounces higher than leg-spin
+Actual result and measured values:
+  - PlayMode SpinningBallsTurnAtTheBounce: 80 balls; heading change 2.44-9.23 deg, each within 0.018 deg of its planned (varied) turn and inside the type's range widened by the variation; toward the type's turn direction for both hands; the turned heading is kept in the air (10 steps later < 0.2 deg).
+  - Pitch point with vs without the turn (same ball, turn/bounce/grip zeroed): identical, 0.000 mm.
+  - Bounce height at 82 km/h, 6 m, movement 0.5: leg-spin rebound peak 1.349 m (v_y 5.08 m/s), googly 1.496 m (v_y 5.36 m/s).
+  - EditMode: TurnAtBounce turns the heading by exactly theta toward its direction for either travel direction, grip and bounce factor as specified; the solver accepts full spin movements, carries turn/bounce/grip in the plan, and its launch equals the no-turn solve.
+  - Swing, Stock and real-scene results unchanged (T074 0.08/0.10 cm; AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; Main 0.02 cm; T077 0.04 cm).
+  - Suites: EditMode 147/147, PlayMode 58/58.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: (1) crease position after the turn carries PhysX's rebound offset (up to about 2 cm, owner-accepted); T079 arrival-line solve. (2) Spin types are not in any default plan's mix yet (T065), so they are not bowled in normal play. (3) The rebound peaks (1.3-1.5 m off a good length at 82 km/h) come from the existing pitch material; review in T083 calibration. (4) Headset AC-27 in T082.
+```
+
+```text
+Check ID / acceptance scenario: E-055 / T079 arrival-line requests (D-1, REQ-044: crease line within about 3 cm for every type)
+Requirement IDs: REQ-044, REQ-047
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: lineReference AtBatter; all 7 types; both hands; variation 0; 144 Hz
+Steps or exact command: Unity -batchmode -runTests -testPlatform EditMode, then PlayMode
+Expected result: simulation reaches the requested crease line within 1 mm; PhysX within about 3 cm for every type; bounce-line requests unchanged
+Actual result and measured values:
+  - EditMode: 336 solves (7 types x 2 hands x lengths 1/3/6/8 m x lines -0.1/+0.1/+0.3 x movement 0/1), all reachable; worst crease miss 0.995 mm; pitch line up to 0.73 m from the arrival line. Off-spin asked to finish on middle (right-hander) pitches outside off. Bounce-line requests: no arrival line, target unchanged.
+  - PlayMode ArrivalLineRequestsReachTheCreaseLineWithinThreeCentimetres: 84 balls (7 types x 2 hands x 4/6/8 m x lines 0/+0.2, movement 0.7): spin worst 2.35 cm (PhysX rebound offset at the turn's pivot, as predicted for Option A); Stock and swing 0.00 cm.
+  - Other results unchanged (T074/T077/T078, AC-04, AC-29, Main 0.02 cm). Suites: EditMode 150/150, PlayMode 59/59.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: spin bounce height at the crease (owner request before T082)
+```
+
+```text
+Check ID / acceptance scenario: E-056 / Spin bounce height at the striker's popping crease (owner request before T082); crease height in the CSV and on the result panel
+Requirement IDs: REQ-043, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: PlayMode (Mac batch); EditMode for the CSV
+Configuration: shipped types, right-handed, line +0.1 m, movement 0.5, variation 0; height = ball centre above the pitch surface where it crosses z = 1.22 m (BallFlight.CreaseHeight)
+Steps or exact command: SwingPlayModeTests.SpinBallsReachTheCreaseBetweenKneeAndWaistAtAGoodLength, then both full suites
+Expected result: good length (6 m): 0.5-0.9 m for every spin type at 75/85/95 km/h; googly higher than leg-spin and doosra lower than off-spin at every length and speed; fix through the spin types' own bounce factors only, Stock and swing unchanged
+Actual result and measured values (m; full 4 m / good 6 m / short 8 m, each at 75 / 85 / 95 km/h):
+  Before (bounce factors off +0.05, leg +0.08, doosra +0.03, googly +0.12):
+    Stock    0.71 0.63 0.56 | 0.95 0.92 0.86 | 1.09 1.14 1.15
+    Off-spin 0.78 0.72 0.62 | 1.08 1.05 0.97 | 1.25 1.30 1.31
+    Doosra   0.77 0.71 0.61 | 1.06 1.02 0.95 | 1.21 1.26 1.27
+    Leg-spin 0.82 0.77 0.66 | 1.15 1.12 1.03 | 1.33 1.39 1.38
+    Googly   0.87 0.82 0.69 | 1.23 1.20 1.10 | 1.44 1.50 1.48
+  After (every (1 + b) x 0.75: off -0.21, leg -0.19, doosra -0.23, googly -0.16):
+    Stock    0.71 0.63 0.56 | 0.95 0.92 0.86 | 1.09 1.14 1.15   (unchanged)
+    Off-spin 0.57 0.53 0.47 | 0.72 0.70 0.67 | 0.76 0.78 0.83
+    Doosra   0.55 0.51 0.46 | 0.69 0.67 0.64 | 0.73 0.74 0.80
+    Leg-spin 0.60 0.55 0.49 | 0.76 0.74 0.70 | 0.81 0.83 0.88
+    Googly   0.63 0.59 0.52 | 0.83 0.80 0.76 | 0.90 0.91 0.96
+  - Good length: 0.64-0.83 m, all within 0.5-0.9 m. Googly above leg-spin by 0.03-0.08 m; doosra below off-spin by 0.01-0.03 m (kept at every length and speed).
+  - bounceFactor limits widened from -0.2..0.3 to -0.5..0.3. Pitch material unchanged; Stock and swing results identical (AC-04 0.16 cm; AC-29 0.21/0.19/0.12 cm; T074 0.08/0.10 cm; Main 0.02 cm).
+  - CSV: new column crease_height_m (round-trip test); session PlayMode test checks it is filled for every unhit ball. turn_deg is now filled (it was empty): the turn applied at the bounce, + = toward +X.
+  - Result panel line: "Height at the crease: X.XX m" for every ball that reaches the crease unhit, plus "<type>: turned X.X°" for spin balls; the swing line now appears only for swing types.
+  - Suites: EditMode 150/150, PlayMode 60/60.
+Outcome: Pass (automated). Headset check of the heights in T082.
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: (1) Stock (and so swing) reaches the crease at 0.86-0.95 m at a good length, at the top of the spin target range; left as is, per the owner's instruction. (2) The off-spin and doosra rows include 75 and 95 km/h, outside their 80-92 km/h range, because the owner asked for those speeds. (3) T082 headset.
+```
+
+```text
+Check ID / acceptance scenario: E-057 / T082 spin-check headset build (AC-27 headset; AC-28 spin visual not in this build: T080 not done)
+Requirement IDs: REQ-043, REQ-045, REQ-047
+Date and tester: 2026-10-27 17:26, agent
+Git commit or build identifier: branch m7.5-delivery 5ebb240 (+ b83a30f config field); Builds/CricketVR-T082-spincheck.apk sha256 730739f8fa546306eb5b19f43944800bb971eed6b6b1a7687794ec0bb6b0cdea
+Unity and package versions: as E-001
+Environment: APK build (batch, -cricketvrSpinCheck)
+Configuration: Net Practice bowls the fixed spin-check sequence: balls 1-4 off-spin, doosra, leg-spin, googly at good length (6 m); 5-8 full (4 m); 9-12 short (8 m); 85 km/h; pitched on off stump; movement 0.5; no variation. Flag restored to off after the build
+Steps or exact command: Unity -batchmode -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrSpinCheck -quit
+Expected result: build succeeds; committed GameConfig keeps spinCheck off
+Actual result and measured values: Build Succeeded, 0 errors, 0 warnings, OpenXR validation 0/0; GameConfig spinCheck: 0. Suites before the build: EditMode 151/151, PlayMode 60/60
+Outcome: Build pass; headset pending (owner, after the AC-08/AC-09 run)
+Log or artifact path: Builds/CricketVR-T082-spincheck.apk (gitignored)
+Remaining limitation / follow-up task: AC-28 (spin seam visual, deception, strobing, 72 Hz) needs T080 and a later build
+```
+
+```text
+Check ID / acceptance scenario: E-059 / Net Practice Bowler choice: Pace / Off-spin / Leg-spin (owner request 2026-10-27)
+Requirement IDs: REQ-028, REQ-029, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch); scene builder
+Configuration: new menu row "Bowler" in NetOptions; Overs, Difficulty and Batting rows moved (110 / 30 / -50) and buttons 70 high to fit
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (twice: identical output), then both suites
+Expected result: Pace keeps the Stock-only plan; Off-spin / Leg-spin bowl only that type, from the type's speed range, always reachable; a session bowls the chosen spinner with the turn and crease height recorded
+Actual result and measured values:
+  - EditMode NetPracticeSpinBowlersDrawOnlyTheirTypeAndAreAlwaysReachable: 200 draws x 2 types x 2 hands, all of the chosen type, speeds within the type's range, lengths within 3.5-9 m, 0 redraws.
+  - PlayMode NetPracticeBowlsTheChosenSpinner: one over of off-spin then one of leg-spin: 6 records each, type recorded, turn toward leg (off-spin, -X) / off (leg-spin, +X) for a right-hander, crease height filled, pitched within 1 cm of its length.
+  - Scene: 31 new objects (label and three buttons); existing IDs kept; a second builder run is byte-identical.
+  - Suites: EditMode 152/152, PlayMode 61/61.
+Outcome: Pass (automated); headset not run
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: needs a new APK for the headset; the spin seam visual (T080) is not done, so a spinning ball still shows the pace seam setup
 ```
 
 ```text
@@ -728,6 +1122,153 @@ Log or artifact path: Docs/evidence/2026-10-27-m7-ac08-partial/
 Remaining limitation / follow-up task: complete the remaining checklist rows on the M7 APK; then merge m7-session into main on the owner's go-ahead
 ```
 
+```text
+Check ID / acceptance scenario: E-060 / Spin feel in Net Practice: length, speed off the pitch, flight (owner feedback 2026-10-27)
+Requirement IDs: REQ-028, REQ-043, REQ-045
+Date and tester: 2026-10-27 18:01-18:04 owner (headset, netbowler APK sha256 96f924c3…76e7); agent (CSV analysis, change, tests)
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3 (owner session); then EditMode and PlayMode (Mac batch)
+Configuration: Net Practice, Bowler = Leg-spin (3 sessions, 36 balls) then Off-spin (3 sessions, 36 balls)
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-27-net-spin/); SwingPlayModeTests.SpinCharacterTable before and after; full suites
+Expected result: owner: (1) vary the length, not almost all short; (2) the ball slows after pitching; (3) more flight, and varying
+Actual result and measured values:
+  - Device CSVs: lengths drawn uniformly 3.7-8.8 m (pace range 3.5-9 m), so about half beyond 6 m, short for a spinner. Crease heights 0.38-0.83 m; turns off-spin -2.7..-6.5 deg, leg-spin 4.6..9.4 deg.
+  - Before (PlayMode, 5 m, movement 0.5): launch -1.7..+2.1 deg, highest point at most +0.02 m above the release (flat as Stock); horizontal speed kept through the bounce 71-80% (Stock 75-76%).
+  - Change 1, length: spin bowlers draw from a triangle 2.5..4.75..7.5 m; labels full < 4 m, good length 4-6 m, short > 6 m. EditMode 400 draws: full 92, good length 248 (62%), short 60; 0 redraws. Pace unchanged (uniform path and random sequence).
+  - Change 2, speed off the pitch: grip off-spin/doosra 0.05 -> 0.10, leg-spin/googly 0.06 -> 0.12 (limit 0.2 -> 0.4). Kept through the bounce: off-spin 54% (tossed up) / 62% / 76% (flat); leg-spin 60 / 65 / 66%; googly 66-67%; Stock 75-76%. (0.15/0.18 was tried: 51-71%, more than "a bit".)
+  - Change 3, flight: new DeliveryTypeData.flightDip, the dip at the type's slowest speed, falling to dip at its fastest: off-spin/doosra 5.0 -> 1.0 m/s^2 over 75-92 km/h (was 0.6 at 80-92), leg-spin 5.5 -> 1.2 over 72-90 (was 0.8 at 75-90), googly 6.0 -> 1.8 over 72-90 (was 1.2). Launch: off-spin +5.8 / +1.3 / -1.4 deg at 75 / 84 / 92 km/h, highest point +0.14 / +0.01 / 0.00 m; leg-spin +7.5 / +2.4 / -1.0 deg, +0.22 m at 72; googly +8.1 deg, +0.24 m at 72. Arrival 14-23 deg (Stock 14-16.5).
+  - Crease height (m; 4 / 6 / 8 m at 75 / 85 / 95 km/h): Off-spin 0.89 0.63 0.49 | 1.03 0.82 0.70 | 1.04 0.88 0.86; Doosra 0.86 0.61 0.48 | 0.98 0.79 0.68 | 0.99 0.83 0.82; Leg-spin 0.91 0.65 0.52 | 1.06 0.85 0.74 | 1.07 0.91 0.91; Googly 0.95 0.72 0.57 | 1.22 0.96 0.83 | 1.23 1.06 1.04 (googly bounce -0.16 -> -0.14 to stay above leg-spin at 4 m 75 km/h). Googly above leg-spin and doosra below off-spin at every length and speed.
+  - Height test bounds changed: 6 m all speeds 0.5-1.25 m; 85/95 km/h 0.5-1.0 m (was 0.5-0.9 everywhere): tossed-up balls now go above 0.9 m.
+  - Unchanged: Stock and swing (AC-04 0.16 cm; AC-29 0.21/0.19/0.12; T074 0.08/0.10 cm; Main 0.02 cm); T077 drift 0.0 mm, T078 turn within 0.018 deg, T079 spin 2.25 cm.
+  - Suites: EditMode 152/152, PlayMode 62/62.
+Outcome: Pass (automated); headset re-check by the owner pending
+Log or artifact path: Docs/evidence/2026-10-27-net-spin/; batch test results (scratchpad)
+Remaining limitation / follow-up task: OWNER DECISION: tossed-up balls reach the crease at up to 1.0-1.2 m off a good length, above the earlier 0.5-0.9 m target (keep, or cap them). No air drag, so the ball arrives at its release speed (spin feels quicker through the air than a real one).
+```
+
+```text
+Check ID / acceptance scenario: E-061 / Net Practice spin lines and release side (owner feedback 2026-10-27)
+Requirement IDs: REQ-028, REQ-044, REQ-045
+Date and tester: 2026-10-27 18:44-18:50 owner (headset, spinfeel APK sha256 d774cc8d…ae8e); agent (CSV analysis, change, tests)
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3 (owner session); then EditMode and PlayMode (Mac batch)
+Configuration: Net Practice, Off-spin, 8 sessions, 96 balls (Docs/evidence/2026-10-27-net-spin-2/)
+Steps or exact command: adb pull; change; scene builder twice (byte-identical); both suites
+Expected result: owner: the ball lands mostly on middle and turns down the leg side; the machine should release over or around the wicket like a bowler
+Actual result and measured values:
+  - Device: pitch lines uniform -0.10..+0.40 m (the pace range, a pitch-point line). Every ball pitched at or inside +0.10 m that reached the crease finished 0.13-0.62 m down the leg side (leg stump -0.11 m); only balls pitched about +0.17..+0.30 m finished on the stumps (all 13 bowled balls).
+  - Change: menu row Wicket (Over / Around); release x +0.35 m over, -0.80 m around (right-arm, world frame; not mirrored for a left-hander); the launcher moves to it. Spin lines are arrival lines: off-spin -0.10..+0.25, leg-spin -0.05..+0.35 (batter frame). New CSV column release_x_m. Menu rows re-spaced (65 apart, buttons 60 high).
+  - EditMode (150 draws per side x bowler x hand, all reachable, crease line within 1 mm): average pitch -> finish line (right-hander): off-spin over +0.33 -> +0.07 m, around +0.10 -> +0.07 m; leg-spin over -0.12 -> +0.14 m, around -0.36 -> +0.14 m.
+  - PlayMode session (off-spin over, leg-spin around): released from the chosen side, every ball reached the crease within 3 cm of its finish line.
+  - Suites: EditMode 153/153, PlayMode 62/62.
+Outcome: Pass (automated); headset re-check by the owner pending
+Log or artifact path: Docs/evidence/2026-10-27-net-spin-2/
+Remaining limitation / follow-up task: right-arm bowler only (no left-arm option yet); the Pace bowler in Net Practice now also releases over the wicket by default (was centred)
+```
+
+```text
+Check ID / acceptance scenario: E-062 / Net Practice spin from over and around the wicket on device (follow-up to E-061)
+Requirement IDs: REQ-028, REQ-044, REQ-045
+Date and tester: 2026-10-27 19:47-19:56 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-wicket.apk sha256 5ad4c4c93f9d145cce98a9627bdbef1c416dbbc19b2fd54f2a2265759443f0f1, installed 19:43:47; app started 19:46:47
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice; Off-spin over the wicket (9 sessions), Off-spin around (3), Leg-spin around (3); one empty session file at 19:56:36
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-27-net-spin-wicket/)
+Expected result: release from the chosen side; balls finish on their requested line (about ±3 cm) instead of down the leg side
+Actual result and measured values (unhit balls that reached the crease):
+  - Off-spin over (+0.35 m), 108 balls (75 hit, 25 bowled, 8 missed): pitched +0.10..+0.55 m (average +0.34, outside off); finished on average +0.06 m (requested +0.07); 41 on the stumps, 22 just outside off, 0 outside leg; worst crease miss 1.2 cm.
+  - Off-spin around (-0.80 m), 36 balls (25 / 7 / 4): pitched -0.13..+0.28 (average +0.08); finished +0.09 average; 13 on the stumps, 8 outside off, 0 outside leg; worst 1.1 cm.
+  - Leg-spin around (-0.80 m), 36 balls (14 hit, 2 bowled, 20 missed): pitched -0.75..-0.09 (average -0.42, outside leg); finished +0.12 average; 15 on the stumps, 16 outside off, 0 outside leg; worst 1.9 cm.
+  - Lengths 2.8-7.2 m; crease height 0.29-1.09 m.
+  - Before (E-061, 96 off-spin balls from the centre): every ball pitched at or inside +0.10 m finished 0.13-0.62 m outside leg.
+Outcome: Pass for the line problem the owner reported (device). Leg-spin over the wicket not played.
+Log or artifact path: Docs/evidence/2026-10-27-net-spin-wicket/
+Remaining limitation / follow-up task: owner's view on the feel; open owner decision on tossed-up bounce height (E-060)
+```
+
+```text
+Check ID / acceptance scenario: E-063 / Flighted off-spin variation (owner request 2026-10-27)
+Requirement IDs: REQ-043, REQ-044, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch)
+Configuration: off-spin flightedShare 0.25, 70-80 km/h, launch 4-10 deg; dip solved within 0-10 m/s^2; flat balls unchanged (75-92 km/h, dip 5.0 -> 1.0 with speed)
+Steps or exact command: both suites
+Expected result: a flighted ball leaves at its launch angle (or the nearest angle 0-10 m/s^2 of dip can land), at its speed, and still lands on its length and line; about a quarter of off-spin balls flighted; everything else unchanged
+Actual result and measured values:
+  - EditMode: 216 solves (70/75/80 km/h x 4/7/10 deg x 3/4.75/6.5 m x over/around x both line references x both hands), all reachable; launched 4.0-10.0 deg, 40 clamped (slow full balls need more than 4 deg with no dip; 10 deg at 75-80 km/h on 6.5 m needs more than 10 m/s^2); worst pitch or crease-line miss 0.31 mm. Planner: 104 of 400 off-spin balls flighted, all flighted 70-80 km/h, 0 redraws; leg-spin has no flighted balls.
+  - PlayMode (over the wicket, finish +0.05 m): flat 92 km/h launch -2.5..+0.1 deg, top 0.00 m; flat 84 km/h -0.0..+3.1 deg, top up to +0.06 m; flighted 80 km/h +4 deg, top +0.07..+0.09 m, arrives 18-20 deg; 75 km/h +7 deg, top +0.17..+0.23 m, arrives 20-23 deg; 70 km/h +10 deg, top +0.30..+0.39 m, arrives 23-25 deg. Every ball pitched within 1 cm of its length and finished +0.056..+0.064 m (asked +0.05).
+  - Crease height of flighted balls: 3.5 m 0.57-0.87 m; 4.75 m 0.87-1.19 m; 6 m 1.13-1.35 m (flat balls 0.44-0.84 m).
+  - Unchanged: AC-04 0.16 cm; AC-29 0.21/0.19/0.12; T074 0.08/0.10 cm; Main 0.02 cm; T077 0.08 cm; T078 0.018 deg; T079 spin 2.25 cm.
+  - Suites: EditMode 155/155, PlayMode 63/63.
+Outcome: Pass (automated); headset check by the owner pending
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: flighted balls bounce to 1.1-1.35 m at the crease off 4.75-6 m (open owner decision on bounce height, E-060); leg-spin, doosra and googly have no flighted variation yet
+```
+
+```text
+Check ID / acceptance scenario: E-064 / Flighted off-spin on device (follow-up to E-063)
+Requirement IDs: REQ-043, REQ-044, REQ-045
+Date and tester: 2026-10-27 20:14-20:20 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-flighted.apk sha256 fc6c4b54166b3cf5529dfcab7141c796abbe8020f043ceaf8ad2bf61219f5334, installed 20:14:01; app started 20:14:37
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice, Off-spin, over the wicket; 9 sessions, 108 balls (Docs/evidence/2026-10-27-flighted-offspin/)
+Steps or exact command: owner played; adb pull
+Expected result: about a quarter flighted, 70-80 km/h, launched 4-10 deg; still on length and line
+Actual result and measured values:
+  - Flighted: 20 of 108 (19%; 25% expected, within chance for 108 balls); 70-80 km/h; launched +4.2..+9.8 deg; 13 hit, 7 missed, 0 bowled; crease height 0.60-1.14 m (7 unhit balls); worst pitch error 0.19 cm; worst finish-line miss 1.1 cm.
+  - Flat: 88; 75-92 km/h; launched -2.8..+8.5 deg (the slowest flat balls, by the speed-linked dip); 53 hit, 14 bowled, 21 missed; crease height 0.38-0.98 m; worst pitch error 0.20 cm; worst finish miss 1.4 cm.
+Outcome: Pass (device data matches the design); owner's feel pending
+Log or artifact path: Docs/evidence/2026-10-27-flighted-offspin/
+Remaining limitation / follow-up task: open owner decision on bounce height (E-060); flighted variation for the other spin types
+```
+
+```text
+Check ID / acceptance scenario: E-065 / Off-spinner's doosra and straighter one, 1 in 12 each (owner request 2026-10-27)
+Requirement IDs: REQ-041, REQ-043, REQ-045
+Date and tester: 2026-10-27, agent
+Git commit or build identifier: branch m7.5-delivery, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: EditMode and PlayMode (Mac batch). One EditMode run crashed in Unity's Burst compiler before any test (exit 139); re-run with -burst-disable-compilation (no Burst code in the project)
+Configuration: new type ArmBall "Straighter one" (asset created by the scene builder); Net Practice off-spinner mix off-spin 10 : doosra 1 : straighter one 1
+Steps or exact command: scene builder; both suites
+Expected result: about 1 doosra and 1 straighter one in 12; doosra turns the other way; the straighter one barely turns, keeps more pace and stays lower; everything reachable
+Actual result and measured values:
+  - EditMode 1200 balls: off-spin 1020, doosra 96, straighter one 84 (100 each expected); 0 redraws; only off-breaks flighted (86 of 400 balls in the flighted check).
+  - PlayMode at 86 km/h, finish +0.05 m, over the wicket: 4 m: off-spin turns 4.5 deg, keeps 63% of its pace, crease height 0.61 m; straighter one turns 0.2 deg, keeps 71%, 0.45 m. 5.5 m: 4.5 / 63% / 0.77 m vs 0.3 deg / 71% / 0.57 m. Both reached the crease within 3 cm of their line.
+  - Straighter one across 82-95 km/h at 5 m: launch -0.1..-2.1 deg, crease height 0.52-0.56 m, keeps 70-73%.
+  - Session test: the off-spinner's records turn the right way per type (doosra opposite, straighter one < 0.7 deg).
+  - Suites: EditMode 157/157, PlayMode 64/64.
+Outcome: Pass (automated); headset pending
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: spin seam visual (T080) not done, so the disguise (looks like off-spin) isn't visible yet
+```
+
+```text
+Check ID / acceptance scenario: E-066 / Off-spinner's doosra and straighter one on device (follow-up to E-065)
+Requirement IDs: REQ-041, REQ-043, REQ-045
+Date and tester: 2026-10-27 20:50-20:58 owner (headset); agent (CSV pull and analysis)
+Git commit or build identifier: Builds/CricketVR-offspin-variations.apk sha256 e25d249400cae1c75b83e51301e7dc3dde760bf798eef8cdf67cea67437e82fd, installed 20:49:17; app started 20:50:01
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: Net Practice, Off-spin, over the wicket; 8 sessions, 96 balls; one empty session file at 20:51:39 (Docs/evidence/2026-10-27-offspin-variations/)
+Steps or exact command: owner played; adb pull
+Expected result: about 8 doosras and 8 straighter ones in 96; each behaves as designed
+Actual result and measured values:
+  - Off-break flighted 27 (22 hit, 5 missed): 70-80 km/h, launch +4.2..+9.6 deg, turn -2.9..-6.2 deg, crease height 0.50-1.25 m, worst finish miss 1.3 cm.
+  - Off-break flat 50 (39 hit, 7 missed, 4 bowled): 75-92 km/h, launch -2.9..+8.8 deg, turn -3.0..-6.5 deg, crease height 0.33-0.76 m, worst finish miss 1.8 cm.
+  - Doosra 9 (4 hit, 4 missed, 1 bowled): 75-91 km/h, turn +2.2..+4.3 deg (the other way), crease height 0.48-0.66 m.
+  - Straighter one 10 (4 hit, 6 bowled): 83-95 km/h, launch -3.8..+1.5 deg, turn -0.5..0.0 deg, crease height 0.22-0.47 m.
+Outcome: Pass (device data matches the design); owner's feel pending
+Log or artifact path: Docs/evidence/2026-10-27-offspin-variations/
+Remaining limitation / follow-up task: flighted share came out 27 of 77 off-breaks (35%, 25% expected); the spin seam visual (T080) is not done
+```
+
 ## Re-plan note (2026-10-26)
 
 The game was re-planned into two modes (`proposals/two-modes-replan.md`, merged into spec.md, plan.md and tasks.md). Effects on existing evidence:
@@ -744,6 +1285,14 @@ Use the standard template plus these fields:
 - **Scorer (AC-19..21):** test counts; calibration CSV row count; outcome histogram (dot / 1 / 2 / 3 / 4 / 6 / caught / dropped / played on); carry percentiles; each tuned setting before and after, with the reason.
 - **Chase (AC-23):** scenario seed, target / balls / wickets; the ball-by-ball log; the end condition; per ball, whether the visible ball matched the result and the sounds played; the PlayMode visible-vs-scored test result (landing and end-position differences).
 - **Performance (AC-24):** as AC-14, per mode.
+
+## Delivery-types evidence additions (M7.5, AC-25 to AC-31)
+
+Added 2026-10-27 from `proposals/delivery-types.md`. Planned evidence starts at E-040 (T070 bounce measurement). Use the standard template plus:
+- **Bounce measurement change (T070):** per preset, the old error (contact report) and the new error (pitch point), and whether the Stock tolerance was tightened.
+- **Swing/spin runs:** type, hand, speed, requested length/line/movement; measured bounce and its error; curve (predicted/measured); drift; turn angle; arrival line; the 10-run range.
+- **Headset (AC-26..28):** for each type, whether the movement was seen and its direction; whether off-spin and leg-spin could be told apart; whether the deception held; any strobing.
+- **AC-29:** speeds tested; contact matrix counts per speed and type; the cap decision.
 
 ## M6.5 evidence template (AC-11 to AC-14)
 

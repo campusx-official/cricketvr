@@ -45,6 +45,16 @@ namespace CricketVR.Tests
             Assert.That(Vector3.Angle(origin.transform.forward, Vector3.forward), Is.LessThan(1f));
         }
 
+        /// <summary>The solver aims at the same pitch top the scene has (E-052): a 2 mm gap moved the pitch point ~1 cm.</summary>
+        [Test]
+        public void PitchColliderTopIsTheHeightTheSolverAimsAt()
+        {
+            var box = Find("Main/Environment/Pitch/Surface").GetComponent<BoxCollider>();
+            Assert.AreEqual(FD.PitchSurfaceHeight, box.bounds.max.y, 1e-4f, "pitch collider top");
+            const float r = 0.036f;
+            Assert.AreEqual(box.bounds.max.y + r, DeliverySolver.ContactHeight(r), 1e-4f, "solver contact height");
+        }
+
         [Test]
         public void StumpColliderMatchesRegulationSizeAtOrigin()
         {

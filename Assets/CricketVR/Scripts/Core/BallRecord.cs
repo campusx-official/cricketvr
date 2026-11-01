@@ -23,8 +23,38 @@ namespace CricketVR
         public float Time;
 
         // Delivery
+        /// <summary>World-frame launch fields (line mirrored for a left-hander).</summary>
         public DeliveryConfig Delivery;
+        /// <summary>The session's random seed.</summary>
         public int Seed;
+
+        // Delivery type (M7.5, REQ-045). Unknown or not yet measured = NaN.
+        public string DeliveryType = "";
+        public float Movement = float.NaN;
+        public Handedness Hand;
+        public LineReference LineRef;
+        /// <summary>The request's own seed (natural variation, REQ-048).</summary>
+        public int BallSeed;
+        /// <summary>Natural-variation factors applied to swing, drift and turn (REQ-048).</summary>
+        public float VarSwing = float.NaN, VarDrift = float.NaN, VarTurn = float.NaN;
+        /// <summary>Swing (m): distance at the popping crease from the line the ball was released along (plan.md §19).</summary>
+        public float PredictedSwing = float.NaN, MeasuredSwing = float.NaN;
+        /// <summary>Curve (m): largest sideways distance from the straight release-to-pitch line (diagnostic).</summary>
+        public float PredictedCurve = float.NaN, MeasuredCurve = float.NaN;
+        /// <summary>Measured change of horizontal direction at the bounce (degrees, + = toward +X).</summary>
+        public float TurnDegrees = float.NaN;
+        /// <summary>Ball x where it reached the striker's popping crease (world, m).</summary>
+        public float ArrivalLine = float.NaN;
+        /// <summary>Ball centre height above the pitch where it reached the striker's popping crease (m).</summary>
+        public float CreaseHeight = float.NaN;
+        /// <summary>A flighted (tossed-up) ball, and the launch angle above horizontal it was released at (degrees).</summary>
+        public bool Flighted;
+        public float LaunchDegrees = float.NaN;
+        /// <summary>Where the delivery pitched (T070), and its distance from the requested bounce point.</summary>
+        public Vector3 Bounce = NaN3;
+        public float BounceError = float.NaN;
+        /// <summary>Where PhysX started the rebound relative to the pitch point (m along the travel, + = past it).</summary>
+        public float ReboundOffset = float.NaN;
 
         // Physical result
         public DeliveryResult Result;
@@ -131,7 +161,28 @@ namespace CricketVR
             AddF("speed_kmh", r => r.Delivery.speedKmh, (r, v) => r.Delivery.speedKmh = v);
             AddF("line_m", r => r.Delivery.line, (r, v) => r.Delivery.line = v);
             AddF("length_m", r => r.Delivery.length, (r, v) => r.Delivery.length = v);
+            AddF("release_x_m", r => r.Delivery.releasePosition.x, (r, v) => r.Delivery.releasePosition.x = v);
             Add("seed", r => r.Seed.ToString(CultureInfo.InvariantCulture), (r, s) => r.Seed = PI(s));
+            Add("type", r => r.DeliveryType, (r, s) => r.DeliveryType = s);
+            AddF("movement", r => r.Movement, (r, v) => r.Movement = v);
+            Add("hand", r => r.Hand.ToString(), (r, s) => r.Hand = Enum.TryParse(s, out Handedness h) ? h : default);
+            Add("line_ref", r => r.LineRef.ToString(), (r, s) => r.LineRef = Enum.TryParse(s, out LineReference l) ? l : default);
+            Add("ball_seed", r => r.BallSeed.ToString(CultureInfo.InvariantCulture), (r, s) => r.BallSeed = PI(s));
+            AddF("var_swing", r => r.VarSwing, (r, v) => r.VarSwing = v);
+            AddF("var_drift", r => r.VarDrift, (r, v) => r.VarDrift = v);
+            AddF("var_turn", r => r.VarTurn, (r, v) => r.VarTurn = v);
+            AddF("pred_swing_m", r => r.PredictedSwing, (r, v) => r.PredictedSwing = v);
+            AddF("swing_m", r => r.MeasuredSwing, (r, v) => r.MeasuredSwing = v);
+            AddF("pred_curve_m", r => r.PredictedCurve, (r, v) => r.PredictedCurve = v);
+            AddF("curve_m", r => r.MeasuredCurve, (r, v) => r.MeasuredCurve = v);
+            AddF("turn_deg", r => r.TurnDegrees, (r, v) => r.TurnDegrees = v);
+            AddF("arrival_line_m", r => r.ArrivalLine, (r, v) => r.ArrivalLine = v);
+            AddF("crease_height_m", r => r.CreaseHeight, (r, v) => r.CreaseHeight = v);
+            Add("flighted", r => r.Flighted ? "1" : "0", (r, s) => r.Flighted = s == "1");
+            AddF("launch_deg", r => r.LaunchDegrees, (r, v) => r.LaunchDegrees = v);
+            AddV("bounce", r => r.Bounce, (r, v) => r.Bounce = v);
+            AddF("bounce_error_m", r => r.BounceError, (r, v) => r.BounceError = v);
+            AddF("rebound_offset_m", r => r.ReboundOffset, (r, v) => r.ReboundOffset = v);
             Add("outcome", r => r.Result.Outcome.ToString(), (r, s) => SetResult(r, f => { f.Outcome = Enum.TryParse(s, out DeliveryOutcome o) ? o : default; return f; }));
             Add("end", r => r.Result.End.ToString(), (r, s) => SetResult(r, f => { f.End = Enum.TryParse(s, out DeliveryEnd e) ? e : default; return f; }));
             Add("zone", r => r.Result.Zone.ToString(), (r, s) => SetResult(r, f => { f.Zone = Enum.TryParse(s, out ScoringZone z) ? z : default; return f; }));

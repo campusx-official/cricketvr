@@ -263,6 +263,10 @@ namespace CricketVR.Tests
                 Delivery = DeliveryConfig.Create("Net Practice: Good length", 82f, 0.125f, 6.5f), Seed = 1234,
                 Result = result, ContactPoint = new Vector3(0.1f, 0.6f, 1.2f), BallVelocityOut = new Vector3(1f, 5f, 30f),
                 SweetFactor = 0.83f, EdgeFactor = -0.1f, SwingTimingOffset = -0.021f, ShotClass = "Middled",
+                DeliveryType = "Googly", Movement = 0.625f, Hand = Handedness.Left, LineRef = LineReference.AtBatter, BallSeed = -77,
+                VarSwing = 1f, VarDrift = 0.875f, VarTurn = 1.125f, PredictedSwing = 0.4375f, MeasuredSwing = 0.4f,
+                PredictedCurve = 0.3125f, MeasuredCurve = 0.3f,
+                TurnDegrees = -5.5f, ArrivalLine = 0.0625f, CreaseHeight = 0.71875f, Flighted = true, LaunchDegrees = 7.5f, Bounce = new Vector3(0.05f, 0.036f, 5.998f), BounceError = 0.0021f, ReboundOffset = -0.03125f,
             };
             var back = BallRecord.FromCsv(BallRecord.CsvHeader, r.ToCsvRow());
             Assert.AreEqual(r.SessionId, back.SessionId);
@@ -289,6 +293,44 @@ namespace CricketVR.Tests
             Assert.IsNaN(back.BallVelocityIn.x);
             Assert.AreEqual("Middled", back.ShotClass);
             Assert.AreEqual(-1, back.SimRuns);
+            // M7.5 delivery-type columns (T072, REQ-045)
+            Assert.AreEqual("Googly", back.DeliveryType);
+            Assert.AreEqual(0.625f, back.Movement);
+            Assert.AreEqual(Handedness.Left, back.Hand);
+            Assert.AreEqual(LineReference.AtBatter, back.LineRef);
+            Assert.AreEqual(-77, back.BallSeed);
+            Assert.AreEqual(1f, back.VarSwing);
+            Assert.AreEqual(0.875f, back.VarDrift);
+            Assert.AreEqual(1.125f, back.VarTurn);
+            Assert.AreEqual(0.4375f, back.PredictedSwing);
+            Assert.AreEqual(0.4f, back.MeasuredSwing);
+            Assert.AreEqual(0.3125f, back.PredictedCurve);
+            Assert.AreEqual(0.3f, back.MeasuredCurve);
+            Assert.AreEqual(-5.5f, back.TurnDegrees);
+            Assert.AreEqual(0.0625f, back.ArrivalLine);
+            Assert.AreEqual(0.71875f, back.CreaseHeight);
+            Assert.IsTrue(back.Flighted);
+            Assert.AreEqual(7.5f, back.LaunchDegrees);
+            Assert.AreEqual(r.Bounce, back.Bounce);
+            Assert.AreEqual(0.0021f, back.BounceError);
+            Assert.AreEqual(-0.03125f, back.ReboundOffset);
+            foreach (var column in new[] { "type", "movement", "hand", "line_ref", "ball_seed", "var_swing", "var_drift", "var_turn",
+                         "pred_swing_m", "swing_m", "pred_curve_m", "curve_m", "turn_deg", "arrival_line_m", "bounce_x", "bounce_z", "bounce_error_m", "rebound_offset_m" })
+                StringAssert.Contains(column, BallRecord.CsvHeader);
+        }
+
+        [Test]
+        public void StockRecordLeavesMovementMeasurementsEmpty()
+        {
+            var r = new BallRecord { Delivery = DeliveryConfig.Create("x", 80f, 0f, 6f), DeliveryType = "Stock", Movement = 0f };
+            var back = BallRecord.FromCsv(BallRecord.CsvHeader, r.ToCsvRow());
+            Assert.AreEqual("Stock", back.DeliveryType);
+            Assert.AreEqual(0f, back.Movement);
+            Assert.IsNaN(back.MeasuredCurve, "not measured = empty cell");
+            Assert.IsNaN(back.PredictedSwing);
+            Assert.IsNaN(back.TurnDegrees);
+            Assert.IsNaN(back.Bounce.x);
+            Assert.IsNaN(back.BounceError);
         }
 
         [Test]

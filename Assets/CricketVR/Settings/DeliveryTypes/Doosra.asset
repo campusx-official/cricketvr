@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d73a64b4a15ee4fe3bb1ba334eb040b1, type: 3}
+  m_Name: Doosra
+  m_EditorClassIdentifier: CricketVR.Runtime::CricketVR.DeliveryType
+  data:
+    kind: 5
+    displayName: Doosra
+    description: 'The off-spinner''s variation: looks like off-spin but turns the
+      other way, away from a right-hander.'
+    style: 1
+    minSpeedKmh: 75
+    maxSpeedKmh: 92
+    swingDirection: 0
+    swingMin: 0
+    swingMax: 0
+    swingLateness: 0
+    turnDirection: 1
+    driftMin: 0.05
+    driftMax: 0.1
+    dip: 1
+    flightDip: 5
+    turnMin: 2.5
+    turnMax: 5
+    bounceFactor: -0.23
+    grip: 0.10
+    seamDegrees: 0
+    visualRevPerSecond: 4
+    looksLike: 3
+    variation: 0.15
