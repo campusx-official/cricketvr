@@ -9,8 +9,9 @@ namespace CricketVR
     /// <summary>
     /// Owns the bat: which controller holds it, grip alignment, the visual, the kinematic physics proxy,
     /// and the pose history used for contact-point velocity. In bat mode (<see cref="BatMode.Strapped"/>, plan.md §21)
-    /// the controller is strapped to a real bat: the bat sits at the calibrated mount instead of the hand grip, and
-    /// everything downstream (proxy, sweeps, contact velocity) is unchanged. Contacts are only trustworthy while
+    /// the controller is strapped to a real bat: the bat sits at the owner's fitted mount instead of the hand grip, and
+    /// everything downstream (proxy, sweeps, contact velocity) is unchanged. While fitting, the visual bat is frozen in
+    /// front of the player with a ghost controller on it, which the owner moves to where the real controller is taped. Contacts are only trustworthy while
     /// <see cref="ContactAllowed"/> is true; any tracking discontinuity clears history first.
     /// </summary>
     [DefaultExecutionOrder(-50)]
@@ -26,6 +27,8 @@ namespace CricketVR
         [SerializeField] Renderer bladeRenderer;
         [SerializeField] Rigidbody physicsProxy;
         [SerializeField] BoxCollider proxyCollider;
+        [Tooltip("Ghost controller shown on the frozen bat while fitting bat mode (child of the bat visual).")]
+        [SerializeField] Transform fitGhost;
         [Tooltip("Off only for automated tests without an XR device.")]
         [SerializeField] bool requireTrackedState = true;
 
@@ -44,6 +47,7 @@ namespace CricketVR
         readonly GripAlignment[] _alignment = new GripAlignment[3];
         BatMode _mode = BatMode.InHand;
         Pose _mount;
+        Pose _fitController; // while fitting: the controller's pose in the visual bat's frame
         InputAction _leftTracked, _rightTracked;
         readonly List<XRInputSubsystem> _inputSubsystems = new List<XRInputSubsystem>();
         bool _originChanged, _focusChanged;
@@ -65,10 +69,12 @@ namespace CricketVR
         public BatMode Mode => _mode;
         /// <summary>The bat frame's pose in the strapped controller's grip frame (bat mode).</summary>
         public Pose Mount => _mount;
-        /// <summary>True once the mount was measured on the real bat; false while it is the photo-based default.</summary>
-        public bool MountCalibrated { get; private set; }
-        /// <summary>The transform tracking the strapped controller's grip pose (bat-mode calibration samples it).</summary>
-        public Transform StrappedController => Controller(config.bat.strappedController);
+        /// <summary>True once the owner has fitted the mount; false while it is the photo-based default.</summary>
+        public bool MountFitted { get; private set; }
+        /// <summary>The visual bat is frozen and the ghost controller is being moved (bat-mode setup).</summary>
+        public bool Fitting { get; private set; }
+        /// <summary>While fitting: the ghost controller's pose in the visual bat's frame.</summary>
+        public Pose FitController => _fitController;
         /// <summary>Bat mode: true if the hitting face is the side the controller is strapped to.</summary>
         public bool HitsWithControllerSide => config.bat.controllerOnFace != _alignment[StrapSlot].faceFlipped;
         int Slot => _mode == BatMode.Strapped ? StrapSlot : (int)_hand;
@@ -96,8 +102,8 @@ namespace CricketVR
             _alignment[(int)BatHand.Right] = LoadAlignment(PrefsPrefix + BatHand.Right, config.bat.rightHandGrip);
             _alignment[(int)BatHand.Left] = LoadAlignment(PrefsPrefix + BatHand.Left, config.bat.leftHandGrip);
             _alignment[StrapSlot] = LoadAlignment(StrapPrefsPrefix, default);
-            _mount = LoadMount(BatMount.DefaultPose(Geometry, config.bat.controllerOnFace), out bool calibrated);
-            MountCalibrated = calibrated;
+            _mount = LoadMount(BatMount.DefaultPose(Geometry, config.bat.controllerOnFace), out bool fitted);
+            MountFitted = fitted;
             _mode = (BatMode)PlayerPrefs.GetInt(ModePrefsKey, (int)BatMode.InHand);
 
             physicsProxy.isKinematic = true;
@@ -113,6 +119,7 @@ namespace CricketVR
                 _tintBlock = new MaterialPropertyBlock();
                 _bladeColor = bladeRenderer.sharedMaterial.HasProperty(BaseColorId) ? bladeRenderer.sharedMaterial.GetColor(BaseColorId) : Color.white;
             }
+            if (fitGhost != null) fitGhost.gameObject.SetActive(false);
             ApplyHand(_mode == BatMode.Strapped ? config.bat.strappedController : _hand, MotionResetReason.HandChanged);
         }
 
@@ -216,7 +223,7 @@ namespace CricketVR
 
         void FixedUpdate()
         {
-            bool usable = _hasPose && IsControllerTracked(_hand);
+            bool usable = _hasPose && !Fitting && IsControllerTracked(_hand);
             if (proxyCollider.enabled != usable)
                 proxyCollider.enabled = usable;
             if (!usable)
@@ -268,29 +275,122 @@ namespace CricketVR
         {
             if (mode == _mode)
                 return;
+            if (Fitting) EndFit(false);
             _mode = mode;
             PlayerPrefs.SetInt(ModePrefsKey, (int)mode);
             PlayerPrefs.Save();
             ApplyHand(mode == BatMode.Strapped ? config.bat.strappedController : _hand, MotionResetReason.HandChanged);
-            Debug.Log($"[CricketVR] Bat mode: {mode} ({_hand} controller{(mode == BatMode.Strapped ? MountCalibrated ? ", calibrated mount" : ", default mount: calibrate" : "")})");
+            Debug.Log($"[CricketVR] Bat mode: {mode} ({_hand} controller{(mode == BatMode.Strapped ? MountFitted ? ", fitted mount" : ", default mount: fit it in Bat setup" : "")})");
         }
 
         /// <summary>
-        /// Sets the measured mount (bat-mode calibration) and clears the fine-tuning on top of it, keeping the face flip.
-        /// Persists locally.
+        /// Sets the mount and clears the fine-tuning on top of it, keeping the face flip. Persists locally.
         /// </summary>
-        public void SetMount(Pose mount, bool calibrated = true)
+        public void SetMount(Pose mount, bool fitted = true)
         {
             _mount = mount;
-            MountCalibrated = calibrated;
-            SaveMount(mount, calibrated);
+            MountFitted = fitted;
+            SaveMount(mount, fitted);
             var a = _alignment[StrapSlot];
             _alignment[StrapSlot] = new GripAlignment { faceFlipped = a.faceFlipped };
             SaveAlignment(StrapPrefsPrefix, _alignment[StrapSlot]);
             ApplyVisualPose();
             ResetMotion(MotionResetReason.Manual);
             var e = mount.rotation.eulerAngles;
-            Debug.Log($"[CricketVR] Bat mount {(calibrated ? "calibrated" : "default")}: grip point {mount.position * 100f} cm, rotation {e} deg in the controller frame");
+            Debug.Log($"[CricketVR] Bat mount {(fitted ? "fitted" : "default")}: grip point {mount.position * 100f} cm, rotation {e} deg in the controller frame");
+        }
+
+        // ---------- Bat-mode fitting (REQ-054) ----------
+
+        /// <summary>
+        /// Freezes the visual bat at <paramref name="display"/> (world) and shows the ghost controller where the mount puts
+        /// the real one. Contacts are off until <see cref="EndFit"/>. Bat mode only.
+        /// </summary>
+        public void BeginFit(Pose display)
+        {
+            if (_mode != BatMode.Strapped || Fitting)
+                return;
+            LocalGrip(out var position, out var rotation);
+            _fitController = BatMount.Inverse(new Pose(position, rotation));
+            Fitting = true;
+            batVisual.SetParent(transform, false);
+            batVisual.SetPositionAndRotation(display.position, display.rotation);
+            if (fitGhost != null) fitGhost.gameObject.SetActive(true);
+            UpdateGhost();
+            ResetMotion(MotionResetReason.Manual);
+            Debug.Log("[CricketVR] Bat fit started");
+        }
+
+        /// <summary>Moves the ghost controller up (+) or down (−) the bat by whole slide steps.</summary>
+        public void FitMove(int steps)
+        {
+            if (!Fitting) return;
+            var p = _fitController.position;
+            p.y = BatMount.ClampAlong(Geometry, p.y + steps * config.bat.slideStep);
+            _fitController.position = p;
+            UpdateGhost();
+        }
+
+        /// <summary>Turns the ghost controller in place on the bat's surface (about the face normal), by whole angle steps.</summary>
+        public void FitTurn(int steps) => FitRotate(Vector3.forward, steps);
+
+        /// <summary>Tilts the ghost controller in place (about the blade's width), by whole angle steps.</summary>
+        public void FitTilt(int steps) => FitRotate(Vector3.right, steps);
+
+        void FitRotate(Vector3 batAxis, int steps)
+        {
+            if (!Fitting) return;
+            _fitController.rotation = Quaternion.AngleAxis(steps * config.bat.alignmentStepDegrees, batAxis) * _fitController.rotation;
+            UpdateGhost();
+        }
+
+        /// <summary>
+        /// Swaps the hitting face while fitting: the frozen bat turns 180° about its length and the ghost stays where it
+        /// is, so it is now on the other side of the blade's frame.
+        /// </summary>
+        public void FitSwapFace()
+        {
+            if (!Fitting) return;
+            var half = Quaternion.AngleAxis(180f, Vector3.up);
+            var a = _alignment[StrapSlot];
+            a.faceFlipped = !a.faceFlipped;
+            _alignment[StrapSlot] = a;
+            batVisual.rotation *= half;
+            _fitController = new Pose(half * _fitController.position, half * _fitController.rotation);
+            UpdateGhost();
+        }
+
+        /// <summary>Ends fitting; with <paramref name="keep"/> the ghost's pose becomes the mount (saved).</summary>
+        public void EndFit(bool keep)
+        {
+            if (!Fitting)
+                return;
+            Fitting = false;
+            if (fitGhost != null) fitGhost.gameObject.SetActive(false);
+            var flip = _alignment[StrapSlot].faceFlipped;
+            if (keep)
+            {
+                // The visual frame is the mount followed by the face flip (fine-tuning is folded in and cleared).
+                var grip = BatMount.Inverse(_fitController);
+                var unflip = Quaternion.Inverse(BatFrame.OffsetRotation(0f, 0f, 0f, flip));
+                SetMount(new Pose(grip.position, grip.rotation * unflip));
+                Debug.Log($"[CricketVR] Bat fit saved: controller {_fitController.position * 100f} cm, {_fitController.rotation.eulerAngles} deg in the bat frame; hitting face {(HitsWithControllerSide ? "with" : "without")} the controller");
+            }
+            else
+            {
+                _alignment[StrapSlot] = LoadAlignment(StrapPrefsPrefix, default); // undo an unsaved face swap
+                Debug.Log("[CricketVR] Bat fit cancelled");
+            }
+            batVisual.SetParent(Controller(_hand), false);
+            ApplyVisualPose();
+            ResetMotion(MotionResetReason.Manual);
+        }
+
+        void UpdateGhost()
+        {
+            if (fitGhost == null) return;
+            fitGhost.localPosition = _fitController.position;
+            fitGhost.localRotation = _fitController.rotation;
         }
 
         /// <summary>Adjusts the current hand's grip by whole steps on each axis (angles wrap). Persists locally.</summary>
@@ -365,6 +465,7 @@ namespace CricketVR
         void ApplyVisualPose()
         {
             // The visual is a child of the controller, so it follows the late (onBeforeRender) pose update.
+            if (Fitting) return; // frozen in front of the player until EndFit
             LocalGrip(out var position, out var rotation);
             batVisual.localPosition = position;
             batVisual.localRotation = rotation;
@@ -438,29 +539,31 @@ namespace CricketVR
             PlayerPrefs.Save();
         }
 
-        static Pose LoadMount(Pose fallback, out bool calibrated)
+        static Pose LoadMount(Pose fallback, out bool fitted)
         {
-            calibrated = PlayerPrefs.GetInt(MountPrefsPrefix + "calibrated", 0) != 0;
-            if (!calibrated)
+            fitted = PlayerPrefs.GetInt(MountPrefsPrefix + "fitted", 0) != 0;
+            if (!fitted)
                 return fallback;
             float F(string k) => PlayerPrefs.GetFloat(MountPrefsPrefix + k, 0f);
             var q = new Quaternion(F("qx"), F("qy"), F("qz"), F("qw"));
             if (q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w < 0.5f)
             {
-                calibrated = false;
+                fitted = false;
                 return fallback;
             }
             return new Pose(new Vector3(F("px"), F("py"), F("pz")), Quaternion.Normalize(q));
         }
 
-        static void SaveMount(Pose mount, bool calibrated)
+        static void SaveMount(Pose mount, bool fitted)
         {
             void F(string k, float v) => PlayerPrefs.SetFloat(MountPrefsPrefix + k, v);
             F("px", mount.position.x); F("py", mount.position.y); F("pz", mount.position.z);
             F("qx", mount.rotation.x); F("qy", mount.rotation.y); F("qz", mount.rotation.z); F("qw", mount.rotation.w);
-            PlayerPrefs.SetInt(MountPrefsPrefix + "calibrated", calibrated ? 1 : 0);
+            PlayerPrefs.SetInt(MountPrefsPrefix + "fitted", fitted ? 1 : 0);
             PlayerPrefs.Save();
         }
+
+        public void ConfigureFit(Transform ghost) => fitGhost = ghost;
 
         /// <summary>Wires references from code (scene builder and tests).</summary>
         public void Configure(GameConfig cfg, Transform left, Transform right, Transform visual, Renderer blade,

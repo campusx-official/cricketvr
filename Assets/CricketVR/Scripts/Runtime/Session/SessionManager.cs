@@ -32,8 +32,6 @@ namespace CricketVR
         [SerializeField] Transform xrOrigin;
         [Tooltip("The striker's wicket reaction (cosmetic; reset before every ball and on restart, menu, pause, mode switch).")]
         [SerializeField] WicketReaction wicket;
-        [Tooltip("Bat-mode calibration (controller strapped to a real bat); runs inside Bat setup.")]
-        [SerializeField] BatMountCalibrator calibrator;
 
         SessionStateMachine _session;
         System.Random _rng;
@@ -77,7 +75,7 @@ namespace CricketVR
             if (score != null) score.DeliveryFinalized += OnDeliveryFinalized;
             if (resolver != null) resolver.BatContact += OnBatContact;
             if (ui != null) ui.ButtonPressed += OnButton;
-            if (calibrator != null) calibrator.Changed += OnCalibrationChanged;
+            if (setupControls != null) setupControls.FitConfirmed += ExitBatSetup;
             _doneTap = new InputAction("BatSetupDone", InputActionType.Button, "<XRController>/{PrimaryButton}");
             _doneTap.Enable();
             // The batter asks for each ball with B (owner decision 2026-10-26: "as a batsman I want that control").
@@ -91,7 +89,7 @@ namespace CricketVR
             if (score != null) score.DeliveryFinalized -= OnDeliveryFinalized;
             if (resolver != null) resolver.BatContact -= OnBatContact;
             if (ui != null) ui.ButtonPressed -= OnButton;
-            if (calibrator != null) calibrator.Changed -= OnCalibrationChanged;
+            if (setupControls != null) setupControls.FitConfirmed -= ExitBatSetup;
             _doneTap?.Dispose();
             _readyPress?.Dispose();
         }
@@ -116,8 +114,8 @@ namespace CricketVR
             }
             if (_batSetup)
             {
-                if (calibrator != null && calibrator.Active)
-                    _doneDown = -1f; // A belongs to the calibration steps
+                if (bat != null && bat.Fitting)
+                    _doneDown = -1f; // A moves the ghost controller; a stick click confirms the fit
                 else if (Tapped(_doneTap, ref _doneDown))
                     ExitBatSetup();
                 return;
@@ -384,7 +382,7 @@ namespace CricketVR
                 : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending." +
                   (WicketCheck ? "\n<b>WICKET CHECK BUILD (T088)</b>: every ball hits the stumps (LED on)." : "");
             if (strapped)
-                board += bat.MountCalibrated ? "\nReal bat (calibrated)." : "\n<b>Real bat: not calibrated.</b> Open Bat setup and hold B.";
+                board += bat.MountFitted ? "\nReal bat (fitted)." : "\n<b>Real bat: not fitted yet.</b> Open Bat setup.";
             ui.Board(board);
             pointer?.SetVisible(true);
         }
@@ -398,27 +396,22 @@ namespace CricketVR
             ShowBatSetupPanel();
         }
 
-        void OnCalibrationChanged()
-        {
-            if (_batSetup)
-                ShowBatSetupPanel();
-        }
-
         void ShowBatSetupPanel()
         {
-            if (calibrator != null && calibrator.Active)
-            {
-                ui.ShowBatSetup(calibrator.Instructions, "Press B to cancel the calibration", "Calibrating the bat");
-                return;
-            }
             if (bat != null && bat.Mode == BatMode.Strapped)
             {
-                string last = calibrator != null && !string.IsNullOrEmpty(calibrator.LastResult) ? calibrator.LastResult + "\n\n" : "";
-                string face = bat.HitsWithControllerSide ? "the side WITH the controller" : "the side WITHOUT the controller";
-                ui.ShowBatSetup(last +
-                    $"<b>REAL BAT</b> ({(bat.MountCalibrated ? "calibrated" : "<color=#ff9a70>not calibrated</color>")}). Hitting face: {face}.\n" +
-                    "<b>Hold B: calibrate</b> (3 steps, about 20 s).\n" +
-                    "Fine-tune after: thumbstick up/down tilt, left/right spin.\nStick click: undo fine-tuning (hold: swap the hitting face).");
+                // The frozen bat stands to the right of the panel, upright, its controller side toward the player.
+                var at = (xrOrigin != null ? xrOrigin.position : Vector3.zero) + new Vector3(0.62f, 1.25f, 0.65f);
+                var toPlayer = (xrOrigin != null ? xrOrigin.position : Vector3.zero) - at;
+                toPlayer.y = 0f;
+                var face = Quaternion.LookRotation(bat.HitsWithControllerSide ? toPlayer : -toPlayer, Vector3.up);
+                bat.BeginFit(new Pose(at, face));
+                ui.ShowBatSetup(
+                    "<b>REAL BAT: fit the controller</b>\nThe virtual bat is frozen on your right. The cyan controller shows where the game thinks yours is taped. " +
+                    "Move it to match your real bat:\n" +
+                    "<b>B / A</b>: up / down the bat\n<b>Thumbstick left/right</b>: turn it on the bat\n<b>Thumbstick up/down</b>: tilt it\n" +
+                    "<b>Hold stick click</b>: swap the hitting face (the bat turns round)",
+                    "Click the thumbstick: OK", "Bat setup");
                 return;
             }
             ui.ShowBatSetup("Thumbstick up/down: tilt.  Left/right: spin.\nTrigger + left/right: lean.  Grip + up/down: slide.\nGrip + left/right: face turn.  Stick click: reset (hold: flip face).\nHold B: move the bat to the other controller.");
@@ -426,8 +419,10 @@ namespace CricketVR
 
         void ExitBatSetup()
         {
+            if (!_batSetup)
+                return;
             _batSetup = false;
-            if (calibrator != null && calibrator.Active) calibrator.Cancel("left Bat setup");
+            if (bat != null && bat.Fitting) bat.EndFit(false);
             if (setupControls != null) setupControls.allowSetupInput = false;
             // Shown on the first Update: HandednessSetup.Start may move the rig to the saved stance first.
             _menuPending = true;
@@ -535,7 +530,6 @@ namespace CricketVR
 
         public void ConfigureWicket(WicketReaction wicketReaction) => wicket = wicketReaction;
 
-        public void ConfigureBatMode(BatMountCalibrator mountCalibrator) => calibrator = mountCalibrator;
 
         public void Configure(GameConfig cfg, BowlingMachine bowlingMachine, BallController ballController, ScoreManager scoreManager,
             BatBallContactResolver contactResolver, BatController batController, HandednessSetup handednessSetup,

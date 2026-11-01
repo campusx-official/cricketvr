@@ -151,8 +151,9 @@ Owner request 2026-11-01: the right controller strapped to a real bat. Requireme
 
 - [x] T089 *(done, E-071)* Bat mode in `BatController`: In hand / Real bat, the mount on the strapped controller, fine-tuning on top, saved; the bat can't leave the strapped controller. Menu row **Bat** (In hand / Real bat / Bat setup). PlayMode tests (AC-34).
 - [x] T090 *(done, E-071)* `BatMount` (Core, pure): default mount from the owner's photos, pivot solve, calibration from toe, handle top and flat. EditMode tests (AC-34).
-- [x] T091 *(done, E-071)* `BatMountCalibrator`: the three steps with A/B, quality checks and reasons, buzzes, log lines; Bat setup instructions in bat mode. PlayMode tests (AC-34).
-- [ ] T092 Headset: AC-34 (calibration, toe on the floor, hitting face, stance/blocks/drives without tracking drops, contact, back to In hand).
+- [x] T091 *(done E-071; removed in T093 after it failed on the device, E-072)* `BatMountCalibrator`: three-step pivot calibration.
+- [x] T093 *(done, E-072)* Manual fit (owner request): frozen bat with a ghost controller; B/A up/down, stick turn/tilt, hold click swaps the face, click saves; `FitGhost` built by the scene builder; the old calibrator component removed from the scene. PlayMode tests (AC-34).
+- [ ] T092 Headset: AC-34 (fit, toe on the floor, hitting face, stance/blocks/drives without tracking drops, contact, back to In hand).
 
 ## M8 — Net Practice with Shot Confidence
 

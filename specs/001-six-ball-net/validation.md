@@ -43,7 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
-| AC-34 | REQ-053..056 | Automated pass (E-071); headset pending (T092) | E-071 | T092 headset run |
+| AC-34 | REQ-053..056 | Automated pass (E-072, the fit); headset pending (T092). The first calibration failed on the device (E-072) | E-071, E-072 | T092 headset run with the fit |
 
 ## Evidence entry template
 
@@ -1367,6 +1367,26 @@ Actual result and measured values:
 Outcome: Pass (automated). Headset pending (T092).
 Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_bat.log
 Remaining limitation / follow-up task: T092 headset run; the real bat's length is only checked (±12 cm), not used to resize the virtual bat
+```
+
+```text
+Check ID / acceptance scenario: E-072 / Bat-mode calibration on the device (failed) and its replacement, the manual fit (T093, AC-34 automated)
+Requirement IDs: REQ-053, REQ-054, REQ-055, REQ-056
+Date and tester: 2026-11-01 owner (headset, Builds/CricketVR-bat-mode.apk from E-071); agent (log, code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-fit.apk sha256 c793b670184c3b5ed666fef4dff283593dc83f2a2776ab2eb9c65daa60c66cf7 (969.6 MB, 0 errors, 0 warnings)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller taped to the back of the owner's bat; macOS batch mode for tests
+Configuration: logcat buffer 16 MB (set at install; reverts on reboot)
+Steps or exact command: owner tried the calibration; adb logcat (Docs/evidence/2026-11-01-bat-calibration/logcat_calibration.txt); then T093 implemented, MainSceneBuilder.BuildOrRepairBatch, EditMode and PlayMode, QuestBuild.Build
+Expected result: calibration completes (E-071 build); then AC-34 automated items for the fit
+Actual result and measured values:
+  - Device, 15:13-15:15: six toe steps failed: "toe moved" 3.6, 3.9 and 9.4 cm (limit 1.5 cm), "only rocked" 21, 2 and 14 degrees (minimum 25); TrackingLost resets every few seconds while the controller was near the floor. Owner: "not able to calibrate". Cause: a real toe is 11 cm wide and rolls on its corners, so it is not a fixed point; the floor work hides the controller from the headset.
+  - Replaced (owner's request) by the manual fit: the frozen bat with a ghost controller, B/A up/down, stick turn/tilt, hold click swap face, click saves. BatMountCalibrator and the pivot maths removed; the builder removes the component's now-missing script from the scene (0 missing scripts left).
+  - EditMode 167/167 (BatMountTests now 3: default mount, inverse, fit range).
+  - PlayMode 76/76 (BatModePlayModeTests 5: bat on the strapped controller; fit freezes the bat, ignores the controller, disables contacts, B moves 3 cm, turn and tilt in place, saved controller pose equals the ghost within 0.1 mm / 0.05 deg; face swap keeps the ghost; cancel changes nothing; fine-tuning). The first PlayMode run failed one unrelated test, SessionPlayModeTests.NetPracticeBowlsTheChosenSpinner (leg-spin arrival 2.1 cm vs 5.5 cm +/- 3 cm); it seeds from the clock and passed on the rerun: a flaky tolerance, not a bat-mode effect.
+Outcome: calibration Fail on the device (replaced); fit automated Pass. Headset pending (T092).
+Log or artifact path: Docs/evidence/2026-11-01-bat-calibration/
+Remaining limitation / follow-up task: T092 headset run; the flaky spinner session test (seed from the clock) should get a fixed seed or a wider bound
 ```
 
 ## Re-plan note (2026-10-26)

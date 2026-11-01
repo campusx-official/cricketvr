@@ -7,7 +7,7 @@ namespace CricketVR
     /// <summary>
     /// Temporary in-headset setup controls until the Start panel exists (M7). Works from either controller:
     ///   hold A/X 1 s       toggle handedness (stance side)
-    ///   hold B/Y 1 s       move the bat to the other controller; in bat mode, calibrate the strapped bat instead
+    ///   hold B/Y 1 s       move the bat to the other controller
     ///   thumbstick up/down               tilt (about the blade's width)
     ///   thumbstick left/right            spin the bat clockwise/anticlockwise about its own handle
     ///   hold trigger + left/right        lean sideways (about the face normal)
@@ -16,21 +16,28 @@ namespace CricketVR
     ///   thumbstick click                 tap: reset alignment; hold 1 s: flip the face 180 degrees
     /// Holding the stick repeats the step. Angles step by GameConfig.bat.alignmentStepDegrees.
     /// Each action gives a short vibration on the controller that triggered it.
+    /// While fitting bat mode (<see cref="BatController.Fitting"/>, the virtual bat frozen with a ghost controller on it):
+    ///   B / A (hold repeats)             move the controller up / down the bat
+    ///   thumbstick left/right            turn it in place on the bat's surface
+    ///   thumbstick up/down               tilt it in place
+    ///   thumbstick click                 tap: OK (save the fit); hold 1 s: swap the hitting face
     /// </summary>
     public class BatSetupControls : MonoBehaviour
     {
         [SerializeField] BatController bat;
         [SerializeField] HandednessSetup handedness;
-        [SerializeField] BatMountCalibrator calibrator;
         [Tooltip("Disabled during a live session (M7).")]
         public bool allowSetupInput = true;
+
+        /// <summary>Raised when the owner confirms the bat-mode fit (the fit is already saved).</summary>
+        public event System.Action FitConfirmed;
 
         const float HoldSeconds = 1f;
         const float StickThreshold = 0.7f;
         const float StickRepeatSeconds = 0.15f;
 
         InputAction _primary, _secondary, _stick, _stickClick, _trigger, _grip;
-        float _primaryHeld, _secondaryHeld, _clickHeld, _nextStickStep;
+        float _primaryHeld, _secondaryHeld, _clickHeld, _nextStickStep, _nextButtonStep;
         bool _primaryFired, _secondaryFired, _clickFired;
 
         void OnEnable()
@@ -64,10 +71,9 @@ namespace CricketVR
         {
             if (!allowSetupInput || bat == null || handedness == null)
                 return;
-            if (calibrator != null && calibrator.Active)
+            if (bat.Fitting)
             {
-                // The calibration owns A and B until it ends; a hold already in progress must not fire afterwards.
-                _primaryFired = _secondaryFired = true;
+                UpdateFit();
                 return;
             }
 
@@ -79,28 +85,16 @@ namespace CricketVR
 
             if (HoldFired(_secondary, ref _secondaryHeld, ref _secondaryFired))
             {
-                if (bat.Mode == BatMode.Strapped)
+                var other = bat.Hand == BatHand.Right ? BatHand.Left : BatHand.Right;
+                if (bat.IsControllerTracked(other))
                 {
-                    // Bat mode has no other controller to move to: B measures the strapped bat instead.
-                    if (calibrator != null)
-                    {
-                        calibrator.Begin();
-                        Buzz(_secondary, 0.5f, 0.15f);
-                    }
+                    bat.SetBatHand(other);
+                    Buzz(_secondary, 0.5f, 0.15f);
                 }
                 else
                 {
-                    var other = bat.Hand == BatHand.Right ? BatHand.Left : BatHand.Right;
-                    if (bat.IsControllerTracked(other))
-                    {
-                        bat.SetBatHand(other);
-                        Buzz(_secondary, 0.5f, 0.15f);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[CricketVR] {other} controller isn't tracking; bat stays in the {bat.Hand} hand.");
-                        Buzz(_secondary, 0.2f, 0.4f);
-                    }
+                    Debug.LogWarning($"[CricketVR] {other} controller isn't tracking; bat stays in the {bat.Hand} hand.");
+                    Buzz(_secondary, 0.2f, 0.4f);
                 }
             }
 
@@ -150,6 +144,50 @@ namespace CricketVR
             }
         }
 
+        void UpdateFit()
+        {
+            // A and B step the ghost along the bat: once on the press, then repeating while held.
+            int along = (_secondary.IsPressed() ? 1 : 0) - (_primary.IsPressed() ? 1 : 0);
+            if (_secondary.WasPressedThisFrame() || _primary.WasPressedThisFrame())
+                _nextButtonStep = 0f;
+            if (along != 0 && Time.unscaledTime >= _nextButtonStep)
+            {
+                _nextButtonStep = Time.unscaledTime + (_nextButtonStep == 0f ? 0.4f : StickRepeatSeconds);
+                bat.FitMove(along);
+                Buzz(along > 0 ? _secondary : _primary, 0.15f, 0.03f);
+            }
+            // Never let a hold started while fitting fire handedness or the hand swap afterwards.
+            _primaryFired = _secondaryFired = true;
+
+            bool clickWasHeld = _clickFired;
+            if (HoldFired(_stickClick, ref _clickHeld, ref _clickFired))
+            {
+                bat.FitSwapFace();
+                Buzz(_stickClick, 0.5f, 0.15f);
+            }
+            if (_stickClick.WasReleasedThisFrame() && !clickWasHeld)
+            {
+                bat.EndFit(true);
+                Buzz(_stickClick, 0.6f, 0.2f);
+                FitConfirmed?.Invoke();
+                return;
+            }
+
+            var stick = _stick.ReadValue<Vector2>();
+            if (Mathf.Abs(stick.x) <= StickThreshold && Mathf.Abs(stick.y) <= StickThreshold)
+            {
+                _nextStickStep = 0f;
+            }
+            else if (Time.unscaledTime >= _nextStickStep)
+            {
+                _nextStickStep = Time.unscaledTime + StickRepeatSeconds;
+                if (Mathf.Abs(stick.y) >= Mathf.Abs(stick.x)) bat.FitTilt((int)Mathf.Sign(stick.y));
+                // Stick right turns it clockwise as you look at it: the frozen bat shows you the controller's side.
+                else bat.FitTurn((int)Mathf.Sign(stick.x) * (bat.HitsWithControllerSide ? -1 : 1));
+                Buzz(_stick, 0.15f, 0.03f);
+            }
+        }
+
         static bool HoldFired(InputAction action, ref float held, ref bool fired)
         {
             if (!action.IsPressed())
@@ -171,11 +209,10 @@ namespace CricketVR
                 controller.SendImpulse(amplitude, seconds);
         }
 
-        public void Configure(BatController batController, HandednessSetup handednessSetup, BatMountCalibrator mountCalibrator = null)
+        public void Configure(BatController batController, HandednessSetup handednessSetup)
         {
             bat = batController;
             handedness = handednessSetup;
-            calibrator = mountCalibrator;
         }
     }
 }

@@ -6,14 +6,14 @@ using UnityEngine.TestTools;
 namespace CricketVR.Tests
 {
     /// <summary>
-    /// Bat mode (AC-34, PlayMode): the real BatController and BatMountCalibrator with stand-in controller transforms
-    /// (no XR device). The calibration is fed simulated controller poses of a crookedly taped controller.
+    /// Bat mode (AC-34, PlayMode): the real BatController with stand-in controller transforms (no XR device): the bat on
+    /// the strapped controller, and the fit (frozen bat, ghost controller moved, saved or cancelled).
     /// </summary>
     public class BatModePlayModeTests
     {
         static readonly string[] PrefKeys =
         {
-            "CricketVR.BatMode", "CricketVR.Mount.v1.calibrated",
+            "CricketVR.BatMode", "CricketVR.Mount.v1.fitted",
             "CricketVR.Mount.v1.px", "CricketVR.Mount.v1.py", "CricketVR.Mount.v1.pz",
             "CricketVR.Mount.v1.qx", "CricketVR.Mount.v1.qy", "CricketVR.Mount.v1.qz", "CricketVR.Mount.v1.qw",
             "CricketVR.Strap.v1.tilt", "CricketVR.Strap.v1.face", "CricketVR.Strap.v1.lean",
@@ -23,7 +23,7 @@ namespace CricketVR.Tests
         GameObject _root;
         Transform _right, _left;
         BatController _bat;
-        BatMountCalibrator _calibrator;
+        Transform _visual, _ghost;
         Rigidbody _proxy;
         GameConfig _config;
         BatGeometry G => _config.bat.geometry;
@@ -50,15 +50,16 @@ namespace CricketVR.Tests
             batGo.transform.SetParent(_root.transform);
             var visual = new GameObject("BatVisual").transform;
             visual.SetParent(batGo.transform);
+            _visual = visual;
+            _ghost = new GameObject("FitGhost").transform;
+            _ghost.SetParent(visual);
             var proxyGo = new GameObject("BatPhysicsProxy");
             proxyGo.transform.SetParent(batGo.transform);
             _proxy = proxyGo.AddComponent<Rigidbody>();
             var box = proxyGo.AddComponent<BoxCollider>();
             _bat = batGo.AddComponent<BatController>();
             _bat.Configure(_config, _left, _right, visual, null, _proxy, box, requireTracked: false);
-            _calibrator = batGo.AddComponent<BatMountCalibrator>();
-            _calibrator.Configure(_config, _bat);
-            _calibrator.requireTrackedState = false;
+            _bat.ConfigureFit(_ghost);
             batGo.SetActive(true);
         }
 
@@ -70,35 +71,16 @@ namespace CricketVR.Tests
             ClearPrefs();
         }
 
-        /// <summary>Controller taped crooked and off-centre on the back.</summary>
-        static Pose TrueMount() => BatMount.Inverse(new Pose(new Vector3(-0.025f, -0.16f, -0.05f),
-            Quaternion.LookRotation(Vector3.down, Vector3.back) * Quaternion.Euler(-5f, 8f, -4f)));
-
-        Vector3 HandleTop => new Vector3(0f, G.handleLength - G.gripToBlade, 0f);
-
-        /// <summary>Feeds the calibrator the controller poses of the real bat rocking about one of its points on the floor.</summary>
-        void Rock(Pose mount, Vector3 batPoint, Vector3 floor, float degrees, float yawDegrees = 60f)
-        {
-            var local = mount.position + mount.rotation * batPoint;
-            for (int i = 0; i < 240; i++)
-            {
-                float t = i / 240f * Mathf.PI * 4f;
-                var r = Quaternion.Euler(degrees * Mathf.Sin(t), yawDegrees * Mathf.Sin(t * 0.3f), degrees * Mathf.Cos(t * 1.3f));
-                _calibrator.AddSample(new Pose(floor - r * local, r));
-            }
-        }
-
-        /// <summary>Feeds poses of the bat lying flat on the floor, controller side up.</summary>
-        void LayFlat(Pose mount)
-        {
-            // Rotation taking the controller-side normal (bat −Z, in the controller frame) to world up.
-            var r = Quaternion.FromToRotation(mount.rotation * Vector3.back, Vector3.up);
-            var p = new Vector3(0.2f, 0.07f, 0.9f);
-            for (int i = 0; i < 100; i++)
-                _calibrator.AddSample(new Pose(p, Quaternion.Euler(0f, i * 0.01f, 0f) * r));
-        }
-
         Vector3 WorldToe() => _bat.GripPose.position + _bat.GripPose.rotation * G.Toe;
+
+        /// <summary>The controller's pose in the live bat frame (where the game thinks it is taped).</summary>
+        Pose ControllerInBat()
+        {
+            var inv = Quaternion.Inverse(_bat.GripPose.rotation);
+            return new Pose(inv * (_right.position - _bat.GripPose.position), inv * _right.rotation);
+        }
+
+        static readonly Pose Display = new Pose(new Vector3(0.6f, 1.25f, 0.65f), Quaternion.Euler(0f, 200f, 0f));
 
         [UnityTest]
         public IEnumerator StrappedBatFollowsTheMountOnTheStrappedController()
@@ -129,82 +111,108 @@ namespace CricketVR.Tests
         }
 
         [UnityTest]
-        public IEnumerator CalibrationPutsTheVirtualToeOnTheRealToe()
+        public IEnumerator FitFreezesTheBatAndSavesWhereTheGhostWasMoved()
         {
             _bat.SetMode(BatMode.Strapped);
-            Assert.IsFalse(_bat.MountCalibrated);
-            var truth = TrueMount();
-
-            _calibrator.Begin();
-            Assert.AreEqual(BatMountCalibrator.Step.ToeReady, _calibrator.Current);
-            _calibrator.Advance();
-            Rock(truth, G.Toe, new Vector3(0.1f, 0f, 0.6f), 30f);
-            _calibrator.FinishStep();
-            Assert.AreEqual(BatMountCalibrator.Step.TopReady, _calibrator.Current, _calibrator.Instructions);
-            _calibrator.Advance();
-            Rock(truth, HandleTop, new Vector3(-0.2f, 0f, 0.7f), 30f);
-            _calibrator.FinishStep();
-            Assert.AreEqual(BatMountCalibrator.Step.FlatReady, _calibrator.Current, _calibrator.Instructions);
-            _calibrator.Advance();
-            LayFlat(truth);
-            _calibrator.FinishStep();
-            Assert.AreEqual(BatMountCalibrator.Step.Idle, _calibrator.Current);
-            Assert.IsTrue(_bat.MountCalibrated, _calibrator.LastResult);
-
-            // Put the real bat anywhere: its toe (by the true mount) and the virtual toe coincide.
-            _right.SetPositionAndRotation(new Vector3(0.4f, 1.1f, 0.5f), Quaternion.Euler(-60f, 25f, 70f));
+            _right.SetPositionAndRotation(new Vector3(0.3f, 0.9f, 0.8f), Quaternion.Euler(20f, 40f, -10f));
             yield return null;
-            var realToe = _right.TransformPoint(truth.position + truth.rotation * G.Toe);
-            Assert.Less(Vector3.Distance(WorldToe(), realToe), 0.005f, "virtual toe on the real toe");
-            var realFace = _right.rotation * (truth.rotation * Vector3.forward);
-            Assert.Less(Vector3.Angle(_bat.GripPose.rotation * Vector3.forward, realFace), 1.5f, "hitting face");
+            var before = ControllerInBat();
+
+            _bat.BeginFit(Display);
+            Assert.IsTrue(_bat.Fitting);
+            Assert.IsTrue(_ghost.gameObject.activeSelf, "ghost shown");
+            Assert.Less(Vector3.Distance(_visual.position, Display.position), 1e-5f, "bat frozen at the display pose");
+            Assert.Less(Vector3.Distance(_ghost.localPosition, before.position), 1e-4f, "ghost starts where the controller is on the bat");
+            Assert.Less(Quaternion.Angle(_ghost.localRotation, before.rotation), 0.05f);
+
+            _right.SetPositionAndRotation(new Vector3(-0.5f, 1.4f, 0.2f), Quaternion.Euler(-70f, 10f, 30f));
+            yield return null;
+            yield return new WaitForFixedUpdate();
+            yield return new WaitForFixedUpdate();
+            Assert.Less(Vector3.Distance(_visual.position, Display.position), 1e-5f, "the frozen bat ignores the controller");
+            Assert.IsFalse(_proxy.GetComponent<BoxCollider>().enabled, "no contacts while fitting");
+
+            _bat.FitMove(3);
+            Assert.AreEqual(before.position.y + 0.03f, _ghost.localPosition.y, 1e-4f, "B moves it 3 cm up the bat");
+            var placed = _ghost.localPosition;
+            _bat.FitTurn(2);
+            _bat.FitTilt(-1);
+            Assert.Less(Vector3.Distance(_ghost.localPosition, placed), 1e-5f, "turns and tilts are in place");
+            Assert.AreEqual(Mathf.Sqrt(10f * 10f + 5f * 5f), Quaternion.Angle(_ghost.localRotation, before.rotation), 0.3f, "10° turn and 5° tilt");
+            var fitted = _bat.FitController;
+
+            _bat.EndFit(true);
+            Assert.IsFalse(_bat.Fitting);
+            Assert.IsFalse(_ghost.gameObject.activeSelf);
+            Assert.AreEqual(_right, _visual.parent, "the bat follows the controller again");
+            Assert.IsTrue(_bat.MountFitted);
+            yield return null;
+            var now = ControllerInBat();
+            Assert.Less(Vector3.Distance(now.position, fitted.position), 1e-4f, "saved: the controller sits where the ghost was put");
+            Assert.Less(Quaternion.Angle(now.rotation, fitted.rotation), 0.05f);
+            Assert.AreEqual(1, PlayerPrefs.GetInt("CricketVR.Mount.v1.fitted"), "remembered");
         }
 
         [UnityTest]
-        public IEnumerator FailedOrCancelledCalibrationChangesNothing()
+        public IEnumerator SwappingTheFaceWhileFittingKeepsTheGhostWhereItIs()
         {
             _bat.SetMode(BatMode.Strapped);
-            var before = _bat.Mount;
-            _calibrator.Begin();
-            _calibrator.Advance();
-            Rock(TrueMount(), G.Toe, Vector3.zero, 5f, 5f); // barely rocked
-            _calibrator.FinishStep();
-            Assert.AreEqual(BatMountCalibrator.Step.ToeReady, _calibrator.Current, "the step is repeated");
-            StringAssert.Contains("Rock it further", _calibrator.Instructions);
-
-            _calibrator.Advance();
-            Rock(TrueMount(), G.Toe, new Vector3(0f, 0.3f, 0f), 30f); // held 30 cm off the floor
-            _calibrator.FinishStep();
-            Assert.AreEqual(BatMountCalibrator.Step.ToeReady, _calibrator.Current);
-            StringAssert.Contains("floor", _calibrator.Instructions);
-
-            _calibrator.Cancel();
-            Assert.IsFalse(_calibrator.Active);
-            Assert.IsFalse(_bat.MountCalibrated);
-            Assert.AreEqual(before.position, _bat.Mount.position);
-            Assert.AreEqual(before.rotation, _bat.Mount.rotation);
+            _right.SetPositionAndRotation(new Vector3(0f, 1f, 0.5f), Quaternion.identity);
             yield return null;
+            Assert.IsFalse(_bat.HitsWithControllerSide);
+            _bat.BeginFit(Display);
+            var ghostWorld = new Pose(_ghost.position, _ghost.rotation);
+            _bat.FitSwapFace();
+            Assert.Less(Vector3.Distance(_ghost.position, ghostWorld.position), 1e-5f);
+            Assert.Less(Quaternion.Angle(_ghost.rotation, ghostWorld.rotation), 0.05f);
+            Assert.IsTrue(_bat.HitsWithControllerSide, "now hits with the controller's side");
+            var fitted = _bat.FitController;
+            _bat.EndFit(true);
+            yield return null;
+            Assert.IsTrue(_bat.HitsWithControllerSide);
+            var now = ControllerInBat();
+            Assert.Less(Vector3.Distance(now.position, fitted.position), 1e-4f);
+            Assert.Less(Quaternion.Angle(now.rotation, fitted.rotation), 0.05f);
+        }
+
+        [UnityTest]
+        public IEnumerator CancelledFitChangesNothing()
+        {
+            _bat.SetMode(BatMode.Strapped);
+            var mount = _bat.Mount;
+            _bat.BeginFit(Display);
+            _bat.FitMove(5);
+            _bat.FitTurn(7);
+            _bat.FitSwapFace();
+            _bat.EndFit(false);
+            yield return null;
+            Assert.IsFalse(_bat.MountFitted);
+            Assert.IsFalse(_bat.HitsWithControllerSide, "the unsaved face swap is undone");
+            Assert.AreEqual(mount.position, _bat.Mount.position);
+            Assert.AreEqual(mount.rotation, _bat.Mount.rotation);
+            Assert.AreEqual(_right, _visual.parent);
         }
 
         [UnityTest]
         public IEnumerator FineTuningSitsOnTopOfTheMountAndResets()
         {
             _bat.SetMode(BatMode.Strapped);
-            _bat.SetMount(TrueMount());
+            _bat.SetMount(BatMount.Inverse(new Pose(new Vector3(-0.025f, -0.16f, -0.05f),
+                Quaternion.LookRotation(Vector3.down, Vector3.back) * Quaternion.Euler(-5f, 8f, -4f))));
             _right.SetPositionAndRotation(new Vector3(0f, 1f, 0.5f), Quaternion.identity);
             yield return null;
-            var calibrated = _bat.GripPose;
+            var fitted = _bat.GripPose;
 
             _bat.NudgeAlignment(2, 0);
             yield return null;
-            Assert.AreEqual(10f, Quaternion.Angle(_bat.GripPose.rotation, calibrated.rotation), 0.1f, "two 5° tilt steps");
+            Assert.AreEqual(10f, Quaternion.Angle(_bat.GripPose.rotation, fitted.rotation), 0.1f, "two 5° tilt steps");
 
             _bat.FlipFace();
             _bat.ResetAlignment();
             yield return null;
             Assert.IsTrue(_bat.HitsWithControllerSide, "reset keeps the face swap");
-            Assert.Less(Vector3.Distance(WorldToe(), calibrated.position + calibrated.rotation * G.Toe), 1e-4f, "the swap keeps the toe");
-            Assert.Less(Vector3.Distance(_bat.GripPose.position, calibrated.position), 1e-4f);
+            Assert.Less(Vector3.Distance(WorldToe(), fitted.position + fitted.rotation * G.Toe), 1e-4f, "the swap keeps the toe");
+            Assert.Less(Vector3.Distance(_bat.GripPose.position, fitted.position), 1e-4f);
         }
     }
 }
