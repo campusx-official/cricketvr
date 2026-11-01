@@ -151,6 +151,12 @@ MonoBehaviour:
       firstCountdown: 3
       countdown: 2
       betweenBalls: 3
+    realBatTimings:
+      waitForReady: 0
+      readyDelay: 0
+      firstCountdown: 8
+      countdown: 3
+      betweenBalls: 5
     defaultOvers: 2
     matchPlaceholderBalls: 12
     logBallsCsv: 1

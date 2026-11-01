@@ -167,6 +167,58 @@ namespace CricketVR.Tests
             }
         }
 
+        /// <summary>
+        /// Bat mode (owner 2026-11-01): B can't be pressed while holding a real bat, so balls come automatically, 8 s after
+        /// Start and 8 s after each result (5 s result, 3 s countdown), even though the in-hand setting waits for B.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator RealBatBowlsAutomaticallyWithAnEightSecondBreak()
+        {
+            _config.session.timings = new SessionTimings { waitForReady = true, betweenBalls = 1f };
+            var bat = new GameObject("Bat");
+            bat.SetActive(false);
+            bat.transform.SetParent(_root.transform);
+            var right = new GameObject("Right").transform;
+            var left = new GameObject("Left").transform;
+            right.position = left.position = new Vector3(10f, 5f, 0f); // far from the ball's path
+            var visual = new GameObject("BatVisual").transform;
+            visual.SetParent(bat.transform);
+            var proxy = new GameObject("Proxy");
+            proxy.transform.SetParent(bat.transform);
+            var controller = bat.AddComponent<BatController>();
+            controller.Configure(_config, left, right, visual, null, proxy.AddComponent<Rigidbody>(), proxy.AddComponent<BoxCollider>(), requireTracked: false);
+            bat.SetActive(true);
+            controller.SetMode(BatMode.Strapped);
+            try
+            {
+                var gameplay = _session.gameObject;
+                gameplay.SetActive(false);
+                Object.DestroyImmediate(_session);
+                _session = gameplay.AddComponent<SessionManager>();
+                _session.Configure(_config, gameplay.GetComponent<BowlingMachine>(), _ball, gameplay.GetComponent<ScoreManager>(),
+                    null, controller, null, null, null, null, gameplay.GetComponent<SessionUI>(), null, null, null);
+                gameplay.SetActive(true);
+                yield return null;
+                _session.Press("Overs1");
+                float start = Time.time;
+                _session.Press("Start");
+                yield return WaitFor(() => _launches.Count == 1, 12f);
+                Assert.AreEqual(1, _launches.Count, "the first ball comes without a press");
+                Assert.AreEqual(8f, Time.time - start, 0.3f, "8 s after Start");
+                yield return WaitFor(() => _session.Session.Records.Count == 1, 15f);
+                float result = Time.time;
+                yield return WaitFor(() => _launches.Count == 2, 12f);
+                Assert.AreEqual(2, _launches.Count, "the next ball comes without a press");
+                Assert.AreEqual(8f, Time.time - result, 0.3f, "an 8 s break after the result");
+            }
+            finally
+            {
+                controller.SetMode(BatMode.InHand);
+                PlayerPrefs.DeleteKey("CricketVR.BatMode");
+                PlayerPrefs.Save();
+            }
+        }
+
         /// <summary>Default behaviour: each ball comes only when the batter presses B (owner decision 2026-10-26).</summary>
         [UnityTest]
         public IEnumerator EachBallWaitsForTheReadyPress()

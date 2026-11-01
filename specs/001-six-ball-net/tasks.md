@@ -154,6 +154,7 @@ Owner request 2026-11-01: the right controller strapped to a real bat. Requireme
 - [x] T091 *(done E-071; removed in T093 after it failed on the device, E-072)* `BatMountCalibrator`: three-step pivot calibration.
 - [x] T093 *(done, E-072)* Manual fit (owner request): frozen bat with a ghost controller; B/A up/down, stick turn/tilt, hold click swaps the face, click saves; `FitGhost` built by the scene builder; the old calibrator component removed from the scene. PlayMode tests (AC-34).
 - [x] T094 *(done, E-073)* Fit in six directions after the owner's screenshots (the ghost couldn't reach a controller off the blade): MOVE (up/down, across, away/onto) and TURN (turn, tilt, roll) modes; hold the stick click to save.
+- [x] T095 *(done, E-074)* Bat mode bowls automatically (8 s after Start and after each result); PlayMode test.
 - [ ] T092 Headset: AC-34 (fit, toe on the floor, hitting face, stance/blocks/drives without tracking drops, contact, back to In hand).
 
 ## M8 — Net Practice with Shot Confidence

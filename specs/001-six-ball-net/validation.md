@@ -43,7 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
-| AC-34 | REQ-053..056 | Automated pass (E-073, the six-direction fit); headset pending (T092). The first calibration failed on the device (E-072) | E-071–E-073 | T092 headset run with the fit |
+| AC-34 | REQ-053..057 | Automated pass (E-073 fit, E-074 automatic balls); owner: the fit "is working" (E-074); headset pending (T092). The first calibration failed on the device (E-072) | E-071–E-074 | T092 headset run: play with the real bat |
 
 ## Evidence entry template
 
@@ -1406,6 +1406,24 @@ Actual result and measured values:
 Outcome: automated Pass; headset pending (T092)
 Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_fit2.log
 Remaining limitation / follow-up task: T092 headset run with the fit
+```
+
+```text
+Check ID / acceptance scenario: E-074 / Fit used on the device; automatic balls in bat mode (T095, AC-34 automated)
+Requirement IDs: REQ-054, REQ-057
+Date and tester: 2026-11-01 owner (headset, Builds/CricketVR-bat-fit.apk E-073); agent (code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-auto.apk sha256 9015bacce8c28b8190ad20a33f2c1f07523247947e80956e7418727533f54f0b, installed 19:47:11
+Unity and package versions: as E-001
+Environment: Quest 3 standalone; macOS batch mode for tests
+Configuration: GameConfig.session.realBatTimings automatic, firstCountdown 8, betweenBalls 5, countdown 3
+Steps or exact command: owner fitted the controller and saved (hold stick click); T095; EditMode, PlayMode; MainSceneBuilder (wrote realBatTimings to the asset); QuestBuild.Build; adb install
+Expected result: the fit can be saved; real-bat sessions need no B press
+Actual result and measured values:
+  - Owner: the fit "it's working"; then "while holding the bat i can't press B"; chose "automatic mode with a break of 8 secs".
+  - EditMode 167/167; PlayMode 77/77 (new SessionPlayModeTests.RealBatBowlsAutomaticallyWithAnEightSecondBreak: first ball 8 s after Start, next 8 s after the result, each within 0.3 s, with the in-hand timings set to wait for B).
+Outcome: fit saving confirmed by the owner (no measurement yet); automatic balls automated Pass; headset pending (T092)
+Log or artifact path: scratchpad PlayMode.xml / apk_auto.log
+Remaining limitation / follow-up task: T092: play with the real bat (contact, tracking, toe on the floor)
 ```
 
 ## Re-plan note (2026-10-26)

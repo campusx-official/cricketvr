@@ -443,6 +443,8 @@ namespace CricketVR
                 ? SessionOptions.NetPractice(_overs, seed)
                 : SessionOptions.MatchSimulation(Mathf.Max(1, config.session.matchPlaceholderBalls), seed);
             ApplyEnvironment(_mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode);
+            bool strapped = bat != null && bat.Mode == BatMode.Strapped;
+            _session.Timings = strapped ? config.session.realBatTimings : config.session.timings;
             _rng = new System.Random(seed);
             _types = config.delivery.TypeCatalogue();
             _sessionId = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -456,7 +458,7 @@ namespace CricketVR
             pointer?.SetVisible(false);
             ui.ShowPlaying("");
             if (bat != null) bat.ResetMotion(MotionResetReason.Manual);
-            Debug.Log($"[CricketVR] Session {_sessionId}: {_mode}, {options.BallBudget} balls, seed {seed}" +
+            Debug.Log($"[CricketVR] Session {_sessionId}: {_mode}, {options.BallBudget} balls, seed {seed}{(strapped ? ", real bat, automatic balls" : "")}" +
                       (_mode == SessionMode.MatchSimulation ? $", {_difficulty}" : ""));
         }
 

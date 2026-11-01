@@ -143,6 +143,8 @@ namespace CricketVR
     public class SessionSettings
     {
         public SessionTimings timings = SessionTimings.Default;
+        [Tooltip("Bat mode (a real bat): B can't be pressed while holding it, so balls come automatically (owner 2026-11-01: an 8 s break, result shown then a countdown).")]
+        public SessionTimings realBatTimings = new SessionTimings { waitForReady = false, firstCountdown = 8f, countdown = 3f, betweenBalls = 5f };
         public int defaultOvers = 2;
         [Tooltip("Match Simulation balls until the scenario generator exists (M10).")]
         public int matchPlaceholderBalls = 12;

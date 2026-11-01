@@ -662,6 +662,7 @@ The owner tapes the right controller to a real bat: on the back of the blade, ju
 | REQ-054 | §21 | T093, T092 | AC-34 |
 | REQ-055 | §21 | T090, T093, T092 | AC-34 |
 | REQ-056 | §21 | T089, T092 | AC-34 |
+| REQ-057 | §21 | T095, T092 | AC-34 |
 
 ## Open owner decisions
 
@@ -730,3 +731,4 @@ The owner tapes the right controller to a real bat: on the back of the blade, ju
 | 2026-10-30 | Wicket reaction (REQ-049..052, §20) on `feature/wicket-reaction`, branched from `m7.5-delivery`; played-on in Match Simulation through today's physics detection, the M9 simulated path raising the same event later; stumps by scripted knock-back | Owner request and choice (option 1 for both: m7-session's builder isn't deterministic and has no spin types; no simulated path exists yet). Merge order: m7-session → main, m7.5-delivery, then this branch | REQ-049..052 |
 | 2026-11-01 | Bat mode (REQ-053..056, §21) on `feature/bat-mode`, branched from `feature/wicket-reaction`: the right controller strapped to a real bat on the back of the blade; a three-step calibration (toe pivot, handle-top pivot, flat) instead of fixed offsets, because the taping is never exactly the same; the default mount from the owner's photos until then | Owner request; a strapped controller is crooked and off-centre by a few degrees and centimetres, which a preset can't know | REQ-053..056 |
 | 2026-11-01 | Bat-mode calibration replaced by a manual fit (owner: "not able to calibrate... B for moving the controller up the virtual bat and A for moving it down and then the joystick to move it around 360 degree... then ok to fix") | The pivot steps failed on the device: the toe moved 3.6–9.4 cm (limit 1.5 cm) because a real toe rolls on its width, rocking stayed at 2–21°, and tracking dropped near the floor (E-072) | REQ-054, REQ-055 |
+| 2026-11-01 | Bat mode bowls automatically with an 8 s break (owner's choice over tapping the bat on the ground, or both) | B can't be pressed while holding a real bat | REQ-057 |
