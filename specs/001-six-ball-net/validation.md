@@ -43,7 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
-| AC-34 | REQ-053..057 | Automated pass (E-073 fit, E-074 automatic balls); owner: the fit "is working" (E-074); headset pending (T092). The first calibration failed on the device (E-072) | E-071–E-074 | T092 headset run: play with the real bat |
+| AC-34 | REQ-053..057 | Automated pass (E-073, E-074); headset: real-bat play, 119 balls, 71 contacts, no false contacts from tracking drops (E-075). The first calibration failed on the device (E-072) | E-071–E-075 | T092 rest: back to In hand; toe on the floor |
 
 ## Evidence entry template
 
@@ -1424,6 +1424,29 @@ Actual result and measured values:
 Outcome: fit saving confirmed by the owner (no measurement yet); automatic balls automated Pass; headset pending (T092)
 Log or artifact path: scratchpad PlayMode.xml / apk_auto.log
 Remaining limitation / follow-up task: T092: play with the real bat (contact, tracking, toe on the floor)
+```
+
+```text
+Check ID / acceptance scenario: E-075 / Real-bat play on the device (T092 part, AC-34)
+Requirement IDs: REQ-053..057
+Date and tester: 2026-11-01 19:51-22:53 owner (headset); agent (log review)
+Git commit or build identifier: main 55dc652 (= feature/bat-mode f116ed9); Builds/CricketVR-bat-auto.apk (E-074)
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller taped to the back of a real bat, fitted (E-074)
+Configuration: Real bat, automatic balls; Net Practice x4 and Match Simulation x5 (Medium, Hard)
+Steps or exact command: owner played; agent: adb logcat -d, filtered to [CricketVR] lines
+Expected result: contact with the real bat; no false contacts from tracking drops; balls come without B
+Actual result and measured values:
+  - 9 sessions, 119 finalized balls: 71 hits, 30 misses, 18 bowled. All sessions "real bat, automatic balls".
+  - Contacts at 0.00-0.53 m from the toe (most 0.2-0.5 m), edge 0.00 on all; exit speed up to 125 km/h; measured carry up to 17.9 m.
+  - Swings: 223 logged, peak toe median 6.0 m/s, p90 15.4, max 25.2 m/s.
+  - Tracking: 99 TrackingLost and 26 ImplausibleMotion resets, all but one between balls (only 1 of 119 balls had a drop during the delivery: a miss). No contact followed a reset.
+  - 4 pauses "The bat controller lost tracking" (bat lowered between balls); the owner restarted each time.
+  - Misses: closest gaps 0.1-13.8 cm (5 under 1 cm).
+  - Performance: 72 fps, 99.9-100% frames on time.
+Outcome: contact and tracking-drop handling Pass from the log; the owner reported the mode "working fine". Not shown: toe on the floor, switching back to In hand
+Log or artifact path: Docs/evidence/2026-11-01-bat-real-play/logcat_real_bat.txt
+Remaining limitation / follow-up task: T092 rest: In hand after real-bat play; toe-on-floor stance. Between-ball tracking drops pause the session (by design, REQ-012)
 ```
 
 ## Re-plan note (2026-10-26)
