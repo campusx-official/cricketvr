@@ -37,6 +37,15 @@ namespace CricketVR
         public IReadOnlyList<DeliveryResult> Results => _results;
         public SessionTotals Totals => SessionTotals.From(_results);
         public event Action<DeliveryResult> DeliveryFinalized;
+        /// <summary>
+        /// A delivery was decided Bowled (REQ-050): (id, ball position and velocity at the start of the physics step in
+        /// which it met the stumps). Raised once, from the same decision as <see cref="DeliveryFinalized"/>, just before
+        /// it. Cosmetic listeners only (the wicket reaction); nothing here changes the decision.
+        /// </summary>
+        public event Action<int, Vector3, Vector3> WicketBroken;
+
+        bool _stumpHitSeen;
+        Vector3 _stumpHitPosition, _stumpHitVelocity;
 
         void Awake()
         {
@@ -83,11 +92,13 @@ namespace CricketVR
                 _adjudicator.Cancel(_adjudicator.DeliveryId);
             _pending.Clear();
             _results.Clear();
+            _stumpHitSeen = false;
         }
 
         void OnBowled(int id, DeliveryConfig request, DeliverySolution solution)
         {
             _pending.Clear();
+            _stumpHitSeen = false;
             _adjudicator.Begin(id, request);
         }
 
@@ -155,7 +166,16 @@ namespace CricketVR
             if (collision.collider.TryGetComponent<NetWall>(out var wall))
                 _pending.Add(BallEvent.Net(wall.side, point));
             else if (go.layer == _stumpsLayer)
+            {
                 _pending.Add(BallEvent.Stumps(point));
+                if (!_stumpHitSeen)
+                {
+                    // Kept only for the wicket reaction: how the ball came into the stumps.
+                    _stumpHitSeen = true;
+                    _stumpHitPosition = ball.StepStartPosition;
+                    _stumpHitVelocity = ball.StepStartVelocity;
+                }
+            }
             else if ((_groundMask & (1 << go.layer)) != 0)
                 _pending.Add(BallEvent.Ground(point));
         }
@@ -213,6 +233,10 @@ namespace CricketVR
             _results.Add(result);
             if (config.scoring.logResults)
                 Debug.Log($"[CricketVR] Result {result} || {Totals}");
+            if (result.Bowled)
+                WicketBroken?.Invoke(result.DeliveryId, _stumpHitSeen ? _stumpHitPosition : ball.Body.position,
+                    _stumpHitSeen ? _stumpHitVelocity : ball.Body.linearVelocity);
+            _stumpHitSeen = false;
             DeliveryFinalized?.Invoke(result);
         }
 

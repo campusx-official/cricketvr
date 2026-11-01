@@ -41,6 +41,8 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-29 | REQ-042, REQ-044 | **Pace part automated pass** (E-047): AC-04 to 140 km/h, contact to 39 m/s straight and swinging; cap raised to 140 km/h. Spinning balls pending | E-047 | M7.5 T081 |
 | AC-30 | REQ-039 | Not run | None | M7.5 T081 |
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
+| AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
+| AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
 
 ## Evidence entry template
 
@@ -1267,6 +1269,84 @@ Actual result and measured values:
 Outcome: Pass (device data matches the design); owner's feel pending
 Log or artifact path: Docs/evidence/2026-10-27-offspin-variations/
 Remaining limitation / follow-up task: flighted share came out 27 of 77 off-breaks (35%, 25% expected); the spin seam visual (T080) is not done
+```
+
+```text
+Check ID / acceptance scenario: E-067 / Wicket reaction T084-T087 (AC-32, AC-33 automated)
+Requirement IDs: REQ-049, REQ-050, REQ-051, REQ-052
+Date and tester: 2026-10-30, agent
+Git commit or build identifier: branch feature/wicket-reaction (from m7.5-delivery), the commit that adds this entry
+Unity and package versions: as E-001; batch runs with -burst-disable-compilation (Unity's Burst compiler crashed once in batch, E-065; no Burst code in the project)
+Environment: EditMode and PlayMode (Mac batch); scene builder twice (byte-identical)
+Configuration: stumps by scripted knock-back (max 35 deg, 0.12 s ease-out); bails kinematic rigidbodies on the new WicketDebris layer (collides with Pitch, Outfield, itself only); knock-back scaled by the speed at the stumps (17-32 m/s); placeholder clatter; LED off in Net Practice, on in Match Simulation
+Steps or exact command: both suites
+Expected result: AC-32 and AC-33 automated items
+Actual result and measured values:
+  - EditMode WicketImpactTests (5): impact point -> stumps (middle only at x 0; +X only at x +0.097; between two: both, equally square; a graze moves its stump < 5 deg but pops its bail); batter names mirror for a left-hander and the mirrored impact gives the mirrored reaction; square 140 km/h yorker 35 deg, 80 km/h about 19-21 deg, never above 35; bails faster off a fast ball, upward and behind; same seed same reaction (another seed varies the bails only).
+  - EditMode scene: visible stumps equal the detection box within 1 mm; WicketDebris ignores every layer except Pitch, Outfield and itself (so never Ball, BatProxy, Stumps, Boundary); stump visuals collider-free; bails kinematic with capsules on WicketDebris.
+  - PlayMode WicketReactionPlayModeTests (6), both modes: a Stock ball at the stumps (80 km/h 3.0 m, 140 km/h 1.6 m) is Bowled and the reaction fires in the same physics step as the result; a bail is flying one step later; exactly one result over 2.5 s with the bails bouncing; bails rest on the pitch; the ball never touches a bail; the next launch finds the wicket whole. Played on (bat contact then stumps) fires it through physics in Net Practice and Match Simulation. The ball's path to the stumps is identical step for step with the reaction on and off. Resets: Play again, Menu, pause (focus loss) and resume, mode switch (SetMode, and starting the other mode) all leave stumps and bails within 0.1 mm / 0.1 deg, kinematic and still; the broken wicket holds 1 s after the next ball is called and is whole after 1.5 s; the session's next ball finds it whole.
+  - Wicket-check sequence (the T088 build), 12 balls, all Bowled: middle 21 deg (80 km/h), 30 deg (120), 35 deg (140 yorker); leg 27 deg (120); off 32 deg (140); grazes 5 deg with one bail; off-spin 12 / 9 deg (arrives about 60 km/h); between middle and off: both; straighter one 20 deg; 120 km/h at bail height 31 deg with both bails.
+  - Measured speed loss to the stumps: 80 -> 68 km/h, 120 -> 97, 140 -> 117 (so the knock-back scales with the speed at the stumps).
+  - All earlier results unchanged (AC-04, AC-29, T074, T077-T079, Main scene 0.02 cm). Suites: EditMode 164/164, PlayMode 70/70.
+Outcome: Pass (automated)
+Log or artifact path: batch test results (scratchpad)
+Remaining limitation / follow-up task: headset T088; a spin ball's arrival line is at the crease, so it reaches the stumps on its turned heading (about 9 cm further toward the turn for 4.5 deg); real stump sound pending the owner's recording; the next-ball reset happens at the launch if the batter calls the ball inside the 1.5 s hold (the launch never waits)
+```
+
+```text
+Check ID / acceptance scenario: E-068 / T088 wicket-check headset build (AC-32, AC-33 headset pending)
+Requirement IDs: REQ-049..052
+Date and tester: 2026-10-30, agent
+Git commit or build identifier: feature/wicket-reaction 1b5550d; Builds/CricketVR-T088-wicketcheck.apk sha256 6db82ddec2fbb0a437905914f9a8913c5caa397268aab85d91e494959f1634ae
+Unity and package versions: as E-001
+Environment: APK build (batch, -cricketvrWicketCheck)
+Configuration: both modes bowl the 12-ball wicket-check sequence (E-067) from the centred release; LED off in Net Practice, on in Match Simulation; placeholder clatter; the flag restored to off after the build
+Steps or exact command: Unity -batchmode -executeMethod CricketVR.Editor.QuestBuild.Build -cricketvrWicketCheck -quit
+Expected result: build succeeds; committed GameConfig unchanged
+Actual result and measured values: Build Succeeded, 0 errors, 0 warnings; working tree clean afterwards
+Outcome: Build pass; headset pending (owner)
+Log or artifact path: Builds/CricketVR-T088-wicketcheck.apk (gitignored)
+Remaining limitation / follow-up task: owner checklist (T088)
+```
+
+```text
+Check ID / acceptance scenario: E-069 / T088 first headset run: LED flash not visible; Bowler choice ignored in the check build
+Requirement IDs: REQ-049..052
+Date and tester: 2026-10-30 00:33-00:38 owner (headset, E-068 build); agent (log analysis, fix)
+Git commit or build identifier: Builds/CricketVR-T088-wicketcheck.apk sha256 6db82dde…34ae; fix on feature/wicket-reaction, the commit that adds this entry
+Unity and package versions: as E-001
+Environment: Quest 3; then EditMode and PlayMode (Mac batch)
+Configuration: wicket-check build, both modes
+Steps or exact command: owner played both modes; adb logcat
+Expected result: the reaction in both modes; the LEDs flash in Match Simulation
+Actual result and measured values:
+  - Owner: "the functionality is working fine", but "even if i am selecting off spin or leg spin the bowling machine is only bowling pace balls" and "cant see bails flashing red during the match simulations".
+  - Bowler choice: by design of the check build (E-068), both modes bowl only the fixed 12-ball sequence (9 pace, 3 spin), whatever the menu says. Not a gameplay fault, but it was not stated clearly enough before the session. A normal build bowls the chosen bowler.
+  - Device log: every wicket reacted as in PlayMode (e.g. Match Simulation middle stump 34-35 deg at 113-133 km/h at the stumps, grazes 6-9 deg), each with "LED" (the reaction did flash). Cause: the flash set _EmissionColor through a property block, which needs the _EMISSION keyword; URP removes that keyword from a material whose emission colour is black, so StumpWood.mat had no keyword (m_ValidKeywords: []) and nothing showed.
+  - Fix: the LED pieces swap to a bright URP Unlit material (StumpLed.mat) while lit (0.12 s on, 0.08 s off for 1.5 s) and back; no keyword, no lights. StumpWood.mat restored to its m7.5-delivery state. New PlayMode test: lit in Match Simulation, not in Net Practice, flashes on and off, the wood material is back after the flash and at once on a reset; EditMode: the LED material is assigned and unlit.
+  - Suites: EditMode 164/164, PlayMode 71/71.
+Outcome: Reaction Pass on device (owner); LED Fail on device, fixed (automated pass); headset re-check pending
+Log or artifact path: device logcat (scratchpad t088_log.txt)
+Remaining limitation / follow-up task: owner re-check of the LED; the rest of the T088 checklist
+```
+
+```text
+Check ID / acceptance scenario: E-070 / Gameplay build with the wicket reaction on device (AC-32/AC-33 headset, partial)
+Requirement IDs: REQ-049..052, REQ-028
+Date and tester: 2026-10-30 01:02-01:10 owner (headset); agent (CSV pull)
+Git commit or build identifier: Builds/CricketVR-wicket-gameplay.apk sha256 0fe428baf9711f6db9d1c3b0710508d27fcaa8ad921ef3c40afb61961424f09c (feature/wicket-reaction 81bcf1c), installed 00:51; app started 01:01:59
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller, right-handed
+Configuration: normal gameplay (no check build)
+Steps or exact command: owner played; adb pull (Docs/evidence/2026-10-30-wicket-gameplay/)
+Expected result: the chosen bowler is bowled; the wicket reacts when bowled; LEDs flash in Match Simulation; reset on the next ball
+Actual result and measured values:
+  - Net Practice, over the wicket (release +0.35 m): off-spin 3 sessions (32 off-breaks, 3 doosras, 1 straighter one; 5 bowled), leg-spin 2 sessions (24 leg-breaks; 1 bowled), pace 2 sessions (24 Stock; 1 bowled). The Bowler choice works.
+  - Match Simulation (centred release, Medium): 5 sessions, 60 Stock balls, 7 bowled. One more session started at 01:10:20 and was paused at 01:10:27 by focus loss (headset off or Meta button) before ball 1 (empty file).
+  - 14 bowled balls in all. The device's log buffer had rolled over by the pull (only 01:09:37 onward kept, a session without a wicket), so there are no per-wicket log lines or LED lines for this run; the owner's observation is the evidence for how they looked.
+Outcome: Pass. Bowler choice (device CSV); owner: "yes it flashed red, everything working" (the wicket reaction in both modes, the LED flash in Match Simulation, the reset). The owner did not fill in the checklist item by item.
+Log or artifact path: Docs/evidence/2026-10-30-wicket-gameplay/
+Remaining limitation / follow-up task: real stump sound (owner recording); consider a larger logcat buffer (adb logcat -G 16M) for later sessions
 ```
 
 ## Re-plan note (2026-10-26)

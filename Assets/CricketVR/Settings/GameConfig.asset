@@ -106,6 +106,7 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 62b42d84e86574a208b3831b48b8223d, type: 2}
     swingCheck: 0
     spinCheck: 0
+    wicketCheck: 0
     ballRadius: 0.036
     ballMass: 0.16
     ballTimeout: 10
@@ -152,3 +153,12 @@ MonoBehaviour:
     matchPlaceholderBalls: 12
     logBallsCsv: 1
     trackingLossPauseSeconds: 0.5
+  wicket:
+    reaction: 1
+    holdSeconds: 1.5
+    knockSeconds: 0.12
+    ledInNetPractice: 0
+    ledInMatchSimulation: 1
+    ledColor: {r: 1, g: 0.08, b: 0.05, a: 1}
+    ledSeconds: 1.5
+    volume: 0.9

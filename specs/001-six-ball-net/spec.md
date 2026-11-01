@@ -73,6 +73,10 @@ Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simula
 | REQ-046 | The ball shows a seam and rotation matching the delivery, at a readable rate (≤ 5 rev/s visual, no strobing at 72 Hz). Variations look like their stock ball until the bounce unless the honest-seam option is on. The machine shows no difference before release. | M7.5 B |
 | REQ-047 | Left-handed batting mirrors every line and movement exactly through the request's handedness (unverified on device while the left controller is faulty). | M7.5 |
 | REQ-048 | Natural variation: each ball's swing amount, drift and turn angle vary by a seeded random factor within ±v (setting, default 15%). The applied factors are in the per-ball record. The same request seed gives the same ball. Variation 0 gives exactly the nominal movement. | M7.5 |
+| REQ-049 | *(Wicket reaction, owner request 2026-10-30, both modes.)* When the stumps are hit, the bails fly off and the struck stump or stumps are knocked back, tilting from the base as if still pegged (at most about 35°; a square hit about 20–35° depending on speed, a graze may move only the bails). Which stumps move follows the impact point (off, middle, leg, or between two). Bail direction and speed follow the impact point and ball speed, with a small seeded variation; the bails fall and land on the pitch or grass. The ball carries on, slowed and slightly deflected (cosmetic only). | Wicket |
+| REQ-050 | The reaction is purely visual and sound: wicket detection (the stumps box, the Bowled rule, exactly one result per delivery, priorities) is unchanged. It triggers exactly once per delivery, at the moment the wicket is decided, for bowled and played-on balls, from the decided wicket's impact point and ball velocity. Flying bails and knocked-back stumps are on their own physics layer (collides only with the pitch, the outfield and itself) and can never cause a result, affect a scorer or touch the ball or bat. The ball's path before the stumps, the bowling machine, the solver and every delivery type are unchanged. Any later source of a decided wicket (the M9/M10 simulated path, T059/T064) raises the same wicket event. Hit wicket is out of scope. | Wicket |
+| REQ-051 | Before the next ball the stumps and bails are back exactly in their original poses (within 0.1 mm and 0.1°) with no physics running: on the next ball, Play again and Menu from any point, pause and resume, focus or tracking loss, and a mode switch. The wicket stays broken while the result shows, at least 1.5 s, unless the player leaves the delivery first (Play again, Menu, pause). | Wicket |
+| REQ-052 | A short stump-and-bail clatter plays on the reaction, its loudness scaled by impact speed (a marked placeholder until the owner's recording). Optional LED "zing" stumps and bails flash an emissive colour when dislodged: a setting, default off in Net Practice and on in Match Simulation; no extra lights or shadows. | Wicket |
 
 ## Proposed defaults and precise rules
 
@@ -320,6 +324,17 @@ Recorded numbers for both modes with foveation on and off, as in AC-14.
 - variation 0 gives exactly the nominal movement.
 
 All other type tests run with variation 0.
+
+### AC-32 — Wicket reaction (REQ-049, REQ-050, REQ-052)
+
+- **Automated (EditMode):** the impact point maps to the right stumps (off, middle, leg, between two), mirrored for a left-hander; the knock-back and bail speed grow with impact speed and squareness, within the limits; the same seed gives the same reaction.
+- **Automated (PlayMode, both modes):** a Stock ball aimed at the stumps dislodges the bails within one physics step of the Bowled result; a played-on ball (bat, then stumps) triggers it through physics in both modes; exactly one result per delivery with the bails bouncing; bails and stumps never reach any detector, the ball or the bat; the ball's path up to the stumps is identical with the reaction on or off; the visible stumps match the detection box.
+- **Headset:** believable at 80, 120 and 140 km/h and for a spinner (a 140 km/h yorker dramatic, an 80 km/h off-break clipping the bail gentle); you can tell which stump was hit; sound; the LED setting in Match Simulation; both modes.
+
+### AC-33 — Wicket reset (REQ-051)
+
+- **Automated (PlayMode):** stumps and bails are back within 0.1 mm / 0.1° with no velocity and no physics running before the next ball, and after Play again, Menu, pause and resume, and a mode switch; the wicket is still broken 1.5 s after the result when the player waits.
+- **Headset:** no broken wicket left on the next ball; Play again, Menu, pause and taking the headset off all reset it, in both modes.
 
 ## Completion rule
 

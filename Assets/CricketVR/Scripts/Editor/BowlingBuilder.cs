@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
@@ -47,7 +48,7 @@ namespace CricketVR.Editor
 
         public static void Build(GameObject main, GameObject environment, GameConfig config, List<string> created)
         {
-            PracticeNetBuilder.EnsureLayers(created, BallLayer, GroundBuilder.OutfieldLayer);
+            PracticeNetBuilder.EnsureLayers(created, BallLayer, GroundBuilder.OutfieldLayer, WicketDebrisLayer);
             ConfigureCollisionMatrix();
             EnsureDeliveryTypes(config, created);
             ApplyPhysicsMaterials(environment, created);
@@ -84,6 +85,8 @@ namespace CricketVR.Editor
             score.Configure(config, ball, resolver, machine);
             EditorUtility.SetDirty(score);
 
+            EnsureWicketReaction(environment, config, score, machine, ball, created);
+
             debug.Configure(config, machine, score, EnsureReadout(main, created));
             EditorUtility.SetDirty(machine);
             EditorUtility.SetDirty(debug);
@@ -114,7 +117,80 @@ namespace CricketVR.Editor
                 Physics.IgnoreLayerCollision(ball, layer, !ballHits.Contains(layer));
                 Physics.IgnoreLayerCollision(bat, layer, true);
             }
+            // Flying bails (REQ-050): they land on the pitch and grass and knock each other, nothing else; in particular
+            // never the ball, the bat, the stumps box or any scoring detector, so they can't cause or change a result.
+            int debris = LayerMask.NameToLayer(WicketDebrisLayer);
+            var debrisHits = new HashSet<int>
+            {
+                LayerMask.NameToLayer(PracticeNetBuilder.PitchLayer),
+                LayerMask.NameToLayer(GroundBuilder.OutfieldLayer),
+                debris,
+            };
+            for (int layer = 0; layer < 32; layer++)
+                Physics.IgnoreLayerCollision(debris, layer, !debrisHits.Contains(layer));
         }
+
+        public const string WicketDebrisLayer = "WicketDebris";
+
+        /// <summary>
+        /// The striker's wicket reaction (T085, plan.md §20), added to the existing stumps in place: the bails get
+        /// kinematic rigidbodies and capsule colliders on <see cref="WicketDebrisLayer"/>; the stump visuals stay
+        /// collider-free (scripted knock-back). The stumps' detection box is untouched.
+        /// </summary>
+        static void EnsureWicketReaction(GameObject environment, GameConfig config, ScoreManager score, BowlingMachine machine,
+            BallController ball, List<string> created)
+        {
+            var root = environment.transform.Find("Stumps");
+            if (root == null)
+            {
+                Debug.LogError("[CricketVR] Environment/Stumps missing; no wicket reaction.");
+                return;
+            }
+            var stumps = new[] { root.Find("OffStump"), root.Find("MiddleStump"), root.Find("LegStump") };
+            var bailTransforms = new[] { root.Find("OffBail"), root.Find("LegBail") };
+            if (stumps.Any(t => t == null) || bailTransforms.Any(t => t == null))
+            {
+                Debug.LogError("[CricketVR] Stumps are missing their stump or bail visuals; no wicket reaction.");
+                return;
+            }
+            int debris = LayerMask.NameToLayer(WicketDebrisLayer);
+            var bailMaterial = Material("Bail", 0.35f, 0.4f, 0.5f, PhysicsMaterialCombine.Average, created);
+            var bails = new Rigidbody[2];
+            for (int i = 0; i < 2; i++)
+            {
+                var go = bailTransforms[i].gameObject;
+                go.layer = debris;
+                var capsule = GetOrAdd<CapsuleCollider>(go, created);
+                capsule.direction = 1; // the cylinder's long axis (local Y)
+                capsule.radius = 0.5f;
+                capsule.height = 2f;
+                capsule.sharedMaterial = bailMaterial;
+                var body = GetOrAdd<Rigidbody>(go, created);
+                body.mass = 0.02f;
+                body.isKinematic = true;
+                body.useGravity = true;
+                body.interpolation = RigidbodyInterpolation.Interpolate;
+                body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                bails[i] = body;
+            }
+            var audio = GetOrAdd<AudioSource>(root.gameObject, created);
+            audio.playOnAwake = false;
+            audio.spatialBlend = 1f;
+            audio.minDistance = 2f;
+            var leds = stumps.Concat(bailTransforms).Select(t => t.GetComponent<Renderer>()).ToArray();
+            // LED flash (REQ-052): the pieces swap to this bright unlit material while lit. (An emission keyword on the
+            // stump material doesn't survive: URP drops _EMISSION from a material whose emission colour is black, so
+            // the first headset build never flashed, E-069.)
+            var led = PracticeNetBuilder.UnlitMat("StumpLed", config.wicket.ledColor);
+            var reaction = GetOrAdd<WicketReaction>(root.gameObject, created);
+            reaction.Configure(config, score, machine, ball, stumps, bails, root.GetComponent<BoxCollider>(), audio,
+                OptionalClips("StumpHit"), leds, led);
+            EditorUtility.SetDirty(reaction);
+        }
+
+        /// <summary>Like <see cref="ImpactClips"/>, but none is fine (the wicket uses a placeholder until recorded).</summary>
+        static AudioClip[] OptionalClips(string prefix) =>
+            File.Exists($"{AudioFolder}/{prefix}_0.wav") ? ImpactClips(prefix) : new AudioClip[0];
 
         static void ApplyPhysicsMaterials(GameObject environment, List<string> created)
         {

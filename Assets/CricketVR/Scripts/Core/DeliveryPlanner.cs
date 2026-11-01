@@ -319,6 +319,49 @@ namespace CricketVR
             return request;
         }
 
+        // ---------- Wicket-check headset build (T088, AC-32/AC-33) ----------
+
+        /// <summary>The wicket check's balls (batter frame): type, km/h, length, where it reaches the stumps (crease line), what it shows.
+        /// Lengths chosen from the measured height at the stumps (stumps 0.71 m; the 120 km/h ball at 4.5 m arrives at bail height).</summary>
+        public static readonly (DeliveryKind kind, float kmh, float length, float line, string label)[] WicketCheckBalls =
+        {
+            (DeliveryKind.Stock, 80f, 2.5f, 0f, "80 km/h full, middle stump"),
+            (DeliveryKind.Stock, 80f, 2.5f, 0.135f, "80 km/h grazing off stump"),
+            (DeliveryKind.Stock, 120f, 1.5f, 0f, "120 km/h yorker, middle"),
+            (DeliveryKind.Stock, 120f, 2.5f, -0.097f, "120 km/h on leg stump"),
+            (DeliveryKind.Stock, 140f, 1.3f, 0f, "140 km/h yorker, middle"),
+            (DeliveryKind.Stock, 140f, 2.0f, 0.097f, "140 km/h on off stump"),
+            // A turned ball keeps its new heading past the crease (1.17 m to the stumps' face): a 4.5 degree off-break
+            // moves 0.09 m toward leg after the crease, so it is aimed that much wider at the crease.
+            (DeliveryKind.OffSpin, 85f, 3.0f, 0.09f, "off-spin turning onto middle"),
+            (DeliveryKind.OffSpin, 85f, 3.0f, 0.19f, "off-spin hitting off stump"),
+            (DeliveryKind.Stock, 140f, 1.5f, 0.048f, "140 km/h between middle and off"),
+            (DeliveryKind.ArmBall, 90f, 4.0f, 0f, "straighter one, middle"),
+            (DeliveryKind.Stock, 120f, 4.5f, 0f, "120 km/h up at the bails"),
+            (DeliveryKind.Stock, 80f, 2.5f, -0.135f, "80 km/h grazing leg stump"),
+        };
+
+        /// <summary>
+        /// A fixed sequence for the wicket headset check (T088 build only): every ball aimed to hit the stumps (an
+        /// arrival-line request: its line is where it reaches the batter), from the centred release, no variation.
+        /// </summary>
+        public static DeliveryRequest WicketCheckRequest(int ballIndex, Handedness handedness, IReadOnlyList<DeliveryTypeData> types)
+        {
+            var b = WicketCheckBalls[ballIndex % WicketCheckBalls.Length];
+            var type = Find(b.kind, types);
+            type.variation = 0f;
+            var request = DeliveryRequest.FromConfig(DeliveryConfig.Create($"Wicket check {ballIndex % WicketCheckBalls.Length + 1}: {b.label}", b.kmh, b.line, b.length));
+            request.handedness = handedness;
+            request.lineReference = LineReference.AtBatter;
+            if (!type.IsStill)
+            {
+                request.type = type;
+                request.movement = 0.5f;
+                request.seed = ballIndex + 1;
+            }
+            return request;
+        }
+
         /// <summary>Reachability of a request (any type) as the machine will solve it.</summary>
         public static Func<DeliveryRequest, bool> RequestSolverCheck(float gravity, float fixedDeltaTime, float ballRadius) =>
             r =>

@@ -580,6 +580,18 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 
 **Testing.** As AC-25..AC-31. The PlayMode type tests use the shipped `DeliveryType` assets and pitch material, so re-tuning them is caught.
 
+## 20. Wicket reaction (feature/wicket-reaction, T084–T088) — owner request 2026-10-30
+
+Purely cosmetic: detection stays the single `Stumps` box on the `Stumps` layer and the adjudicator's Bowled rule.
+
+- **Event.** `ScoreManager` already queues a stump collision during the physics step and decides it in its next `FixedUpdate` (−45). It now also keeps the ball's state at the start of each step, so when a decided result is Bowled it raises `WicketBroken(deliveryId, ballCentreAtImpact, incomingVelocity)` from `Decide`, once. The M9 played-on sweep (T059) raises the same event from the simulated path. Played-on in both modes today is the physics stump hit after a bat contact (Match Simulation: within its 1.5 s window, as now).
+- **Impact model (`WicketImpact`, Core, pure).** Ball centre x at the stumps' front plane, against the stump centres (±0.0968 m, 0): a stump is struck if |x − x_stump| < r_ball + r_stump (0.0535 m); squareness s = 1 − |dx| / 0.0535. Knock-back θ = 35° · s^0.7 · lerp(0.55, 1, (v − 17)/(32 − 17) m/s), v = the speed at the stumps (a ball loses pace off the pitch: 80 km/h arrives at about 68 km/h, 140 km/h at about 117 km/h), so ≈ 35° square for a 140 km/h yorker, ≈ 20° at 80 km/h, a few degrees on a graze, about the horizontal axis ⟂ the ball's horizontal travel through the stump's base. A bail flies if a stump under it moves or the ball meets the bail height: speed = v · (0.05 + 0.15 · s_bail), direction = the ball's travel lifted 25–55° with ±20° seeded spread, seeded spin. Loudness = clamp(v / 32 m/s, 0.2, 1). `System.Random(seed)`; the seed is the delivery id. Names follow the batter: off stump is +X for a right-hander, −X for a left-hander.
+- **Stumps: scripted knock-back, not a hinge.** Each struck stump rotates about its base over 0.12 s (ease-out) and holds. Chosen because it is exact (the limit can't be exceeded), deterministic, costs no physics, and can't interact with anything; a hinge joint would need a dynamic stump body that could collide with the bails and ball and drift on reset.
+- **Bails.** Kinematic `Rigidbody` + capsule collider on `WicketDebris`, continuous dynamic collision, made dynamic only when dislodged. `WicketDebris` collides with Pitch, Outfield and itself; never Ball, BatProxy, Stumps or Boundary.
+- **Ball.** After the reaction the ball's collision with the stumps box is ignored until the reset, and its velocity becomes 35% of the incoming velocity turned up to ±8° (seeded): it carries on past the stumps. It is already dead (result decided), so it can't change anything.
+- **Reset.** `WicketReaction` saves the local poses of stumps and bails at start and restores them exactly (bails kinematic, zero velocity, ball–stumps collision restored): on every `BowlingMachine` launch (guarantee), when the next ball is called after the 1.5 s hold, and immediately on Play again, Menu, pause and mode switch.
+- **Sound and LED.** `StumpHit_N.wav` clips in `Assets/CricketVR/Audio/` if present, else a generated placeholder clatter (logged as a placeholder). LED: an emissive flash on the stump material via a property block; settings in `GameConfig.wicket` (off in Net Practice, on in Match Simulation).
+
 ## Requirement traceability
 
 | Requirement | Plan sections | Tasks | Acceptance |
@@ -632,6 +644,10 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | REQ-046 | §19 | T074, T080, T082 | AC-28 |
 | REQ-047 | §19 | T071, T073, T078 | AC-26, AC-27 |
 | REQ-048 | §19 | T072a | AC-31 |
+| REQ-049 | §20 | T084, T086, T088 | AC-32 |
+| REQ-050 | §20 | T085, T086 (T059 later) | AC-32 |
+| REQ-051 | §20 | T087, T088 | AC-33 |
+| REQ-052 | §20 | T086, T088 | AC-32 |
 
 ## Open owner decisions
 
@@ -646,6 +662,7 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
    2. Seam movement for pace (D-2), revisit after the headset test.
    3. "Flighted" spin (the solver's higher, loopier root) as an option for slower, loopier deliveries, if the flat trajectories feel machine-like.
    4. Reverse swing (late inswing of an old ball) as a later variation of the swing types: it needs only different settings.
+7. **Hit wicket** (the bat hitting the stumps) is out of scope of the wicket reaction (REQ-050); open for a later decision.
 
 ## Decisions log
 
@@ -696,3 +713,4 @@ Decision record: `proposals/delivery-types.md`. Directions are for a right-hande
 | 2026-10-27 | Net Practice **Wicket** choice: a right-arm bowler's release over the wicket (x = +0.35 m, default) or around (x = −0.8 m), for every Net Practice bowler (pace included; Match Simulation and the calibration tests keep the centred release). Spin bowlers' lines become arrival lines (D-1): off-spin finishes −0.10..+0.25 m, leg-spin −0.05..+0.35 m (batter frame), and the solver chooses the pitch line | Owner feedback: off-spin pitched on middle turned down the leg side (96 device balls: every ball pitched at or inside +0.1 m finished 0.2–0.6 m outside leg); "the bowling machine should not be at the center" (E-061) | REQ-028, REQ-044 |
 | 2026-10-27 | **Flighted off-spin** variation: 25% of off-spin balls are tossed up at 70–80 km/h with a launch angle drawn from 4–10°; the solver finds the dip (0–10 m/s²) that lands the ball on its length and line at that angle, clamped to what that dip range can land (a slow full ball may need more than the asked angle with no dip; a longer one gets as high as 10 m/s² allows). New type fields flightedShare / flightedMin/MaxKmh / flightedMin/MaxLaunch; request fields flighted / launchDegrees; CSV columns flighted, launch_deg | Owner feedback: off-spin is mostly flat; wants loopy, tossed-up balls launched 0–10° upward at a little less speed as a variation (E-063) | REQ-043, REQ-044 |
 | 2026-10-27 | Off-spinner variations: a new type, the **straighter one** (`DeliveryKind.ArmBall`, looks like off-spin; 82–95 km/h, flat, drifts slightly away, turns 0–0.5°, bounce −0.28, grip 0.02), and the Net Practice off-spinner's mix becomes off-spin 10 : doosra 1 : straighter one 1 (only the off-break is flighted) | Owner request: "add 2 more variations to the off-spin, the doosra and the straighter one, at 1 out of 12" (E-065) | REQ-041, REQ-043 |
+| 2026-10-30 | Wicket reaction (REQ-049..052, §20) on `feature/wicket-reaction`, branched from `m7.5-delivery`; played-on in Match Simulation through today's physics detection, the M9 simulated path raising the same event later; stumps by scripted knock-back | Owner request and choice (option 1 for both: m7-session's builder isn't deterministic and has no spin types; no simulated path exists yet). Merge order: m7-session → main, m7.5-delivery, then this branch | REQ-049..052 |
