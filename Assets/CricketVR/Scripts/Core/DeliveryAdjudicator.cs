@@ -189,13 +189,12 @@ namespace CricketVR
         {
             _open = false;
             bool bowled = end == DeliveryEnd.StumpsHit;
-            int runs = _contact && !bowled ? PracticeScoring.Runs(zone, Rules) : 0;
             DeliveryOutcome outcome = bowled ? DeliveryOutcome.Bowled
                 : !_contact ? DeliveryOutcome.Miss
                 : Mode == DeliveryRules.Ground ? DeliveryOutcome.ScoringPending
-                : runs > 0 ? DeliveryOutcome.Scored : DeliveryOutcome.NoRuns;
+                : DeliveryOutcome.Hit;
             var carry = !_contact ? CarryState.NotHit : _carryDecided ? _carry : CarryState.NoLanding;
-            return new DeliveryResult(_id, outcome, end, zone, runs, _contact, bowled, carry,
+            return new DeliveryResult(_id, outcome, end, zone, _contact, bowled, carry,
                 carry == CarryState.Measured ? _carryMetres : 0f, _contact ? _shot : default, _config);
         }
     }

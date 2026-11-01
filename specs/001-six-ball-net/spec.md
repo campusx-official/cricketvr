@@ -33,7 +33,7 @@ Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simula
 | REQ-008 | Every finalized playable delivery produces exactly one per-ball record (see REQ-027), including contact state, wicket state and the measurements available in its mode. | M6, M7 |
 | REQ-009 | *(Amended 2026-10-26)* Net Practice scores no runs. A net zone reached after contact is recorded only as a "where it went" label. Misses, leaves and bowled balls score nothing in either mode. Runs exist only in Match Simulation, from the virtual-field scorer (REQ-032..034). | M6, M8 |
 | REQ-010 | *(Amended 2026-10-26)* Net Practice shows "Measured carry" only for a real landing before any net, otherwise "Net hit" / "N/A". Match Simulation shows "Simulated carry" from the scorer and never labels it measured. | M6, M10 |
-| REQ-011 | *(Amended 2026-10-26)* Choosing a mode starts a readiness countdown, then a session with a ball budget: Net Practice = overs × 6 (overs 1, 2, 3 or 5; default 2); Match Simulation = the scenario's balls. A ball is bowled only after the previous one is finalized and the between-ball interval has passed. The budget is never exceeded. | M7 |
+| REQ-011 | *(Amended 2026-10-26; ready press added during M7 by owner request)* Choosing a mode starts a session with a ball budget: Net Practice = overs × 6 (overs 1, 2, 3 or 5; default 2); Match Simulation = the scenario's balls. **Each ball is bowled when the batter taps B** ("as a batsman I want that control"), and only after the previous ball is finalized; the delay after the press is a setting (0 s by default). Automatic countdowns remain available as a setting. The budget is never exceeded. | M7 |
 | REQ-012 | *(Amended 2026-10-26)* The end screen shows every ball's record and totals derived only from those records. Net Practice ends after its ball budget; wickets don't end it. Match Simulation ends on a win (target reached), on balls running out, or on wickets running out. | M7, M8, M10 |
 | REQ-013 | *(Amended 2026-10-26)* "Play again" restarts the same mode and options; "Menu" returns to the start menu; "New scenario" (Match Simulation) draws a new scenario. All leave no active ball, stale countdown or callback. | M7 |
 | REQ-014 | *(Amended 2026-10-26)* Focus or tracking loss pauses the session, stops bowling, and cancels any active delivery without consuming it. Resuming requires the player to confirm readiness. Both modes. | M7 |
@@ -47,7 +47,7 @@ Deferred: animated or moving fielders, run-outs, LBW, extras, non-striker simula
 | REQ-022 | Static placeholder fielders stand at the positions in a `FieldConfig` list (angle and radius from the striker's stumps). They can be hidden and don't move or field. | M6.5 |
 | REQ-023 | GroundMode holds the 72 Hz target on Quest 3 within these budgets: ≤ 150 draw calls, < 250k triangles, < 150 MB texture memory. Textures are ASTC with mipmaps. There are no large transparent surfaces and no animated environment. | M6.5 |
 | REQ-024 | The ball stays high-contrast against the sight screen behind the machine, the pitch and the outfield. Thin distant lines (rope, circle markers, stands) don't visibly shimmer, and markings don't z-fight. | M6.5 |
-| REQ-025 | A world-space start menu offers Net Practice (overs 1/2/3/5, default 2) and Match Simulation (scenario preset or random; difficulty Easy/Medium/Hard). It is operated by the right controller's XRI ray, with a fallback of tapping a button with the bat blade. Outside menus the ray is hidden; in menus the bat is hidden. | M7 |
+| REQ-025 | A world-space start menu offers Net Practice (overs 1/2/3/5, default 2) and Match Simulation (scenario preset or random; difficulty Easy/Medium/Hard). It is operated by the right controller's XRI ray, with a fallback of tapping a button with the bat blade. *(Amended 2026-10-26 during M7: panels with buttons appear about 0.75 m in front of the stance so the bat can reach them, and the bat stays visible there; the ray is shown only while such a panel is open. Live ball information stays on the far scoreboard.)* | M7 |
 | REQ-026 | A shared session framework drives both modes: menu → countdown → ball-by-ball (deliver, finalize, per-ball panel, interval) → end screen → play again / menu (/ new scenario), with pause (REQ-014). | M7 |
 | REQ-027 | One per-ball record type holds the delivery parameters (and seed), contact data, `ShotLaunch`, the physical result, the swing timing offset Δt, the Shot Confidence components (when computed) and the virtual-field outcome (Match Simulation). In development builds each record is appended to a per-session CSV on the device for calibration. | M7 |
 | REQ-028 | Each mode has a delivery plan: Net Practice mixes lines and lengths; Match Simulation uses a difficulty preset (speed range; how often yorkers and short balls come). Every planned delivery passes the solver before use; an unreachable one is redrawn and logged, never silently altered. | M7 |
@@ -160,6 +160,8 @@ A Net Practice session of 2 overs delivers exactly 12 balls, then the end screen
 
 From the countdown, an active ball, between balls and the end screen, "Play again" and "Menu" each leave no stale ball or callback. Repeat five times per mode.
 
+*Amended 2026-10-27 (owner):* the five repeats are covered by the automated restart tests (E-036). On the headset, each button is pressed once from each of the four points, in each mode.
+
 ### AC-09 — Interruption (REQ-014)
 
 Given a countdown or active delivery in either mode, when app focus or required tracking is lost, then bowling stops. Any active incomplete delivery is cancelled without changing finalized results. After tracking returns, a player confirmation is required and the next attempt cannot have a velocity spike.
@@ -200,11 +202,13 @@ Given GroundMode on Quest 3 during normal batting for at least 2 minutes:
 
 ### AC-15 — Start menu (REQ-025)
 
-With only the right controller, the owner selects each mode and each option by ray, and once by bat-tap. The ray and the bat are never shown at the same time.
+With only the right controller, the owner selects each mode and each option by ray, and once by bat-tap. The ray is visible only while a panel with buttons is open, never during a delivery.
 
 ### AC-16 — Per-ball record and log (REQ-027, REQ-028)
 
 In a development build, a session writes one CSV row per finalized ball with every field filled for its mode, including the swing timing offset Δt. No planned delivery is unreachable; redraws are logged.
+
+*Amended 2026-10-27 (owner):* until T053 (M8) the three swing-timing columns (`swing_timing_offset_s`, `swing_peak_ms`, `tracking_reset_age_s`) may be empty; M7 passes AC-16 without them. T053 must fill them for every contacted ball, and AC-16 is re-checked for those columns then.
 
 ### AC-17 — Shot Confidence (REQ-029, REQ-030)
 

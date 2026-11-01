@@ -42,17 +42,10 @@ namespace CricketVR.Tests
             Assert.AreEqual(expected, PracticeScoring.NetZone(WallSide.Front, height, Rules));
         }
 
+        /// <summary>Net zones only label where a hit went (REQ-009 amended 2026-10-26: no runs).</summary>
         [Test]
-        public void ZoneRunsMatchTheAcceptedPracticeTable()
+        public void SideAndRearNetsHaveTheirOwnZones()
         {
-            var expected = new Dictionary<ScoringZone, int>
-            {
-                { ScoringZone.FrontLow, 2 }, { ScoringZone.FrontMiddle, 4 }, { ScoringZone.FrontUpper, 6 },
-                { ScoringZone.SideNet, 1 }, { ScoringZone.RearNet, 1 },
-                { ScoringZone.OverFront, 6 }, { ScoringZone.OverSide, 1 }, { ScoringZone.OverRear, 1 }, { ScoringZone.None, 0 },
-            };
-            foreach (var kv in expected)
-                Assert.AreEqual(kv.Value, PracticeScoring.Runs(kv.Key, Rules), kv.Key.ToString());
             Assert.AreEqual(ScoringZone.SideNet, PracticeScoring.NetZone(WallSide.Left, 3.5f, Rules));
             Assert.AreEqual(ScoringZone.SideNet, PracticeScoring.NetZone(WallSide.Right, 0.2f, Rules));
             Assert.AreEqual(ScoringZone.RearNet, PracticeScoring.NetZone(WallSide.Rear, 2f, Rules));
@@ -72,20 +65,20 @@ namespace CricketVR.Tests
         // ---------- Outcomes ----------
 
         [Test]
-        public void HitIntoFrontMiddleScoresFour()
+        public void HitIntoTheFrontNetIsAHitLabelledWithItsZone()
         {
             Hit();
             var r = Finalize(BallEvent.Net(WallSide.Front, new Vector3(0f, 2f, 24f)));
-            Assert.AreEqual(DeliveryOutcome.Scored, r.Outcome);
-            Assert.AreEqual(4, r.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome);
             Assert.AreEqual(ScoringZone.FrontMiddle, r.Zone);
+            Assert.AreEqual("Hit, front net, middle", r.Summary);
             Assert.IsTrue(r.BatContact);
             Assert.IsFalse(r.Bowled);
             Assert.IsFalse(r.Miss);
         }
 
         [Test]
-        public void UnhitBallReachingAnyZoneNeverScores()
+        public void UnhitBallReachingAnyZoneIsAMiss()
         {
             foreach (var e in new[]
                      {
@@ -96,54 +89,52 @@ namespace CricketVR.Tests
                 _a.Begin(7, default);
                 var r = Finalize(e);
                 Assert.AreEqual(DeliveryOutcome.Miss, r.Outcome, e.Kind + " " + e.Wall);
-                Assert.AreEqual(0, r.Runs);
                 Assert.AreEqual(CarryState.NotHit, r.Carry);
             }
         }
 
         [Test]
-        public void BowledWithoutContactIsZeroAndNotAMiss()
+        public void BowledWithoutContactIsNotAMiss()
         {
             var r = Finalize(BallEvent.Stumps(new Vector3(0f, 0.3f, 0f)));
             Assert.AreEqual(DeliveryOutcome.Bowled, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
             Assert.IsTrue(r.Bowled);
             Assert.IsFalse(r.BatContact);
             Assert.IsFalse(r.Miss);
         }
 
         [Test]
-        public void ContactThenBowledIsZeroWithBothFlags()
+        public void ContactThenBowledHasBothFlags()
         {
             Hit();
             _a.ProcessStep(7, Step(BallEvent.Ground(new Vector3(0f, 0f, 0.8f))), out _);
             var r = Finalize(BallEvent.Stumps(new Vector3(0f, 0.2f, 0f)));
             Assert.AreEqual(DeliveryOutcome.Bowled, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
             Assert.IsTrue(r.BatContact && r.Bowled);
             Assert.IsFalse(r.Miss);
         }
 
         [Test]
-        public void ClearingTheFrontNetScoresSixAndCarryIsNotClaimed()
+        public void ClearingTheFrontNetIsLabelledAndCarryIsNotClaimed()
         {
             Hit();
             var r = Finalize(BallEvent.Exit(WallSide.Front, new Vector3(0f, 6.5f, 24.4f)));
-            Assert.AreEqual(6, r.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, r.Outcome);
+            Assert.AreEqual(ScoringZone.OverFront, r.Zone);
             Assert.AreEqual(DeliveryEnd.LeftEnclosure, r.End);
             Assert.AreEqual(CarryState.NoLanding, r.Carry);
             Assert.AreEqual("Carry: N/A", r.CarryLabel);
         }
 
         [Test]
-        public void ClearingASideOrRearNetScoresOne()
+        public void ClearingASideOrRearNetIsLabelled()
         {
             Hit();
-            Assert.AreEqual(1, Finalize(BallEvent.Exit(WallSide.Left, new Vector3(-2.2f, 4.2f, 6f))).Runs);
+            Assert.AreEqual(ScoringZone.OverSide, Finalize(BallEvent.Exit(WallSide.Left, new Vector3(-2.2f, 4.2f, 6f))).Zone);
             _a.Begin(8, default);
             _a.RecordBatContact(8, new ShotData { ContactPoint = BatPoint });
             Assert.IsTrue(_a.ProcessStep(8, Step(BallEvent.Exit(WallSide.Rear, new Vector3(0f, 4.2f, -3.4f))), out var r));
-            Assert.AreEqual(1, r.Runs);
+            Assert.AreEqual(ScoringZone.OverRear, r.Zone);
         }
 
         // ---------- Competing signals and finalize-once ----------
@@ -154,7 +145,6 @@ namespace CricketVR.Tests
             Hit();
             var r = Finalize(BallEvent.Net(WallSide.Front, new Vector3(0f, 4f, 24f)), BallEvent.Stumps(Vector3.zero));
             Assert.AreEqual(DeliveryOutcome.Bowled, r.Outcome);
-            Assert.AreEqual(0, r.Runs);
         }
 
         [Test]
@@ -209,12 +199,13 @@ namespace CricketVR.Tests
         }
 
         [Test]
-        public void SettleOrTimeoutGivesTheZeroRunFallback()
+        public void SettleOrTimeoutIsAHitWithNoZoneOrAMiss()
         {
             Hit();
             Assert.IsTrue(_a.EndWithoutTerminal(7, DeliveryEnd.Settled, out var hit));
-            Assert.AreEqual(DeliveryOutcome.NoRuns, hit.Outcome);
-            Assert.AreEqual(0, hit.Runs);
+            Assert.AreEqual(DeliveryOutcome.Hit, hit.Outcome);
+            Assert.AreEqual(ScoringZone.None, hit.Zone);
+            Assert.AreEqual("Hit", hit.Summary);
             _a.Begin(8, default);
             Assert.IsTrue(_a.EndWithoutTerminal(8, DeliveryEnd.Timeout, out var unhit));
             Assert.AreEqual(DeliveryOutcome.Miss, unhit.Outcome);
@@ -257,7 +248,7 @@ namespace CricketVR.Tests
         {
             var results = new List<DeliveryResult>();
             Hit();
-            results.Add(Finalize(BallEvent.Net(WallSide.Front, new Vector3(0f, 3.5f, 24f))));    // 6
+            results.Add(Finalize(BallEvent.Net(WallSide.Front, new Vector3(0f, 3.5f, 24f))));    // hit
             _a.Begin(8, default);
             _a.ProcessStep(8, Step(BallEvent.Stumps(Vector3.zero)), out var bowled);             // bowled
             results.Add(bowled);
@@ -271,7 +262,6 @@ namespace CricketVR.Tests
 
             var t = SessionTotals.From(results);
             Assert.AreEqual(4, t.BallsFaced);
-            Assert.AreEqual(6, t.PracticeRuns);
             Assert.AreEqual(2, t.BatContacts);
             Assert.AreEqual(1, t.Misses);
             Assert.AreEqual(2, t.Bowled);

@@ -297,6 +297,38 @@ namespace CricketVR.Tests
             Assert.AreNotEqual(DeliveryEnd.PassedStumps, result.End);
         }
 
+        /// <summary>
+        /// Owner report (M7): on the ground the next ball (B) waited until a hit ball stopped or timed out. A hit is
+        /// now decided once the played-on window (1.5 s) has passed; the ball stays visible to watch the shot.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator GroundHitIsDecidedAfterThePlayedOnWindowAndStaysVisible()
+        {
+            float window = _config.scoring.groundHitDecisionSeconds;
+            int id = Hit(new Vector3(0.5f, 0.6f, 1.3f), new Vector3(2f, 1f, 12f)); // along the ground, well inside the rope
+            float hitAt = Time.time;
+            yield return WaitUntil(() => _results.Exists(r => r.DeliveryId == id), window + 1f);
+            var result = OnlyResult(id);
+            Assert.AreEqual(DeliveryOutcome.ScoringPending, result.Outcome);
+            Assert.AreEqual(DeliveryEnd.HitWindowElapsed, result.End);
+            Assert.AreEqual(window, Time.time - hitAt, 0.25f, "decided at the end of the played-on window, not when the ball stops");
+            Assert.IsTrue(_ball.InFlight, "the ball is still visible after the result");
+            Assert.IsFalse(_ball.IsLive);
+            yield return WaitUntil(() => !_ball.InFlight, _config.scoring.groundHitLinger + 1f);
+            Assert.IsFalse(_ball.InFlight, "hidden after the ground-hit linger");
+            Assert.AreEqual(1, _results.FindAll(r => r.DeliveryId == id).Count, "still exactly one result");
+        }
+
+        [UnityTest]
+        public IEnumerator HitOntoTheStumpsWithinTheWindowIsStillBowled()
+        {
+            int id = Hit(new Vector3(0f, 0.5f, 1.5f), new Vector3(0f, 0f, -8f));
+            yield return WaitUntil(() => _results.Exists(r => r.DeliveryId == id), 2f);
+            var result = OnlyResult(id);
+            Assert.AreEqual(DeliveryOutcome.Bowled, result.Outcome);
+            Assert.IsTrue(result.BatContact && result.Bowled, "played on");
+        }
+
         [UnityTest]
         public IEnumerator UnhitBallThatStopsBeforeTheStumpsIsAMiss()
         {

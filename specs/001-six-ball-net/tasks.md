@@ -103,18 +103,18 @@ The old M7 six-ball session and M8 polish tasks are replaced by the two-mode pla
 
 Dependency: M6.5 complete and merged. Requirements: REQ-008, REQ-011..014, REQ-021, REQ-025..028. Acceptance: AC-07, AC-08, AC-09, AC-15, AC-16.
 
-- [ ] T047 Session state machine in Core (Menu, Countdown, Delivering, Resolving, BallPanel, Interval, Paused, SessionEnd), with a generation token, a ball budget and an early end. EditMode tests for every transition, restart and menu from each state, and pause without consuming a ball.
-- [ ] T048 `BallRecord` in Core and the per-session CSV writer (development builds; includes Δt, swing data and closest gap). Test: CSV round trip, one row per finalized ball.
-- [ ] T049 Delivery plans (Net Practice mix; Easy/Medium/Hard), solver-checked with redraw and log, never altering the requested speed. Test: 1,000 draws per plan are all reachable; redraws are counted.
-- [ ] T050 World-space start menu: right-controller XRI ray (menus only), bat-tap fallback by blade distance, bat hidden in menus. Options: mode; overs 1/2/3/5 (default 2); scenario preset or random; difficulty. *(headset: AC-15)*
-- [ ] T051 Wire both modes to the framework with interim results (Net: hit/miss/bowled; Ground: pending), the per-ball panel, the end screen, Play again / Menu / New scenario, and pause/resume. *(headset: AC-07, AC-08, AC-09)*
-- [ ] T052 Retire net-zone runs from the player-facing game (plan.md §16, proposal §7). Rewrite the run assertions in DeliveryAdjudicatorTests and ScoringPlayModeTests to zones and outcomes; keep every finalization test. No test left failing.
+- [x] T047 Session state machine in Core (Menu, Countdown, Delivering, Resolving, BallPanel, Interval, Paused, SessionEnd), with a generation token, a ball budget and an early end. EditMode tests for every transition, restart and menu from each state, and pause without consuming a ball.
+- [x] T048 `BallRecord` in Core and the per-session CSV writer (development builds; includes Δt, swing data and closest gap). Test: CSV round trip, one row per finalized ball.
+- [x] T049 Delivery plans (Net Practice mix; Easy/Medium/Hard), solver-checked with redraw and log, never altering the requested speed. Test: 1,000 draws per plan are all reachable; redraws are counted.
+- [x] T050 *(code done, E-036; headset AC-15 passed, E-039)* World-space start menu: right-controller XRI ray (menus only), bat-tap fallback by blade distance, bat hidden in menus. Options: mode; overs 1/2/3/5 (default 2); scenario preset or random; difficulty. *(headset: AC-15)*
+- [ ] T051 *(code done, E-036; headset AC-07 passed, E-050; AC-08/09 pending owner confirmation)* Wire both modes to the framework with interim results (Net: hit/miss/bowled; Ground: pending), the per-ball panel, the end screen, Play again / Menu / New scenario, and pause/resume. *(headset: AC-07, AC-08, AC-09)*
+- [x] T052 Retire net-zone runs from the player-facing game (plan.md §16, proposal §7). Rewrite the run assertions in DeliveryAdjudicatorTests and ScoringPlayModeTests to zones and outcomes; keep every finalization test. No test left failing.
 
 ## M8 — Net Practice with Shot Confidence
 
 Dependency: M7. Requirements: REQ-009, REQ-029..031. Acceptance: AC-06 (amended), AC-17, AC-18.
 
-- [ ] T053 Swing-peak timestamp in BatController; per-contact swing data (v_peak, t_peak, Δt, reset age) in the contact report and the CSV for every contacted ball.
+- [ ] T053 Swing-peak timestamp in BatController; per-contact swing data (v_peak, t_peak, Δt, reset age) in the contact report and the CSV for every contacted ball. *(Completes AC-16's swing-timing columns, deferred from M7 by the owner on 2026-10-27.)*
 - [ ] T054 `ShotConfidence` and `ConfidenceSettings` (every plan.md §17 calibration setting, including the ±60 ms timing window). EditMode tests per component, edge cap, defensive renormalisation, labels.
 - [ ] T055 Leave / played-and-missed classification with the 0.20 m and 3 m/s thresholds as settings. Tests with recorded gap and bat-speed traces.
 - [ ] T056 Overs selection, per-ball confidence panel with breakdown, and the session summary (averages, best/worst, counts, per-over trend). Test: summary = values recomputed from records.

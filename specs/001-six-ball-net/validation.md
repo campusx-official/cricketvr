@@ -15,17 +15,17 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-03 | REQ-003, REQ-007 | **Pass (right controller)**; left-hand bat pending hardware | APK sha256 9a0e7fc…2663b; E-007–E-014 | Re-run left-hand checks when the left controller works |
 | AC-04 | REQ-004, REQ-005 | **Pass on Quest** | APK sha256 b8f7d8d…9ace3; E-015–E-019 | Re-check if physics rate or pitch material changes |
 | AC-05 | REQ-006, REQ-007, REQ-015 | **Pass on Quest (right controller)**: scripted matrix + owner tests 1-5 | APK sha256 fe6daeb…0800e; E-020–E-029 | Re-check if contact math, physics rate or bat alignment changes; left hand pending hardware |
-| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; run scoring superseded 2026-10-26 (REQ-009 amended) | APK sha256 225a148…00ee7; E-030, E-031 | Re-run the amended AC-06 (no runs) after T052 |
-| AC-07 | REQ-011, REQ-012, REQ-026 | Not run (re-planned: complete session, both modes) | None | M7 T051 |
-| AC-08 | REQ-013 | Not run (re-planned: play again / menu, both modes) | None | M7 T051 |
-| AC-09 | REQ-014 | Not run (both modes) | None | M7 T051 |
+| AC-06 | REQ-008, REQ-009, REQ-010 | **Pass on Quest** (NetMode) for finalization and carry; amended (no runs) re-verified automatically in E-036 | APK sha256 225a148…00ee7; E-030, E-031, E-036 | Headset re-check folded into the M7 session test |
+| AC-07 | REQ-011, REQ-012, REQ-026 | **Pass** (owner, headset; device CSV) (E-050) | APK sha256 c71f726…30f0; E-036, E-050 | M7 T051 |
+| AC-08 | REQ-013 | Automated pass (E-036, covers the five repeats per the owner's 2026-10-27 amendment); headset partial (E-058: Menu from the Net end screen, Play again from the Match end screen) | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
+| AC-09 | REQ-014 | Automated pass (E-036); headset partial (E-058: pause in a countdown, no resume yet) | APK sha256 e0ff087…0d792; E-036 | M7 T051 |
 | AC-10 | REQ-016, REQ-039 | Not run (re-planned: three sessions per mode) | None | M11 T069 |
 | AC-11 | REQ-017, REQ-018, REQ-024 | **Pass on Quest** (owner) | APK sha256 c6b7ff9…0e41e; E-032, E-033 | Re-check if GroundDefinition or the ground shaders change |
 | AC-12 | REQ-019, REQ-020 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-13 | REQ-021, REQ-022 | **Pass on Quest** (owner) + automated (E-032) | APK sha256 c6b7ff9…0e41e; E-032, E-034 | Re-check when the M9 rolling-resistance change lands |
 | AC-14 | REQ-023 | **Pass on Quest** (GroundMode, foveation on and off) | APK sha256 c6b7ff9…0e41e; E-035 | Re-measure in AC-24 for both modes |
-| AC-15 | REQ-025 | Not run | None | M7 T050 start menu |
-| AC-16 | REQ-027, REQ-028 | Not run | None | M7 T048/T049 record, CSV, delivery plans |
+| AC-15 | REQ-025 | **Pass on Quest** (owner, recorded 2026-10-27 at the owner's request; rest of the M7 re-check pending) | APK sha256 c71f726…2b30f0; E-036, E-039 | Re-check if the near panel, ray or bat-tap changes |
+| AC-16 | REQ-027, REQ-028 | **Pass for M7** (automated E-036; device CSV E-050), under the owner's 2026-10-27 amendment: Δt / swing-peak / reset-age columns may be empty until T053 | APK sha256 c71f726…30f0; E-036, E-050 | Re-check those three columns in M8 T053 |
 | AC-17 | REQ-029, REQ-030 | Not run | None | M8 Shot Confidence |
 | AC-18 | REQ-031 | Not run | None | M8 summary |
 | AC-19 | REQ-032, REQ-033 | Not run | None | M9 scorer physics |
@@ -620,6 +620,112 @@ Actual result and measured values:
 Outcome: Pass. Every budget met with a wide margin, foveation on and off.
 Log or artifact path: scratchpad all.log / unity.log (not committed)
 Remaining limitation / follow-up task: (1) Unity FrameTimingManager gives no CPU/GPU split on this Quest/Vulkan setup: the probe's "CPU" equals the frame interval (13.89 ms) and GPU reads 0. Use the VrApi App= / CPU&GPU= lines (or OVR Metrics) instead; fix the probe in M11. (2) The Unity "Texture Memory" profiler counter grows by about 1.1 GB on each pause/resume (559 -> 4365 MB) while the app's real graphics memory stays at 82 MB. Treat the counter as unreliable for budget checks; use dumpsys meminfo. (3) About 1% stale frames: watch in AC-24.
+```
+
+```text
+Check ID / acceptance scenario: E-036 / M7 automated: session framework, per-ball record and CSV, delivery plans, net runs retired, menu build (T047-T052)
+Requirement IDs: REQ-008, REQ-009, REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-025, REQ-026, REQ-027, REQ-028
+Date and tester: 2026-10-26, agent
+Git commit or build identifier: branch m7-session; APK sha256 e0ff087810600fe132052037b9ad68c41d023b25ecc4b4ab418568a6576d0792 (NetMode default, development)
+Unity and package versions: as E-001
+Environment: Mac batch-mode Test Runner; Editor preview render of the menu; Quest install
+Configuration: SessionTimings 3 / 2 / 3 s (tests 1 / 1 / 1 s); delivery plans per spec.md "Two modes"; CSV logging on in development builds
+Steps or exact command: MainSceneBuilder.BuildOrRepairBatch (adds EventSystem + XRUIInputModule, NearPanel, SessionBoard, SessionManager with SessionUI / MenuPointer / BallLogWriter / BatTapButtons); -runTests EditMode and PlayMode; QuestBuild.Build; adb install
+Expected result: exactly-N-balls sessions; no stale results after pause, play again or menu; the interrupted ball is not consumed; records round-trip through CSV; every planned delivery reachable; no runs in Net Practice; all earlier tests still pass
+Actual result and measured values: EditMode 105/105 (new: SessionStateMachineTests 9 - 12-ball session then end with no 13th, countdown 3 s then 2 s, between balls 3 s, stale / duplicate / out-of-phase results rejected, pause mid-delivery cancels and re-bowls the same ball, pause from countdown / between balls, pause after the last ball resumes to the end, play again and menu from every phase invalidate work and clear records, early-end rule, rejected launch retries; BallRecordTests 2 - CSV round trip incl. quotes and NaN, de-DE locale proof; DeliveryPlannerTests 3 - 1,000 draws x 4 plans all reachable with 0 redraws, speeds/lines in range, yorker share 43/95/201 per 1,000 vs 5/10/20%, short 106/159/219 vs 10/15/20%, left-hand mirror, same seed same delivery, redraw not alter, fallback). Net-zone run tests rewritten to zones and Hit outcomes (DeliveryAdjudicatorTests, ScoringPlayModeTests); none removed without replacement. PlayMode 41/41 (new SessionPlayModeTests 3 with the real machine, ball and ScoreManager: one over = exactly 6 launches and 6 records, no 7th after the end; focus loss mid-delivery cancels the ball, no auto-resume, not consumed, re-bowled as a new delivery after Resume; 5 rounds of Play again / Menu mid-delivery leave no stale ball or record). Menu preview render readable at the stance (Builds/Preview/Ground_Menu.png). Build Success, install Success.
+Outcome: Pass (automated). Headset AC-07/08/09/15/16 not run.
+Log or artifact path: scratchpad test XML; Builds/Preview/Ground_Menu.png (gitignored)
+Remaining limitation / follow-up task: headset checks; Match Simulation bowls a 12-ball placeholder with "scoring pending" until M9/M10; swing timing and confidence columns are empty until M8
+```
+
+```text
+Check ID / acceptance scenario: E-037 / M7 owner feedback: ball on the batter's B press instead of a timed countdown
+Requirement IDs: REQ-011, REQ-014, REQ-026
+Date and tester: 2026-10-26, owner (feedback) + agent (change and tests)
+Git commit or build identifier: branch m7-session; APK built and installed after the change (see the commit)
+Unity and package versions: as E-001
+Environment: Quest 3 (owner, previous build e0ff087...); Mac batch-mode tests
+Configuration: SessionTimings waitForReady = true, readyDelay = 0 s, betweenBalls = 3 s
+Steps or exact command: owner tried both modes on the previous build; -runTests EditMode and PlayMode after the change
+Expected result: each ball comes only when the batter taps B, straight after the press; no ball bowled on its own; the end screen still follows the last ball
+Actual result and measured values: owner (previous build): "every next ball in both the modes are coming after a set delay ... revert this feature. as a batsman I want that control". After the change: EditMode 108/108 (new ReadyPressTests 3: nothing bowled for 60 s without a press; launch straight after the press; no press accepted mid-delivery; pressing while the result shows skips the wait; resume after pause waits; no press after the last ball). PlayMode 42/42 (new EachBallWaitsForTheReadyPress: 6 balls, each waits 4 s untouched, launches within 1 s of the press, a press after the last ball bowls nothing). Earlier automatic-mode tests kept (waitForReady = false).
+Outcome: Pass (automated); owner re-check pending
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: owner re-check in the headset (M7 test 1)
+```
+
+```text
+Check ID / acceptance scenario: E-038 / M7 owner feedback: ground-mode delay before B works
+Requirement IDs: REQ-011, REQ-021
+Date and tester: 2026-10-27, owner (feedback) + agent (fix and tests)
+Git commit or build identifier: branch m7-session; APK sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0
+Unity and package versions: as E-001
+Environment: Quest 3 (owner, previous build 7e7254f...); Mac batch-mode tests
+Configuration: ScoringSettings groundHitDecisionSeconds 1.5, groundHitLinger 5; SessionTimings waitForReady true
+Steps or exact command: owner played both modes; -runTests EditMode and PlayMode after the fix; build and install
+Expected result: on the ground, a hit's result appears within the played-on window and B works right after; the ball stays visible to watch the shot
+Actual result and measured values: owner (previous build): Net Practice fine; ground mode "after a few balls it says scoring pending and it takes some time after which B button works". Cause: on the ground a hit was only decided when the ball left the ground, settled or timed out (up to 10 s); the session (correctly) ignores B until the ball's single result exists. Fix: GroundMode decides a hit 1.5 s after contact (stumps still count until then). Tests: EditMode 108/108; PlayMode 44/44 (new GroundHitIsDecidedAfterThePlayedOnWindowAndStaysVisible: result ScoringPending / HitWindowElapsed at 1.5 s (+/-0.25 s), ball still visible, hidden within the 5 s linger, one result; HitOntoTheStumpsWithinTheWindowIsStillBowled: played on = Bowled with both flags). Build Success, install Success.
+Outcome: Pass (automated); owner re-check pending
+Log or artifact path: scratchpad test XML
+Remaining limitation / follow-up task: GroundMode carry is only measured if the ball lands within 1.5 s of contact (placeholder until M10's simulated carry)
+```
+
+```text
+Check ID / acceptance scenario: E-039 / AC-15 headset: start menu
+Requirement IDs: REQ-025
+Date and tester: 2026-10-27, owner
+Git commit or build identifier: branch m7-session (b3e7438); APK sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults (near panel 0.75 m in front of the stance; right Near-Far ray only while a panel with buttons is open)
+Steps or exact command: owner's M7 headset use of the start menu
+Expected result: AC-15: both modes and every option selectable by ray, once by bat-tap; the ray visible only while a panel with buttons is open, never during a delivery
+Actual result and measured values: owner: "record AC-15 (menu) as passed for now". No per-option breakdown or device log supplied.
+Outcome: Pass (owner observation)
+Log or artifact path: none
+Remaining limitation / follow-up task: the rest of the M7 re-check (AC-07, AC-08, AC-09, AC-16 device CSV, and the E-037/E-038 changes) is still pending with the owner
+```
+
+```text
+Check ID / acceptance scenario: E-050 / M7 headset re-check: AC-07 complete session, E-037 B-press control, E-038 ground-mode timing; AC-16 device CSV
+Requirement IDs: REQ-011, REQ-012, REQ-013, REQ-014, REQ-021, REQ-026, REQ-027
+Date and tester: 2026-10-27 09:52-09:55, owner (headset); agent (install over adb, CSV pull and analysis)
+Git commit or build identifier: branch m7-session (b3e7438 code); Builds/CricketVR-M7-recheck.apk sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0, installed 09:52:37
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults (waitForReady true, readyDelay 0 s, groundHitDecisionSeconds 1.5)
+Steps or exact command: adb install -r; owner played Net Practice and Match Simulation; adb pull of the session CSVs
+Expected result: AC-07 exactly 12 balls then the end screen; each ball only on B (E-037); on the ground a hit's result and B come within the played-on window (E-038); one CSV row per finalized ball
+Actual result and measured values:
+  - Owner: "i played normally and watched the balls. all fine".
+  - Device CSVs (Docs/evidence/2026-10-27-m7-recheck/): cricketvr_20261027_095317.csv Net Practice, 12 rows, delivery ids 1-12 (7 Hit, 5 Miss); cricketvr_20261027_095349.csv Match Simulation, 12 rows, ids 13-24 (7 ScoringPending, 5 Miss). No partial session files (no session abandoned part-way).
+  - Balls finalized 1.1-2.6 s apart (Net) and 1.0-5.8 s apart (Match), i.e. each next ball came straight after the batter's press, including after ground-mode "scoring pending" hits (E-038 fix: no long wait for B).
+  - AC-16 field check: one row per finalized ball; contact columns filled for every contacted ball (7/12 each session) and empty for misses; confidence and simulated-scorer columns empty as designed (M8/M9). swing_timing_offset_s, swing_peak_ms and tracking_reset_age_s are empty in every row: Δt is required by AC-16's text but implemented by T053 (M8). Conflict raised with the owner.
+  - Not shown by this data: Play again / Menu from the countdown, an active ball and between balls (AC-08, five times per mode), and focus/tracking interruption (AC-09). Both sessions ran to the end and no pause is visible in the records.
+Outcome: AC-07 Pass (owner observation + device CSV); E-037 and E-038 changes confirmed on device; AC-16 device part Pass (owner amended AC-16 on 2026-10-27: the Δt / swing-peak / reset-age columns may be empty until T053, M8); AC-08 and AC-09 pending the owner's confirmation that they were exercised
+Log or artifact path: Docs/evidence/2026-10-27-m7-recheck/
+Remaining limitation / follow-up task: owner to confirm AC-08/AC-09 (AC-16 Δt decided: amended); then merge m7-session into main only on the owner's go-ahead
+```
+
+```text
+Check ID / acceptance scenario: E-058 / AC-08, AC-09 headset run (partial)
+Requirement IDs: REQ-013, REQ-014
+Date and tester: 2026-10-27 17:36-17:38, owner (headset); agent (install, log and CSV check)
+Git commit or build identifier: Builds/CricketVR-M7-recheck.apk sha256 c71f72659c622da787343b3592da65bc662fa093cb4238e52ac82ffdc62b30f0, installed 17:32:14; app started 17:36:02
+Unity and package versions: as E-001
+Environment: Quest 3 standalone, right controller
+Configuration: defaults
+Steps or exact command: owner run per the amended AC-08 (once per button x point x mode) and AC-09; adb logcat and CSV pull
+Expected result: every row of the AC-08/AC-09 checklist exercised, with matching log lines
+Actual result and measured values (device log and CSVs, Docs/evidence/2026-10-27-m7-ac08-partial/):
+  - Net Practice 12 balls straight through (17:36:20-17:36:55); end screen -> Menu -> Match Simulation.
+  - Match Simulation 12 balls straight through (17:37:03-17:37:48); end screen -> Play again (new session 17:37:51).
+  - 17:37:53 tracking lost; 17:38:05 "Session paused: The headset lost focus / The app was paused" during that session's countdown, before ball 1; no ball bowled while paused. No resume afterwards (still paused at 17:39:53).
+  - Not exercised: Play again / Menu from the countdown, a ball in flight and between balls (both modes); Play again from the end screen (Net); Menu from the end screen (Match); pause mid-ball; resume and the ready confirmation; headset off mid-ball. The owner's results template was not returned.
+  - Earlier the same day the M7 APK installed at 17:17 was never started (no app start in the log), and the 15:37 and 16:47 sessions ran on the T076 build.
+Outcome: Partial. Seen working: Menu from the end screen (Net), Play again from the end screen (Match), pause in a countdown without bowling. AC-08 and AC-09 remain open
+Log or artifact path: Docs/evidence/2026-10-27-m7-ac08-partial/
+Remaining limitation / follow-up task: complete the remaining checklist rows on the M7 APK; then merge m7-session into main on the owner's go-ahead
 ```
 
 ## Re-plan note (2026-10-26)

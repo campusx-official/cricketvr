@@ -1,0 +1,444 @@
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
+
+namespace CricketVR
+{
+    /// <summary>
+    /// Runs the shared session framework (REQ-011..014, REQ-021, REQ-025..028; plan.md §16) on top of the pure
+    /// <see cref="SessionStateMachine"/>: start menu, countdown, ball-by-ball, end screen, play again / menu, pause
+    /// on focus or tracking loss. It owns no gameplay rules: the bowling machine bowls, ScoreManager decides each
+    /// ball's single result, and this component only sequences and records.
+    /// Until later milestones: Net Practice shows Hit / Miss / Bowled (Shot Confidence arrives in M8); Match
+    /// Simulation bowls a placeholder number of balls on the ground with "scoring pending" (scorer and chase in M9/M10).
+    /// </summary>
+    public class SessionManager : MonoBehaviour
+    {
+        [SerializeField] GameConfig config;
+        [SerializeField] BowlingMachine machine;
+        [SerializeField] BallController ball;
+        [SerializeField] ScoreManager score;
+        [SerializeField] BatBallContactResolver resolver;
+        [SerializeField] BatController bat;
+        [SerializeField] HandednessSetup handedness;
+        [SerializeField] EnvironmentModeSwitch environment;
+        [SerializeField] BowlingDebugControls debugControls;
+        [SerializeField] BatSetupControls setupControls;
+        [SerializeField] SessionUI ui;
+        [SerializeField] MenuPointer pointer;
+        [SerializeField] BallLogWriter log;
+        [SerializeField] Transform xrOrigin;
+
+        SessionStateMachine _session;
+        System.Random _rng;
+        string _sessionId = "";
+        float _sessionStart;
+        float _untrackedFor;
+        bool _batSetup;
+        bool _menuPending;
+
+        // Menu selections
+        SessionMode _mode = SessionMode.NetPractice;
+        int _overs;
+        string _difficulty = "Medium";
+
+        readonly Dictionary<int, BatContactReport> _contacts = new Dictionary<int, BatContactReport>();
+        string _lastResultLine = "";
+        InputAction _doneTap;
+        InputAction _readyPress;
+        float _doneDown = -1f;
+
+        public SessionPhase Phase => _session != null ? _session.Phase : SessionPhase.Menu;
+        public SessionStateMachine Session => _session;
+
+        void Awake()
+        {
+            if (config == null || machine == null || ball == null || score == null || ui == null)
+            {
+                Debug.LogError("[CricketVR] SessionManager is missing references; run CricketVR > Setup > 6. Build or Repair Main Scene.", this);
+                enabled = false;
+                return;
+            }
+            _session = new SessionStateMachine(config.session.timings);
+            _overs = Mathf.Max(1, config.session.defaultOvers);
+        }
+
+        void OnEnable()
+        {
+            if (score != null) score.DeliveryFinalized += OnDeliveryFinalized;
+            if (resolver != null) resolver.BatContact += OnBatContact;
+            if (ui != null) ui.ButtonPressed += OnButton;
+            _doneTap = new InputAction("BatSetupDone", InputActionType.Button, "<XRController>/{PrimaryButton}");
+            _doneTap.Enable();
+            // The batter asks for each ball with B (owner decision 2026-10-26: "as a batsman I want that control").
+            _readyPress = new InputAction("Ready", InputActionType.Button, "<XRController>/{SecondaryButton}");
+            _readyPress.AddBinding("<Keyboard>/n");
+            _readyPress.Enable();
+        }
+
+        void OnDisable()
+        {
+            if (score != null) score.DeliveryFinalized -= OnDeliveryFinalized;
+            if (resolver != null) resolver.BatContact -= OnBatContact;
+            if (ui != null) ui.ButtonPressed -= OnButton;
+            _doneTap?.Dispose();
+            _readyPress?.Dispose();
+        }
+
+        void Start()
+        {
+            // The session owns bowling now: the M4 debug taps and the always-on alignment controls are off.
+            if (debugControls != null) debugControls.allowDebugInput = false;
+            if (setupControls != null) setupControls.allowSetupInput = false;
+            // Shown on the first Update: HandednessSetup.Start may move the rig to the saved stance first.
+            _menuPending = true;
+        }
+
+        void Update()
+        {
+            if (_session == null)
+                return;
+            if (_menuPending)
+            {
+                _menuPending = false;
+                ShowMenu();
+            }
+            if (_batSetup)
+            {
+                if (Tapped(_doneTap, ref _doneDown))
+                    ExitBatSetup();
+                return;
+            }
+
+            if (_readyPress.WasPressedThisFrame())
+                PressReady();
+
+            if (_session.Phase == SessionPhase.Countdown || _session.Phase == SessionPhase.Delivering)
+                WatchTracking();
+
+            var step = _session.Tick(Time.deltaTime);
+            Handle(step);
+            RefreshBoard();
+        }
+
+        // ---------- Session steps ----------
+
+        void Handle(SessionStep step)
+        {
+            switch (step.Action)
+            {
+                case SessionAction.LaunchBall:
+                    Launch(step.BallIndex);
+                    break;
+                case SessionAction.CancelBall:
+                    if (ball.InFlight && ball.ActiveDeliveryId == step.DeliveryId)
+                        ball.Cancel();
+                    break;
+                case SessionAction.SessionEnded:
+                    ShowEnd();
+                    break;
+            }
+        }
+
+        void Launch(int ballIndex)
+        {
+            var plan = _mode == SessionMode.NetPractice ? DeliveryPlanSettings.NetPractice
+                : _difficulty == "Easy" ? DeliveryPlanSettings.Easy
+                : _difficulty == "Hard" ? DeliveryPlanSettings.Hard : DeliveryPlanSettings.Medium;
+            bool left = handedness != null && handedness.Current == Handedness.Left;
+            var delivery = DeliveryPlanner.Draw(plan, _rng, left,
+                DeliveryPlanner.SolverCheck(-Physics.gravity.y, Time.fixedDeltaTime, config.delivery.ballRadius), out int redraws);
+            if (redraws > 0)
+                Debug.LogWarning($"[CricketVR] Delivery plan {plan.label}: {redraws} unreachable draw(s) redrawn for ball {ballIndex + 1}");
+            int id = machine.Bowl(delivery);
+            _session.BallLaunched(id);
+        }
+
+        void OnBatContact(BatContactReport report) => _contacts[report.DeliveryId] = report;
+
+        void OnDeliveryFinalized(DeliveryResult result)
+        {
+            if (_session == null || _session.Phase != SessionPhase.Delivering || result.DeliveryId != _session.ActiveDeliveryId)
+                return; // a debug launch or a stale delivery
+            var record = BuildRecord(result);
+            if (!_session.BallFinalized(record))
+                return;
+            log?.Append(record);
+            _lastResultLine = $"Ball {record.Over - 1}.{record.BallInOver}: {result.Summary}" +
+                              (result.BatContact ? $"\n{result.CarryLabel}" : "");
+            _contacts.Remove(result.DeliveryId);
+        }
+
+        BallRecord BuildRecord(DeliveryResult result)
+        {
+            var r = new BallRecord
+            {
+                SessionId = _sessionId,
+                Mode = _mode,
+                DeliveryId = result.DeliveryId,
+                Time = Time.time - _sessionStart,
+                Delivery = machine.LastConfig,
+                Seed = _session.Options.Seed,
+                Result = result,
+                ClosestGap = resolver != null ? resolver.ClosestGapFor(result.DeliveryId) : float.NaN,
+            };
+            if (_contacts.TryGetValue(result.DeliveryId, out var c))
+            {
+                r.ContactPoint = c.Point;
+                r.ContactNormal = c.Normal;
+                r.BallVelocityIn = c.BallVelocityIn;
+                r.BallVelocityOut = c.BallVelocityOut;
+                r.BatPointVelocity = c.BatPointVelocity;
+                r.ApproachSpeed = c.Response.ApproachSpeed;
+                r.SweetFactor = c.Response.SweetFactor;
+                r.EdgeFactor = c.Response.EdgeFactor;
+                r.HeightFromToe = c.HeightFromToe;
+            }
+            return r;
+        }
+
+        // ---------- Pause ----------
+
+        void OnApplicationFocus(bool focused)
+        {
+            if (!focused) Pause("The headset lost focus.");
+        }
+
+        void OnApplicationPause(bool paused)
+        {
+            if (paused) Pause("The app was paused.");
+        }
+
+        void WatchTracking()
+        {
+            if (bat == null || bat.IsControllerTracked(bat.Hand))
+            {
+                _untrackedFor = 0f;
+                return;
+            }
+            _untrackedFor += Time.unscaledDeltaTime;
+            if (_untrackedFor >= config.session.trackingLossPauseSeconds)
+                Pause("The bat controller lost tracking.");
+        }
+
+        void Pause(string reason)
+        {
+            if (_session == null)
+                return;
+            var step = _session.Pause();
+            if (_session.Phase != SessionPhase.Paused)
+                return;
+            Handle(step);
+            _untrackedFor = 0f;
+            if (bat != null) bat.ResetMotion(MotionResetReason.FocusChanged);
+            Debug.Log($"[CricketVR] Session paused: {reason}");
+            ui.PlaceNear(xrOrigin);
+            ui.ShowPaused($"{reason}\nBall {_session.NextBall + 1} of {_session.Options.BallBudget} will be bowled again.\nClear your swing space, then press Resume.");
+            pointer?.SetVisible(true);
+        }
+
+        // ---------- Menu ----------
+
+        /// <summary>Same as pressing the named menu button (tests, desktop debugging).</summary>
+        public void Press(string buttonName) => OnButton(buttonName);
+
+        /// <summary>The batter's ready press (tap B): bowls the next ball. Ignored when no ball can be bowled.</summary>
+        public void PressReady()
+        {
+            if (_session == null || !_session.Ready())
+                return;
+            if (_readyPress?.activeControl?.device is XRControllerWithRumble c)
+                c.SendImpulse(0.25f, 0.04f);
+        }
+
+        /// <summary>Simulates losing focus (tests): the same path as taking the headset off.</summary>
+        public void SimulateFocusLoss() => Pause("Focus lost (simulated).");
+
+        void OnButton(string name)
+        {
+            switch (name)
+            {
+                case "NetPractice": _mode = SessionMode.NetPractice; ShowMenu(); break;
+                case "MatchSim": _mode = SessionMode.MatchSimulation; ShowMenu(); break;
+                case "Overs1": _overs = 1; ShowMenu(); break;
+                case "Overs2": _overs = 2; ShowMenu(); break;
+                case "Overs3": _overs = 3; ShowMenu(); break;
+                case "Overs5": _overs = 5; ShowMenu(); break;
+                case "Easy": case "Medium": case "Hard": _difficulty = name; ShowMenu(); break;
+                case "RightHanded": handedness?.Set(Handedness.Right); ShowMenu(); break;
+                case "LeftHanded": handedness?.Set(Handedness.Left); ShowMenu(); break;
+                case "BatSetup": EnterBatSetup(); break;
+                case "Start": StartSession(); break;
+                case "PlayAgain": StartSession(); break;
+                case "NewScenario": StartSession(); break;
+                case "Menu": Handle(_session.ToMenu()); ShowMenu(); break;
+                case "Resume":
+                    if (bat != null) bat.ResetMotion(MotionResetReason.FocusChanged);
+                    var step = _session.Resume();
+                    pointer?.SetVisible(false);
+                    ui.ShowPlaying("");
+                    Handle(step);
+                    break;
+            }
+        }
+
+        void ShowMenu()
+        {
+            if (_session.Phase != SessionPhase.Menu)
+                return;
+            var envMode = _mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode;
+            ApplyEnvironment(envMode);
+            ui.PlaceNear(xrOrigin);
+            ui.ShowMenu(_mode == SessionMode.NetPractice,
+                "Point with the right controller and pull the trigger, or tap a button with the bat.");
+            ui.Select("NetPractice", _mode == SessionMode.NetPractice);
+            ui.Select("MatchSim", _mode == SessionMode.MatchSimulation);
+            foreach (int o in new[] { 1, 2, 3, 5 }) ui.Select("Overs" + o, _overs == o);
+            foreach (var d in new[] { "Easy", "Medium", "Hard" }) ui.Select(d, _difficulty == d);
+            bool right = handedness == null || handedness.Current == Handedness.Right;
+            ui.Select("RightHanded", right);
+            ui.Select("LeftHanded", !right);
+            ui.Board(_mode == SessionMode.NetPractice
+                ? $"NET PRACTICE\n{_overs} over{(_overs == 1 ? "" : "s")} ({_overs * 6} balls)\nNo runs: every ball gets a result."
+                : $"MATCH SIMULATION\n{_difficulty}\nScenarios and scoring arrive in M9/M10;\nthis build bowls {config.session.matchPlaceholderBalls} balls, scoring pending.");
+            pointer?.SetVisible(true);
+        }
+
+        void EnterBatSetup()
+        {
+            _batSetup = true;
+            _doneDown = -1f;
+            pointer?.SetVisible(false);
+            if (setupControls != null) setupControls.allowSetupInput = true;
+            ui.ShowBatSetup("Thumbstick up/down: tilt.  Left/right: spin.\nTrigger + left/right: lean.  Grip + up/down: slide.\nGrip + left/right: face turn.  Stick click: reset (hold: flip face).\nHold B: move the bat to the other controller.");
+        }
+
+        void ExitBatSetup()
+        {
+            _batSetup = false;
+            if (setupControls != null) setupControls.allowSetupInput = false;
+            // Shown on the first Update: HandednessSetup.Start may move the rig to the saved stance first.
+            _menuPending = true;
+        }
+
+        void StartSession()
+        {
+            int seed = System.Environment.TickCount;
+            var options = _mode == SessionMode.NetPractice
+                ? SessionOptions.NetPractice(_overs, seed)
+                : SessionOptions.MatchSimulation(Mathf.Max(1, config.session.matchPlaceholderBalls), seed);
+            ApplyEnvironment(_mode == SessionMode.NetPractice ? EnvironmentMode.NetMode : EnvironmentMode.GroundMode);
+            _rng = new System.Random(seed);
+            _sessionId = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            _sessionStart = Time.time;
+            _lastResultLine = "";
+            _contacts.Clear();
+            score.ClearResults();
+            log?.BeginSession(_sessionId);
+            Handle(_session.Start(options));
+            pointer?.SetVisible(false);
+            ui.ShowPlaying("");
+            if (bat != null) bat.ResetMotion(MotionResetReason.Manual);
+            Debug.Log($"[CricketVR] Session {_sessionId}: {_mode}, {options.BallBudget} balls, seed {seed}" +
+                      (_mode == SessionMode.MatchSimulation ? $", {_difficulty}" : ""));
+        }
+
+        void ApplyEnvironment(EnvironmentMode mode)
+        {
+            if (environment != null && environment.Mode != mode)
+                environment.Apply(mode);
+            score.SetEnvironment(mode);
+        }
+
+        void ShowEnd()
+        {
+            log?.EndSession();
+            var records = _session.Records;
+            var t = SessionTotals.From(records);
+            var sb = new StringBuilder();
+            for (int over = 0; over * 6 < records.Count; over++)
+            {
+                sb.Append($"Over {over + 1}:");
+                for (int i = over * 6; i < Mathf.Min(records.Count, over * 6 + 6); i++)
+                    sb.Append("  ").Append(Symbol(records[i].Result));
+                sb.Append('\n');
+            }
+            sb.Append($"\n{t}\nH hit   M miss   B bowled   P scoring pending");
+            string heading = _mode == SessionMode.NetPractice ? $"Net Practice: {records.Count} balls" : $"Match Simulation ({_difficulty}): {records.Count} balls";
+            ui.PlaceNear(xrOrigin);
+            ui.ShowEnd(heading, sb.ToString(), _mode == SessionMode.MatchSimulation);
+            ui.Board($"{heading}\n{t}");
+            pointer?.SetVisible(true);
+            Debug.Log($"[CricketVR] Session {_sessionId} ended: {t}");
+        }
+
+        static string Symbol(DeliveryResult r)
+        {
+            switch (r.Outcome)
+            {
+                case DeliveryOutcome.Bowled: return "B";
+                case DeliveryOutcome.Miss: return "M";
+                case DeliveryOutcome.ScoringPending: return "P";
+                default: return "H";
+            }
+        }
+
+        void RefreshBoard()
+        {
+            switch (_session.Phase)
+            {
+                case SessionPhase.AwaitingReady:
+                case SessionPhase.Countdown:
+                case SessionPhase.Delivering:
+                case SessionPhase.BetweenBalls:
+                    var o = _session.Options;
+                    int n = Mathf.Min(_session.NextBall + (_session.Phase == SessionPhase.BetweenBalls ? 0 : 1), _session.Options.BallBudget);
+                    var head = _mode == SessionMode.NetPractice
+                        ? $"NET PRACTICE  ball {n} of {o.BallBudget}  (over {(n - 1) / 6 + 1} of {o.Overs})"
+                        : $"MATCH SIMULATION  ball {n} of {o.BallBudget}  (scoring pending)";
+                    string middle = _session.Phase == SessionPhase.AwaitingReady ? "<size=140%>Press B when ready</size>"
+                        : _session.Phase == SessionPhase.Countdown ? (_session.TimeLeft > 0.5f ? $"<size=180%>{Mathf.CeilToInt(_session.TimeLeft)}</size>" : "")
+                        : _session.Phase == SessionPhase.Delivering ? "<size=140%>Play!</size>"
+                        : _session.Timings.waitForReady && !_session.IsOver ? "<size=100%>Press B for the next ball</size>" : "";
+                    ui.Board($"{head}\n{middle}\n{_lastResultLine}\n<size=80%>{SessionTotals.From(_session.Records)}</size>");
+                    break;
+            }
+        }
+
+        static bool Tapped(InputAction action, ref float downTime)
+        {
+            if (action.WasPressedThisFrame())
+                downTime = Time.unscaledTime;
+            if (action.WasReleasedThisFrame() && downTime >= 0f)
+            {
+                bool tap = Time.unscaledTime - downTime < 0.4f;
+                downTime = -1f;
+                return tap;
+            }
+            return false;
+        }
+
+        public void Configure(GameConfig cfg, BowlingMachine bowlingMachine, BallController ballController, ScoreManager scoreManager,
+            BatBallContactResolver contactResolver, BatController batController, HandednessSetup handednessSetup,
+            EnvironmentModeSwitch environmentSwitch, BowlingDebugControls debug, BatSetupControls setup, SessionUI sessionUi,
+            MenuPointer menuPointer, BallLogWriter ballLog, Transform origin)
+        {
+            config = cfg;
+            machine = bowlingMachine;
+            ball = ballController;
+            score = scoreManager;
+            resolver = contactResolver;
+            bat = batController;
+            handedness = handednessSetup;
+            environment = environmentSwitch;
+            debugControls = debug;
+            setupControls = setup;
+            ui = sessionUi;
+            pointer = menuPointer;
+            log = ballLog;
+            xrOrigin = origin;
+        }
+    }
+}

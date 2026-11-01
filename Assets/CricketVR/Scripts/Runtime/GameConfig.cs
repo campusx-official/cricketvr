@@ -105,7 +105,25 @@ namespace CricketVR
         public float exitMargin = 0.3f;
         [Tooltip("After a delivery is finalized the ball stays visible (but can't be hit or score) for this long (s).")]
         public float deadBallLinger = 1.5f;
+        [Tooltip("GroundMode: a hit ball's result is decided this long after contact unless something ends it sooner; " +
+                 "it is the played-on window (stumps still count until then), so the batter can call the next ball promptly.")]
+        public float groundHitDecisionSeconds = 1.5f;
+        [Tooltip("GroundMode: how long a hit ball stays visible after its result is decided, so the shot can be watched (s).")]
+        public float groundHitLinger = 5f;
         public bool logResults = true;
+    }
+
+    [Serializable]
+    public class SessionSettings
+    {
+        public SessionTimings timings = SessionTimings.Default;
+        public int defaultOvers = 2;
+        [Tooltip("Match Simulation balls until the scenario generator exists (M10).")]
+        public int matchPlaceholderBalls = 12;
+        [Tooltip("Development builds: write one CSV row per finalized ball to Application.persistentDataPath (REQ-027).")]
+        public bool logBallsCsv = true;
+        [Tooltip("Pause if the bat controller stays untracked this long during a countdown or delivery (s).")]
+        public float trackingLossPauseSeconds = 0.5f;
     }
 
     /// <summary>Tunable game settings. One asset: Assets/CricketVR/Settings/GameConfig.asset.</summary>
@@ -125,5 +143,6 @@ namespace CricketVR
         public DeliverySettings delivery = new DeliverySettings();
         public ContactSettings contact = new ContactSettings();
         public ScoringSettings scoring = new ScoringSettings();
+        public SessionSettings session = new SessionSettings();
     }
 }

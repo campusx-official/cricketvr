@@ -5,7 +5,8 @@
         "CricketVR.Core",
         "Unity.InputSystem",
         "Unity.TextMeshPro",
-        "Unity.XR.CoreUtils"
+        "Unity.XR.CoreUtils",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

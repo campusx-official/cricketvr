@@ -1,0 +1,301 @@
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using Unity.XR.CoreUtils;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit.UI;
+
+namespace CricketVR.Editor
+{
+    /// <summary>
+    /// M7 session framework (plan.md §16): SessionManager, the near panel (start menu, pause, end screen, bat setup),
+    /// the session text on the far scoreboard, the XRI event system, the right-controller menu ray and the bat-tap
+    /// fallback. The near panel is generated content and is rebuilt on every run; shared objects are only wired.
+    /// </summary>
+    static class SessionBuilder
+    {
+        const float CanvasScale = 0.001f; // 1 canvas unit = 1 mm
+        static readonly Vector2 PanelSize = new Vector2(820f, 660f);
+        static readonly Color PanelColor = new Color(0.05f, 0.08f, 0.16f, 1f);
+        static readonly Color ButtonColor = new Color(0.16f, 0.22f, 0.36f);
+        static readonly Color StartColor = new Color(0.13f, 0.50f, 0.25f);
+
+        public static void Build(GameObject main, GameConfig config, List<string> created)
+        {
+            var gameplay = main.transform.Find("Gameplay");
+            var uiRoot = main.transform.Find("UI");
+            if (gameplay == null || uiRoot == null)
+            {
+                Debug.LogError("[CricketVR] Main/Gameplay or Main/UI missing; run the earlier builder steps first.");
+                return;
+            }
+
+            EnsureEventSystem(uiRoot, created);
+            var (panel, title, body, hint, menu, net, match, end, pause, buttons) = BuildNearPanel(uiRoot, created);
+            var boardText = EnsureBoardText(uiRoot, created);
+            var readout = uiRoot.Find("LiveScoreboard/DebugReadout")?.gameObject;
+
+            var go = gameplay.Find("SessionManager")?.gameObject;
+            if (go == null)
+            {
+                go = new GameObject("SessionManager");
+                go.transform.SetParent(gameplay, false);
+                created.Add("SessionManager");
+            }
+            var ui = GetOrAdd<SessionUI>(go);
+            ui.Configure(panel, title, body, hint, menu, net, match, end, pause, buttons, boardText, readout);
+            var pointer = GetOrAdd<MenuPointer>(go);
+            var (ray, off) = FindInteractors();
+            pointer.Configure(ray, off);
+            var log = GetOrAdd<BallLogWriter>(go);
+            log.Configure(config);
+
+            var bat = Find<BatController>(main, "Player/Bat");
+            GetOrAdd<BatTapButtons>(go).Configure(bat, ui);
+
+            var session = GetOrAdd<SessionManager>(go);
+            session.Configure(config,
+                Find<BowlingMachine>(main, "Gameplay/BowlingMachine"),
+                Find<BallController>(main, "Gameplay/Ball"),
+                Find<ScoreManager>(main, "Gameplay/ScoreManager"),
+                Find<BatBallContactResolver>(main, "Gameplay/BatBallContact"),
+                bat,
+                Object.FindAnyObjectByType<HandednessSetup>(FindObjectsInactive.Include),
+                Find<EnvironmentModeSwitch>(main, "Environment"),
+                Find<BowlingDebugControls>(main, "Gameplay/BowlingMachine"),
+                Object.FindAnyObjectByType<BatSetupControls>(FindObjectsInactive.Include),
+                ui, pointer, log,
+                Object.FindAnyObjectByType<XROrigin>(FindObjectsInactive.Include)?.transform);
+            foreach (var c in go.GetComponents<MonoBehaviour>())
+                EditorUtility.SetDirty(c);
+            if (ray == null)
+                Debug.LogError("[CricketVR] Right controller Near-Far Interactor not found under the XR Origin; the menu ray won't work (bat-tap still will).");
+        }
+
+        // ---------- XRI ----------
+
+        static void EnsureEventSystem(Transform uiRoot, List<string> created)
+        {
+            var existing = Object.FindAnyObjectByType<EventSystem>(FindObjectsInactive.Include);
+            var go = existing != null ? existing.gameObject : null;
+            if (go == null)
+            {
+                go = new GameObject("EventSystem");
+                go.transform.SetParent(uiRoot, false);
+                go.AddComponent<EventSystem>();
+                created.Add("EventSystem");
+            }
+            // XRI's input module drives world-space UI from tracked controllers (and still supports mouse in the Editor).
+            foreach (var other in go.GetComponents<BaseInputModule>())
+                if (!(other is XRUIInputModule))
+                    Object.DestroyImmediate(other);
+            if (!go.TryGetComponent<XRUIInputModule>(out _))
+                go.AddComponent<XRUIInputModule>();
+        }
+
+        /// <summary>The Starter Assets rig: right Near-Far ray for menus; every other interactor stays off.</summary>
+        static (GameObject ray, GameObject[] off) FindInteractors()
+        {
+            var origin = Object.FindAnyObjectByType<XROrigin>(FindObjectsInactive.Include);
+            if (origin == null)
+                return (null, new GameObject[0]);
+            var all = origin.GetComponentsInChildren<Transform>(true);
+            GameObject Under(string controller, string interactor) => all.FirstOrDefault(t => t.name == interactor && HasAncestor(t, controller))?.gameObject;
+            var ray = Under("Right Controller", "Near-Far Interactor");
+            var off = new[]
+            {
+                Under("Left Controller", "Near-Far Interactor"),
+                Under("Left Controller", "Poke Interactor"), Under("Right Controller", "Poke Interactor"),
+                Under("Left Controller", "Teleport Interactor"), Under("Right Controller", "Teleport Interactor"),
+            }.Where(g => g != null).ToArray();
+            return (ray, off);
+        }
+
+        static bool HasAncestor(Transform t, string name)
+        {
+            for (var p = t.parent; p != null; p = p.parent)
+                if (p.name == name) return true;
+            return false;
+        }
+
+        // ---------- Near panel ----------
+
+        static (GameObject, TMP_Text, TMP_Text, TMP_Text, GameObject, GameObject, GameObject, GameObject, GameObject, Button[])
+            BuildNearPanel(Transform uiRoot, List<string> created)
+        {
+            var old = uiRoot.Find("NearPanel");
+            if (old != null)
+                Object.DestroyImmediate(old.gameObject);
+            var panel = new GameObject("NearPanel", typeof(RectTransform));
+            panel.transform.SetParent(uiRoot, false);
+            created.Add("NearPanel (regenerated)");
+            var rt = (RectTransform)panel.transform;
+            rt.sizeDelta = PanelSize;
+            rt.localScale = Vector3.one * CanvasScale;
+            rt.position = FieldDimensions.RightHandedStance + new Vector3(0f, 1.2f, 0.75f); // SessionUI re-places it at runtime
+            rt.rotation = Quaternion.Euler(20f, 0f, 0f);
+            var canvas = panel.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = Camera.main;
+            panel.AddComponent<TrackedDeviceGraphicRaycaster>();
+            Image(panel.transform, "Background", Vector2.zero, PanelSize, PanelColor);
+
+            var title = Text(panel.transform, "Title", new Vector2(0f, 280f), new Vector2(760f, 70f), 46f, FontStyles.Bold);
+            var body = Text(panel.transform, "Body", new Vector2(0f, 40f), new Vector2(760f, 400f), 30f, FontStyles.Normal);
+            body.enableAutoSizing = true;
+            body.fontSizeMin = 14f;
+            body.fontSizeMax = 30f;
+            var hint = Text(panel.transform, "Hint", new Vector2(0f, -295f), new Vector2(780f, 50f), 22f, FontStyles.Italic);
+
+            var buttons = new List<Button>();
+            var menu = Group(panel.transform, "MenuGroup");
+            buttons.Add(MakeButton(menu, "NetPractice", "Net Practice", new Vector2(-200f, 195f), new Vector2(370f, 80f)));
+            buttons.Add(MakeButton(menu, "MatchSim", "Match Simulation", new Vector2(200f, 195f), new Vector2(370f, 80f)));
+
+            var net = Group(menu, "NetOptions");
+            Label(net, "Overs", new Vector2(-300f, 95f));
+            int i = 0;
+            foreach (var o in new[] { 1, 2, 3, 5 })
+                buttons.Add(MakeButton(net, "Overs" + o, o.ToString(), new Vector2(-140f + 120f * i++, 95f), new Vector2(100f, 75f)));
+
+            var match = Group(menu, "MatchOptions");
+            Label(match, "Difficulty", new Vector2(-300f, 95f));
+            i = 0;
+            foreach (var d in new[] { "Easy", "Medium", "Hard" })
+                buttons.Add(MakeButton(match, d, d, new Vector2(-110f + 170f * i++, 95f), new Vector2(155f, 75f)));
+
+            Label(menu, "Batting", new Vector2(-300f, -10f));
+            buttons.Add(MakeButton(menu, "RightHanded", "Right-handed", new Vector2(-120f, -10f), new Vector2(190f, 75f)));
+            buttons.Add(MakeButton(menu, "LeftHanded", "Left-handed", new Vector2(85f, -10f), new Vector2(190f, 75f)));
+            buttons.Add(MakeButton(menu, "BatSetup", "Bat setup", new Vector2(290f, -10f), new Vector2(190f, 75f)));
+            buttons.Add(MakeButton(menu, "Start", "Start", new Vector2(0f, -150f), new Vector2(420f, 100f), StartColor));
+
+            var end = Group(panel.transform, "EndGroup");
+            buttons.Add(MakeButton(end, "PlayAgain", "Play again", new Vector2(-260f, -215f), new Vector2(240f, 85f), StartColor));
+            buttons.Add(MakeButton(end, "Menu", "Menu", new Vector2(0f, -215f), new Vector2(240f, 85f)));
+            buttons.Add(MakeButton(end, "NewScenario", "New scenario", new Vector2(260f, -215f), new Vector2(240f, 85f)));
+
+            var pause = Group(panel.transform, "PauseGroup");
+            buttons.Add(MakeButton(pause, "Resume", "Resume", new Vector2(-140f, -215f), new Vector2(260f, 85f), StartColor));
+            buttons.Add(MakeButton(pause, "Menu", "Menu", new Vector2(140f, -215f), new Vector2(260f, 85f)));
+
+            end.gameObject.SetActive(false);
+            pause.gameObject.SetActive(false);
+            match.gameObject.SetActive(false);
+            // Hidden in the saved scene: it stands in the delivery sight line and is shown only while a menu is open.
+            panel.SetActive(false);
+            return (panel, title, body, hint, menu.gameObject, net.gameObject, match.gameObject, end.gameObject, pause.gameObject, buttons.ToArray());
+        }
+
+        static Transform Group(Transform parent, string name)
+        {
+            var go = new GameObject(name, typeof(RectTransform));
+            go.transform.SetParent(parent, false);
+            ((RectTransform)go.transform).sizeDelta = PanelSize;
+            return go.transform;
+        }
+
+        static Image Image(Transform parent, string name, Vector2 pos, Vector2 size, Color color)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(parent, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+            var img = go.GetComponent<Image>();
+            img.color = color;
+            return img;
+        }
+
+        static TextMeshProUGUI Text(Transform parent, string name, Vector2 pos, Vector2 size, float fontSize, FontStyles style)
+        {
+            var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+            go.transform.SetParent(parent, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = size;
+            var t = go.GetComponent<TextMeshProUGUI>();
+            t.fontSize = fontSize;
+            t.fontStyle = style;
+            t.alignment = TextAlignmentOptions.Center;
+            t.color = Color.white;
+            t.raycastTarget = false;
+            t.text = "";
+            return t;
+        }
+
+        static void Label(Transform parent, string text, Vector2 pos)
+        {
+            var t = Text(parent, "Label " + text, pos, new Vector2(150f, 60f), 28f, FontStyles.Normal);
+            t.alignment = TextAlignmentOptions.Left;
+            t.text = text;
+        }
+
+        static Button MakeButton(Transform parent, string name, string label, Vector2 pos, Vector2 size, Color? color = null)
+        {
+            var img = Image(parent, name, pos, size, color ?? ButtonColor);
+            var button = img.gameObject.AddComponent<Button>();
+            button.targetGraphic = img;
+            var colors = button.colors;
+            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+            colors.pressedColor = new Color(0.75f, 0.75f, 0.75f);
+            button.colors = colors;
+            var t = Text(img.transform, "Label", Vector2.zero, size - new Vector2(16f, 8f), 30f, FontStyles.Bold);
+            t.enableAutoSizing = true;
+            t.fontSizeMin = 16f;
+            t.fontSizeMax = 30f;
+            t.text = label;
+            return button;
+        }
+
+        /// <summary>Session text on the far scoreboard, beside the M4 debug readout (which SessionUI hides).</summary>
+        static TMP_Text EnsureBoardText(Transform uiRoot, List<string> created)
+        {
+            var board = uiRoot.Find("LiveScoreboard");
+            if (board == null)
+                return null;
+            var t = board.Find("SessionBoard");
+            if (t == null)
+            {
+                var go = new GameObject("SessionBoard");
+                go.transform.SetParent(board, false);
+                go.AddComponent<TextMeshPro>();
+                created.Add("SessionBoard");
+                t = go.transform;
+            }
+            // Same placement rules as the debug readout: undo the board's scale; its -Z face points at the player.
+            var s = board.localScale;
+            t.localScale = new Vector3(1f / s.x, 1f / s.y, 1f / s.z);
+            t.localPosition = new Vector3(0f, 0f, -0.6f);
+            t.localRotation = Quaternion.identity;
+            var text = t.GetComponent<TextMeshPro>();
+            text.rectTransform.sizeDelta = new Vector2(s.x * 0.92f, s.y * 0.88f);
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 0.05f;
+            text.fontSizeMax = 0.5f;
+            text.alignment = TextAlignmentOptions.Center;
+            text.color = Color.white;
+            text.text = "";
+            EditorUtility.SetDirty(text);
+            return text;
+        }
+
+        // ---------- Helpers ----------
+
+        static T GetOrAdd<T>(GameObject go) where T : Component
+        {
+            if (!go.TryGetComponent<T>(out var c))
+                c = go.AddComponent<T>();
+            return c;
+        }
+
+        static T Find<T>(GameObject main, string path) where T : Component
+        {
+            var t = main.transform.Find(path);
+            return t != null && t.TryGetComponent<T>(out var c) ? c : null;
+        }
+    }
+}
