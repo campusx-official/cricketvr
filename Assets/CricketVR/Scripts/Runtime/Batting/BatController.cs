@@ -321,42 +321,37 @@ namespace CricketVR
             Debug.Log("[CricketVR] Bat fit started");
         }
 
-        /// <summary>Moves the ghost controller up (+) or down (−) the bat by whole slide steps.</summary>
-        public void FitMove(int steps)
+        /// <summary>
+        /// Moves the ghost controller by whole slide steps: <paramref name="up"/> along the bat toward the handle,
+        /// <paramref name="across"/> to the player's right as the frozen bat is shown (controller side toward them), and
+        /// <paramref name="outward"/> away from the blade on the controller's side. Kept within reach of the bat.
+        /// </summary>
+        public void FitMove(int up, int across = 0, int outward = 0)
         {
             if (!Fitting) return;
+            float side = HitsWithControllerSide ? 1f : -1f; // bat Z of the controller's side
+            float step = config.bat.slideStep;
             var p = _fitController.position;
-            p.y = BatMount.ClampAlong(Geometry, p.y + steps * config.bat.slideStep);
+            p.y = BatMount.ClampAlong(Geometry, p.y + up * step);
+            p.x = Mathf.Clamp(p.x - side * across * step, -BatMount.MaxAcross, BatMount.MaxAcross);
+            p.z = Mathf.Clamp(p.z + side * outward * step, -BatMount.MaxOut, BatMount.MaxOut);
             _fitController.position = p;
             UpdateGhost();
         }
 
         /// <summary>Turns the ghost controller in place on the bat's surface (about the face normal), by whole angle steps.</summary>
-        public void FitTurn(int steps) => FitRotate(Vector3.forward, steps);
+        public void FitTurn(int steps) => FitRotate(Quaternion.AngleAxis(steps * config.bat.alignmentStepDegrees, Vector3.forward), local: false);
 
         /// <summary>Tilts the ghost controller in place (about the blade's width), by whole angle steps.</summary>
-        public void FitTilt(int steps) => FitRotate(Vector3.right, steps);
+        public void FitTilt(int steps) => FitRotate(Quaternion.AngleAxis(steps * config.bat.alignmentStepDegrees, Vector3.right), local: false);
 
-        void FitRotate(Vector3 batAxis, int steps)
+        /// <summary>Rolls the ghost controller in place about its own length (its grip +Z), by whole angle steps.</summary>
+        public void FitRoll(int steps) => FitRotate(Quaternion.AngleAxis(steps * config.bat.alignmentStepDegrees, Vector3.forward), local: true);
+
+        void FitRotate(Quaternion turn, bool local)
         {
             if (!Fitting) return;
-            _fitController.rotation = Quaternion.AngleAxis(steps * config.bat.alignmentStepDegrees, batAxis) * _fitController.rotation;
-            UpdateGhost();
-        }
-
-        /// <summary>
-        /// Swaps the hitting face while fitting: the frozen bat turns 180° about its length and the ghost stays where it
-        /// is, so it is now on the other side of the blade's frame.
-        /// </summary>
-        public void FitSwapFace()
-        {
-            if (!Fitting) return;
-            var half = Quaternion.AngleAxis(180f, Vector3.up);
-            var a = _alignment[StrapSlot];
-            a.faceFlipped = !a.faceFlipped;
-            _alignment[StrapSlot] = a;
-            batVisual.rotation *= half;
-            _fitController = new Pose(half * _fitController.position, half * _fitController.rotation);
+            _fitController.rotation = local ? _fitController.rotation * turn : turn * _fitController.rotation;
             UpdateGhost();
         }
 

@@ -76,6 +76,7 @@ namespace CricketVR
             if (resolver != null) resolver.BatContact += OnBatContact;
             if (ui != null) ui.ButtonPressed += OnButton;
             if (setupControls != null) setupControls.FitConfirmed += ExitBatSetup;
+            if (setupControls != null) setupControls.FitModeChanged += ShowFitPanel;
             _doneTap = new InputAction("BatSetupDone", InputActionType.Button, "<XRController>/{PrimaryButton}");
             _doneTap.Enable();
             // The batter asks for each ball with B (owner decision 2026-10-26: "as a batsman I want that control").
@@ -90,6 +91,7 @@ namespace CricketVR
             if (resolver != null) resolver.BatContact -= OnBatContact;
             if (ui != null) ui.ButtonPressed -= OnButton;
             if (setupControls != null) setupControls.FitConfirmed -= ExitBatSetup;
+            if (setupControls != null) setupControls.FitModeChanged -= ShowFitPanel;
             _doneTap?.Dispose();
             _readyPress?.Dispose();
         }
@@ -406,15 +408,21 @@ namespace CricketVR
                 toPlayer.y = 0f;
                 var face = Quaternion.LookRotation(bat.HitsWithControllerSide ? toPlayer : -toPlayer, Vector3.up);
                 bat.BeginFit(new Pose(at, face));
-                ui.ShowBatSetup(
-                    "<b>REAL BAT: fit the controller</b>\nThe virtual bat is frozen on your right. The cyan controller shows where the game thinks yours is taped. " +
-                    "Move it to match your real bat:\n" +
-                    "<b>B / A</b>: up / down the bat\n<b>Thumbstick left/right</b>: turn it on the bat\n<b>Thumbstick up/down</b>: tilt it\n" +
-                    "<b>Hold stick click</b>: swap the hitting face (the bat turns round)",
-                    "Click the thumbstick: OK", "Bat setup");
+                ShowFitPanel();
                 return;
             }
             ui.ShowBatSetup("Thumbstick up/down: tilt.  Left/right: spin.\nTrigger + left/right: lean.  Grip + up/down: slide.\nGrip + left/right: face turn.  Stick click: reset (hold: flip face).\nHold B: move the bat to the other controller.");
+        }
+
+        void ShowFitPanel()
+        {
+            bool turning = setupControls != null && setupControls.FitTurning;
+            string move = "<b>B / A</b>: up / down the bat\n<b>Stick left / right</b>: across the blade\n<b>Stick up / down</b>: away from / onto the blade";
+            string turn = "<b>B / A</b>: roll it about its own length\n<b>Stick left / right</b>: turn it on the bat\n<b>Stick up / down</b>: tilt it";
+            ui.ShowBatSetup(
+                "<b>REAL BAT: fit the controller</b>\nThe virtual bat is frozen on your right. Put the cyan controller exactly where yours is taped on your real bat.\n\n" +
+                $"<b>{(turning ? "TURN" : "MOVE")}</b> (tap the stick to switch to {(turning ? "MOVE" : "TURN")})\n" + (turning ? turn : move),
+                "Hold the stick click 1 s: OK (save)", "Bat setup");
         }
 
         void ExitBatSetup()

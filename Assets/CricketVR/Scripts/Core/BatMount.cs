@@ -33,6 +33,9 @@ namespace CricketVR
             return new Pose(inv * -p.position, inv);
         }
 
+        /// <summary>How far the fitted controller may sit from the bat's centre line, across the blade and off its surfaces (m).</summary>
+        public const float MaxAcross = 0.15f, MaxOut = 0.15f;
+
         /// <summary>Where the controller may be fitted along the bat (bat-frame y): from the toe to the top of the handle.</summary>
         public static float ClampAlong(BatGeometry g, float y) => Mathf.Clamp(y, g.Toe.y, g.handleLength - g.gripToBlade);
     }

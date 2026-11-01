@@ -154,22 +154,34 @@ namespace CricketVR.Tests
         }
 
         [UnityTest]
-        public IEnumerator SwappingTheFaceWhileFittingKeepsTheGhostWhereItIs()
+        public IEnumerator FitMovesAcrossAndOffTheBladeAndRollsInPlace()
         {
             _bat.SetMode(BatMode.Strapped);
             _right.SetPositionAndRotation(new Vector3(0f, 1f, 0.5f), Quaternion.identity);
             yield return null;
-            Assert.IsFalse(_bat.HitsWithControllerSide);
+            Assert.IsFalse(_bat.HitsWithControllerSide, "controller on the back");
             _bat.BeginFit(Display);
-            var ghostWorld = new Pose(_ghost.position, _ghost.rotation);
-            _bat.FitSwapFace();
-            Assert.Less(Vector3.Distance(_ghost.position, ghostWorld.position), 1e-5f);
-            Assert.Less(Quaternion.Angle(_ghost.rotation, ghostWorld.rotation), 0.05f);
-            Assert.IsTrue(_bat.HitsWithControllerSide, "now hits with the controller's side");
+            var start = _bat.FitController;
+
+            _bat.FitMove(0, across: 2);
+            // Shown with the back (bat −Z) toward the player, the player's right is bat +X.
+            Assert.AreEqual(start.position.x + 0.02f, _bat.FitController.position.x, 1e-5f, "across, to the player's right");
+            _bat.FitMove(0, outward: -3);
+            Assert.AreEqual(start.position.z + 0.03f, _bat.FitController.position.z, 1e-5f, "onto the blade: toward bat +Z from the back");
+            _bat.FitMove(0, outward: -100);
+            Assert.AreEqual(BatMount.MaxOut, _bat.FitController.position.z, 1e-5f, "kept within reach");
+
+            var before = _bat.FitController;
+            _bat.FitRoll(3);
+            Assert.Less(Vector3.Distance(_bat.FitController.position, before.position), 1e-6f, "rolls in place");
+            var axisBefore = before.rotation * Vector3.forward;
+            var axisAfter = _bat.FitController.rotation * Vector3.forward;
+            Assert.Less(Vector3.Angle(axisBefore, axisAfter), 0.05f, "about its own length");
+            Assert.AreEqual(15f, Quaternion.Angle(before.rotation, _bat.FitController.rotation), 0.1f);
+
             var fitted = _bat.FitController;
             _bat.EndFit(true);
             yield return null;
-            Assert.IsTrue(_bat.HitsWithControllerSide);
             var now = ControllerInBat();
             Assert.Less(Vector3.Distance(now.position, fitted.position), 1e-4f);
             Assert.Less(Quaternion.Angle(now.rotation, fitted.rotation), 0.05f);
@@ -183,11 +195,10 @@ namespace CricketVR.Tests
             _bat.BeginFit(Display);
             _bat.FitMove(5);
             _bat.FitTurn(7);
-            _bat.FitSwapFace();
+            _bat.FitRoll(2);
             _bat.EndFit(false);
             yield return null;
             Assert.IsFalse(_bat.MountFitted);
-            Assert.IsFalse(_bat.HitsWithControllerSide, "the unsaved face swap is undone");
             Assert.AreEqual(mount.position, _bat.Mount.position);
             Assert.AreEqual(mount.rotation, _bat.Mount.rotation);
             Assert.AreEqual(_right, _visual.parent);

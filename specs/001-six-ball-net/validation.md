@@ -43,7 +43,7 @@ Documentation checks confirm that requirements map to tasks and scenarios. That 
 | AC-31 | REQ-048 | **Automated pass** (E-044 factors; E-045/E-046 same seed = same path) | E-044–E-046 | Spin factors re-checked in T077/T078 |
 | AC-32 | REQ-049, REQ-050, REQ-052 | **Pass** (automated E-067; headset, owner, both modes, LED in Match Simulation, E-069/E-070); real stump sound pending the owner's recording | E-067–E-070 | Replace the placeholder clatter when StumpHit_N.wav exist |
 | AC-33 | REQ-051 | **Pass** (automated E-067; headset, owner, E-070) | E-067, E-070 | — |
-| AC-34 | REQ-053..056 | Automated pass (E-072, the fit); headset pending (T092). The first calibration failed on the device (E-072) | E-071, E-072 | T092 headset run with the fit |
+| AC-34 | REQ-053..056 | Automated pass (E-073, the six-direction fit); headset pending (T092). The first calibration failed on the device (E-072) | E-071–E-073 | T092 headset run with the fit |
 
 ## Evidence entry template
 
@@ -1387,6 +1387,25 @@ Actual result and measured values:
 Outcome: calibration Fail on the device (replaced); fit automated Pass. Headset pending (T092).
 Log or artifact path: Docs/evidence/2026-11-01-bat-calibration/
 Remaining limitation / follow-up task: T092 headset run; the flaky spinner session test (seed from the clock) should get a fixed seed or a wider bound
+```
+
+```text
+Check ID / acceptance scenario: E-073 / Bat-mode fit in six directions (T094, AC-34 automated); owner's screenshots of the default mount
+Requirement IDs: REQ-054, REQ-055
+Date and tester: 2026-11-01 owner (headset, still Builds/CricketVR-bat-mode.apk: the E-072 fit build was never installed); agent (log, code, batch-mode Unity)
+Git commit or build identifier: feature/bat-mode; Builds/CricketVR-bat-fit.apk sha256 43270e9d2c5f7f99a67081d20892d60a09d335ff021e3c6838f7a19143fffdf9, installed 19:22:06
+Unity and package versions: as E-001
+Environment: Quest 3 standalone; macOS batch mode for tests
+Configuration: logcat buffer 16 MB
+Steps or exact command: owner's screenshots and log (19:07-19:09: E-071 fine-tuning, tilt -35..10, spin -30..5, then a cancelled calibration); T094; MainSceneBuilder (nothing added); EditMode, PlayMode; QuestBuild.Build; adb install
+Expected result: the ghost can be put anywhere on or near the blade; AC-34 automated items
+Actual result and measured values:
+  - Screenshots: with the default mount the tracked controller model floats off the back of the virtual blade, beside it. The E-071 fine-tuning only turns the bat about its grip point, and the E-072 fit only slid it along the bat and turned it, so neither could move the controller across or onto the blade. Owner: "the controller is in the air wrt to the virtual bat ... not able to move it".
+  - T094: MOVE / TURN modes (up/down, across, away/onto; turn, tilt, roll), hold the stick click to save; the fit's face swap removed.
+  - EditMode 167/167; PlayMode 76/76 (new: across to the player's right, onto the blade, clamped at 15 cm, roll in place about its own length, saved pose equals the ghost; cancel changes nothing).
+Outcome: automated Pass; headset pending (T092)
+Log or artifact path: scratchpad EditMode.xml / PlayMode.xml / apk_fit2.log
+Remaining limitation / follow-up task: T092 headset run with the fit
 ```
 
 ## Re-plan note (2026-10-26)
